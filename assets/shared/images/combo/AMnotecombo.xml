@@ -1,0 +1,17 @@
+<?xml version='1.0' encoding='utf-8'?>
+<TextureAtlas imagePath="AMnotecombo.png">
+<SubTexture name="note combo0000" x="0" y="0" width="810" height="610" frameX="0" frameY="0" frameWidth="810" frameHeight="610" />
+<SubTexture name="note combo0001" x="810" y="0" width="810" height="610" frameX="0" frameY="0" frameWidth="810" frameHeight="610" />
+<SubTexture name="note combo0002" x="1620" y="0" width="810" height="610" frameX="0" frameY="0" frameWidth="810" frameHeight="610" />
+<SubTexture name="note combo0003" x="0" y="610" width="810" height="610" frameX="0" frameY="0" frameWidth="810" frameHeight="610" />
+<SubTexture name="note combo0004" x="810" y="610" width="810" height="610" frameX="0" frameY="0" frameWidth="810" frameHeight="610" />
+<SubTexture name="note combo0005" x="1620" y="610" width="810" height="610" frameX="0" frameY="0" frameWidth="810" frameHeight="610" />
+<SubTexture name="note combo0006" x="0" y="1220" width="810" height="610" frameX="0" frameY="0" frameWidth="810" frameHeight="610" />
+<SubTexture name="note combo0007" x="810" y="1220" width="810" height="610" frameX="0" frameY="0" frameWidth="810" frameHeight="610" />
+<SubTexture name="note combo0008" x="1620" y="1220" width="810" height="610" frameX="0" frameY="0" frameWidth="810" frameHeight="610" />
+<SubTexture name="note combo0009" x="0" y="1830" width="810" height="610" frameX="0" frameY="0" frameWidth="810" frameHeight="610" />
+<SubTexture name="note combo0010" x="810" y="1830" width="810" height="610" frameX="0" frameY="0" frameWidth="810" frameHeight="610" />
+<SubTexture name="note combo0011" x="1620" y="1830" width="810" height="610" frameX="0" frameY="0" frameWidth="810" frameHeight="610" />
+<SubTexture name="note combo0012" x="0" y="2440" width="810" height="610" frameX="0" frameY="0" frameWidth="810" frameHeight="610" />
+<SubTexture name="note combo0013" x="810" y="2440" width="810" height="610" frameX="0" frameY="0" frameWidth="810" frameHeight="610" />
+</TextureAtlas>
