@@ -1,3 +1,5 @@
+package grafex.sprites.background;
+
 import flixel.FlxSprite;
 import flixel.util.FlxColor;
 import flixel.FlxG;
