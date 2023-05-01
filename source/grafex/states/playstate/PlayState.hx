@@ -3686,6 +3686,8 @@ class PlayState extends MusicBeatState
 							boyfriend.alpha = lastAlpha;
 							iconP1.changeIcon(boyfriend.healthIcon, boyfriend.iconOffsets[0], boyfriend.iconOffsets[1], boyfriend.iconScale);
 							iconP1.changeOffsets(boyfriend.iconOffsets[0], boyfriend.iconOffsets[1]);
+							characters.remove(boyfriend);
+							characters.push(boyfriend);
 						}
 						setOnLuas('boyfriendName', boyfriend.curCharacter);
 
@@ -3723,6 +3725,8 @@ class PlayState extends MusicBeatState
 							dad.alpha = lastAlpha;
 							iconP2.changeIcon(dad.healthIcon, dad.iconOffsets[0], dad.iconOffsets[1], dad.iconScale);
 		                    iconP2.changeOffsets(dad.iconOffsets[0], dad.iconOffsets[1]);
+							characters.remove(dad);
+							characters.push(dad);
 						}
 						setOnLuas('dadName', dad.curCharacter);
 
@@ -3754,6 +3758,8 @@ class PlayState extends MusicBeatState
 									gf = gfMap.get(value2);
 									gf.alpha = lastAlpha;
 								}
+								characters.remove(gf);
+								characters.push(gf);
 								setOnLuas('gfName', gf.curCharacter);
 						}
 					
