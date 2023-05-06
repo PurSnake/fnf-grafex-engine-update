@@ -637,7 +637,7 @@ var directories:Array<String> = [Paths.mods('stages/'), Paths.mods(Paths.current
 		stageDropDown.selectedLabel = _song.stage;
 		blockPressWhileScrolling.push(stageDropDown);
 
-	        Utils.difficulties = Utils.defaultDifficulties.copy();
+	        // Utils.difficulties = Utils.defaultDifficulties.copy(); // okey?
 
 		var difficultyDropDown = new FlxUIDropDownMenuCustom(stageDropDown.x, gfVersionDropDown.y, FlxUIDropDownMenuCustom.makeStrIdLabelArray(Utils.difficulties, true), function(difficulty:String)
 		{

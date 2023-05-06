@@ -139,6 +139,7 @@ class CharacterEditorState extends MusicBeatState
 		healthBarBG2.cameras = [camHUD];
  
 		leHealthIcon = new HealthIcon(char.healthIcon, false, 0, 0, 1, false);
+		leHealthIcon.gpuShit = false; // fix "Get Icon Color"
 		leHealthIcon.y = FlxG.height - 150;
 		add(leHealthIcon);
 		leHealthIcon.updateHitbox();
