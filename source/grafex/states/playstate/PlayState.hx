@@ -2274,7 +2274,7 @@ class PlayState extends MusicBeatState
                 daNote.visible = false;
                 daNote.ignoreNote = true;
     
-                if(modchartObjects.exists('note${daNote.ID}'))modchartObjects.remove('note${daNote.ID}');
+                if(modchartObjects.exists('note${daNote.ID}')) modchartObjects.remove('note${daNote.ID}');
                 daNote.kill();
                 unspawnNotes.remove(daNote);
                 daNote.destroy();
@@ -3595,9 +3595,8 @@ class PlayState extends MusicBeatState
                 var val1:Float = Std.parseFloat(value1);
 				var val2:Float = Std.parseFloat(value2);
 				if(Math.isNaN(val1)) val1 = 1;
-				if(Math.isNaN(val2)) val2 = 1;
-                if (value2 == null)
-                 	defaultCamZoom = val1; 
+				if(Math.isNaN(val2) || val2 == 0)
+					defaultCamZoom = val1;  
                 else
                 {
                  	FlxTween.tween(camGame, {zoom: val1}, val2, {ease: FlxEase.sineInOut, onComplete:

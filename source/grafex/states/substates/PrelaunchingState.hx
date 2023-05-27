@@ -68,19 +68,12 @@ class PrelaunchingState extends MusicBeatState
 
         connectionFailed = false;
 
-        if(Utils.getUsername() == 'georg' && FlxG.random.bool(30)) {
-            Utils.browserLoad('https://www.youtube.com/watch?v=oZAGNaLrTd0');
-            FlxG.camera.flash(FlxColor.WHITE, 0.1, function() {
-                Sys.exit(0);
-            });
-        }
-        
         var version:Array<Int> = null;
         
         if(FlxG.save.data.noLaunchScreen == null)
             FlxG.save.data.noLaunchScreen = false;
 
-        if(FlxG.save.data.noLaunchScreen == true/* && Utils.getUsername() != 'georg'*/)
+        if(FlxG.save.data.noLaunchScreen == true)
             MusicBeatState.switchState(new TitleState());
 
         txts.push(["Also, we wish you a pleasant game! \n  - Animania Crew", '']);

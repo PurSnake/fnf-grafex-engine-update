@@ -102,9 +102,9 @@ function onCoolTextBeat(sickBeats) {
 			FlxG.sound.playMusic(Paths.music('freakyMenu'), 0);
 			FlxG.sound.music.fadeIn(4, 0, 0.7);
 		case 2:
-			this.createCoolText(['PurSnake', 'presenting', 'to']);
+			this.createCoolText(['PurSnake']);
 		case 4:
-			this.addMoreText('Astro)');
+			this.addMoreText('present');
 		case 5:
 			this.deleteCoolText();
 		case 6:
