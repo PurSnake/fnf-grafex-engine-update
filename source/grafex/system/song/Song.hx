@@ -28,6 +28,7 @@ typedef SwagSong =
 	var gfVersion:String;
 	var stage:String;
 
+	var composedBy:String;
 	var arrowSkin:String;
 	var splashSkin:String;
 	var validScore:Bool;
@@ -46,6 +47,7 @@ class Song
 	public var speed:Float = 1;
 	public var stage:String;
 
+	public var composedBy:String = '';
 	public var player1:String = 'bf';
 	public var player2:String = 'dad';
 	public var gfVersion:String = 'gf';
@@ -84,10 +86,12 @@ class Song
 		}
 	}
 
-	public function new(song, postfix, notes, bpm)
+	public function new(song, postfix, notes, bpm, composedBy)
 	{
 		this.song = song;
 		if(postfix != null) this.postfix = postfix;
+
+		if(composedBy != null) this.composedBy = composedBy;
 
 		this.notes = notes;
 		this.bpm = bpm;
@@ -123,6 +127,9 @@ class Song
 		var songJson:Dynamic = parseJSONshit(rawJson);
 		if(jsonInput != 'events') StageData.loadDirectory(songJson);
 		if(songJson.postfix == null) songJson.postfix = '';
+
+		if(songJson.composedBy == null) songJson.composedBy = '';
+
 		onLoadJson(songJson);
 		return songJson;
 	}

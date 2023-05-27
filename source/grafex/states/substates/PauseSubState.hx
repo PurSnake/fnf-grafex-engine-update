@@ -48,6 +48,7 @@ class PauseSubState extends MusicBeatSubstate
 	var curTime:Float = Math.max(0, Conductor.songPosition);
 	var bg:FlxSprite = new FlxSprite().makeGraphic(FlxG.width, FlxG.height, FlxColor.BLACK);
 	var levelInfo:FlxText = new FlxText(20, 15, 0, "", 32);
+	var composerInfo:FlxText = new FlxText(20, 15 + 32, 0, "", 27);
 	var levelDifficulty:FlxText = new FlxText(20, 15 + 32, 0, "", 32);
 	var blueballedTxt:FlxText = new FlxText(20, 15 + 64, 0, "", 32);
 	var chartingText:FlxText = new FlxText(20, 15 + 101, 0, "CHARTING MODE", 32);
@@ -139,6 +140,13 @@ class PauseSubState extends MusicBeatSubstate
 		levelInfo.updateHitbox();
 		add(levelInfo);
 
+		composerInfo.text += PlayState.SONG.composedBy;
+		composerInfo.scrollFactor.set();
+		composerInfo.setFormat(Paths.font("vcr.ttf"), 27);
+		composerInfo.updateHitbox();
+		composerInfo.visible = (composerInfo != null && (composerInfo.text != '' && composerInfo.text != ' '));
+		add(composerInfo);
+
 		levelDifficulty.text += Utils.difficultyString();
 		levelDifficulty.scrollFactor.set();
 		levelDifficulty.setFormat(Paths.font('vcr.ttf'), 32);
@@ -171,12 +179,18 @@ class PauseSubState extends MusicBeatSubstate
 		levelDifficulty.alpha = 0;
 		levelInfo.alpha = 0;
 
+		if(composerInfo != null && (composerInfo.text != '' && composerInfo.text != ' ')) composerInfo.alpha = 0;
+
+		if(composerInfo != null && (composerInfo.text != '' && composerInfo.text != ' ')) for (funnyText in [levelDifficulty, blueballedTxt, practiceText]) funnyText.y += 27;     
+
 		levelInfo.x = FlxG.width - (levelInfo.width + 20);
+		if(composerInfo != null && (composerInfo.text != '' && composerInfo.text != ' ')) composerInfo.x = FlxG.width - (composerInfo.width + 20);
 		levelDifficulty.x = FlxG.width - (levelDifficulty.width + 20);
 		blueballedTxt.x = FlxG.width - (blueballedTxt.width + 20);
 
 		FlxTween.tween(bg, {alpha: 0.6}, 0.4, {ease: FlxEase.quartInOut});
 		FlxTween.tween(levelInfo, {alpha: 1, y: 20}, 0.4, {ease: FlxEase.quartInOut, startDelay: 0.3});
+		if(composerInfo != null && (composerInfo.text != '' && composerInfo.text != ' ')) FlxTween.tween(composerInfo, {alpha: 1, y: composerInfo.y + 5}, 0.325, {ease: FlxEase.quartInOut, startDelay: 0.3});
 		FlxTween.tween(levelDifficulty, {alpha: 1, y: levelDifficulty.y + 5}, 0.4, {ease: FlxEase.quartInOut, startDelay: 0.5});
 		FlxTween.tween(blueballedTxt, {alpha: 1, y: blueballedTxt.y + 5}, 0.4, {ease: FlxEase.quartInOut, startDelay: 0.7});
 
@@ -493,6 +507,7 @@ class PauseSubState extends MusicBeatSubstate
 		bg.visible = false;
 		grpMenuShit.visible = false;
 		levelInfo.visible = false;
+		composerInfo.visible = false;
 		levelDifficulty.visible = false;
 		blueballedTxt.visible = false;
 		chartingText.visible = false;

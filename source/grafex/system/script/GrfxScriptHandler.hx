@@ -21,6 +21,7 @@ import hscript.Parser;
 import grafex.sprites.background.BGSprite;
 import grafex.util.RealColor;
 import grafex.states.playstate.PlayState;
+import grafex.states.substates.GameOverSubstate;
 import sys.FileSystem;
 import sys.io.File;
 import grafex.system.Conductor;
@@ -208,6 +209,8 @@ class GrfxModule
 		interp.variables.set('PlayState', PlayState);
 		interp.variables.set('game', PlayState.instance);
 		interp.variables.set('this', PlayState.instance);
+		interp.variables.set('gameOver', GameOverSubstate.instance);
+		interp.variables.set('GameOverSubstate', GameOverSubstate);
 		interp.variables.set('boyfriend', PlayState.instance.boyfriend);
         interp.variables.set('gf', PlayState.instance.gf);
 		interp.variables.set('dad', PlayState.instance.dad);

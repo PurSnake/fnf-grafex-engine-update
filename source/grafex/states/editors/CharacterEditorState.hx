@@ -126,7 +126,7 @@ class CharacterEditorState extends MusicBeatState
 		});
 		changeBGbutton.cameras = [camMenu];
 
-		loadChar(!daAnim.startsWith('bf'), false);
+		loadChar(!daAnim.startsWith('bf'), false, true);
 
 		healthBarBG = new FlxSprite(45, FlxG.height - 70).loadGraphic(Paths.image('old/healthBar'));
 		healthBarBG.scrollFactor.set();
@@ -1079,7 +1079,7 @@ class CharacterEditorState extends MusicBeatState
 		}
 	}
 
-	function loadChar(isDad:Bool, blahBlahBlah:Bool = true) {
+	function loadChar(isDad:Bool, blahBlahBlah:Bool = true, ?defaultChar:Bool = false) {
 		var i:Int = charLayer.members.length-1;
 		while(i >= 0) {
 			var memb:Character = charLayer.members[i];
@@ -1091,11 +1091,20 @@ class CharacterEditorState extends MusicBeatState
 			--i;
 		}
 		charLayer.clear();
-		ghostChar = new Character(0, 0, daAnim, !isDad);
+
+                var funnyChar:String = '';
+                defaultChar ? {
+                    funnyChar = daAnim;
+                } : {
+                    if(charsLoaded.exists(daAnim)) funnyChar = charsLoaded.get(daAnim) + daAnim;
+                    else funnyChar = daAnim;
+                }
+
+		ghostChar = new Character(0, 0, funnyChar, !isDad);
 		ghostChar.debugMode = true;
 		ghostChar.alpha = 0.6;
 
-		char = new Character(0, 0, daAnim, !isDad);
+		char = new Character(0, 0, funnyChar, !isDad);
 		if(char.animationsArray[0] != null) {
 			char.playAnim(char.animationsArray[0].anim, true);
 		}
@@ -1217,39 +1226,42 @@ class CharacterEditorState extends MusicBeatState
         ghostChar.antialiasing = char.antialiasing;
 	}
 
+	var charsLoaded:Map<String, String> = new Map();
 	function reloadCharacterDropDown() {
-		var charsLoaded:Map<String, Bool> = new Map();
+                charsLoaded = [];
 
-
-			#if MODS_ALLOWED
+		#if MODS_ALLOWED
 		characterList = [];
-		var directories:Array<String> = [Paths.mods('characters/'), Paths.mods(Paths.currentModDirectory + '/characters/'), Paths.getPreloadPath('characters/')];
-		for(mod in Paths.getGlobalMods())
+		var directories:Array<String> = [
+			Paths.mods('characters/'), Paths.mods(Paths.currentModDirectory + '/characters/'), Paths.getPreloadPath('characters/')
+		];
+			
+		for(mod in Paths.getGlobalMods()) 
 			directories.push(Paths.mods(mod + '/characters/'));
-                for (i in 0...directories.length) {
-			var directory:String = directories[i];
-			if(FileSystem.exists(directory)) {
-				for (file in FileSystem.readDirectory(directory)) {
-					var path = haxe.io.Path.join([directory, file]);
-					if (!sys.FileSystem.isDirectory(path) && file.endsWith('.json')) {
-						var charToCheck:String = file.substr(0, file.length - 5);
-						if(!charsLoaded.exists(charToCheck)) {
-							characterList.push(charToCheck);
-							charsLoaded.set(charToCheck, true);
-						}
-					}
-				}
-			}
+
+
+        for (i in 0...directories.length) {
+		    var directory:String = directories[i];
+		    if(FileSystem.exists(directory)) {
+		        for (file in FileSystem.readDirectory(directory)) {
+		          	var path = haxe.io.Path.join([directory, file]);
+		          	if (!sys.FileSystem.isDirectory(path) && file.endsWith('.json')) {
+		          		var charToCheck:String = file.substr(0, file.length - 5);
+		          		if(!charsLoaded.exists(charToCheck)) {
+		          			characterList.push(charToCheck);
+		          			charsLoaded.set(charToCheck, '');
+		          		}
+		          	}
+		        }
+		    }
 		}
 		#else
 		characterList = Utils.coolTextFile(Paths.txt('characterList'));
 		#end
 
-
 		charDropDown.setData(FlxUIDropDownMenuCustom.makeStrIdLabelArray(characterList, true));
 		charDropDown.selectedLabel = daAnim;
 	}
-
 	function resetHealthBarColor() {
 		healthColorStepperR.value = char.healthColorArray[0];
 		healthColorStepperG.value = char.healthColorArray[1];
@@ -1271,10 +1283,7 @@ class CharacterEditorState extends MusicBeatState
 	override function update(elapsed:Float)
 	{
 		MusicBeatState.camBeat = FlxG.camera;
-		if(FlxG.keys.justPressed.F11)
-        {
-           FlxG.fullscreen = !FlxG.fullscreen;
-        }
+		if(FlxG.keys.justPressed.F11) FlxG.fullscreen = !FlxG.fullscreen;
 
         if(char.animationsArray[curAnim] != null) {
 			textAnim.text = char.animationsArray[curAnim].anim;
@@ -1290,11 +1299,11 @@ class CharacterEditorState extends MusicBeatState
 		var inputTexts:Array<FlxUIInputText> = [animationInputText, imageInputText, healthIconInputText, animationNameInputText, animationIndicesInputText, characterDeathName, characterDeathSound, characterDeathConfirm, characterDeathMusic];
 		for (i in 0...inputTexts.length) {
 			if(inputTexts[i].hasFocus) {
-				if(FlxG.keys.pressed.CONTROL && FlxG.keys.justPressed.V && Clipboard.text != null) { //Copy paste
+				/*if(FlxG.keys.pressed.CONTROL && FlxG.keys.justPressed.V && Clipboard.text != null) { //Copy paste
 					inputTexts[i].text = ClipboardAdd(inputTexts[i].text);
 					inputTexts[i].caretIndex = inputTexts[i].text.length;
 					getEvent(FlxUIInputText.CHANGE_EVENT, inputTexts[i], null, []);
-				}
+				}*/
 				if(FlxG.keys.justPressed.ENTER) {
 					inputTexts[i].hasFocus = false;
 				}

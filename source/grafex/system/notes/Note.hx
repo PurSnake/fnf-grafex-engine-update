@@ -387,6 +387,8 @@ class Note extends FlxSprite
 			}
 		}
 
+		if (tooLate) multSpeed += FlxG.elapsed * 50;
+
 		if (tooLate && !inEditor)
 		{
 			if (alpha > 0.3)

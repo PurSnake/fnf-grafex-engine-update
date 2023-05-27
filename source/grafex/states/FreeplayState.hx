@@ -458,8 +458,14 @@ class FreeplayState extends MusicBeatState
 			        for (item in grpSongs.members)
 			        	if (item.targetY == 0)
 			        		FlxFlicker.flicker(item, 1.05, 0.06, false, false);
+			        	else
+			        		FlxTween.tween(item, {alpha: 0}, 0.4, {ease: FlxEase.linear});
 			        
 			        FlxFlicker.flicker(iconArray[curSelected], 1.05, 0.06, false, false);
+
+			        for (i in 0...iconArray.length)
+			        	if (i != curSelected)
+			        		FlxTween.tween(iconArray[i], {alpha: 0}, 0.42, {ease: FlxEase.linear});
             
 		            FlxTween.tween(camINTERFACE, {alpha: 0}, 0.3, {ease: FlxEase.linear, startDelay: 0.4});
         

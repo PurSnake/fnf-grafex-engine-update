@@ -42,7 +42,8 @@ class NoteSplash extends FlxSprite
 		colorSwap.brightness = brtColor;
 
 		scale.set(ClientPrefs.noteSplashesScale, ClientPrefs.noteSplashesScale);
-		animation.curAnim.frameRate = 24 + FlxG.random.int(-2, 2);
+		animation.curAnim.frameRate = 24 + FlxG.random.int(-3, 4);
+                angle = FlxG.random.int(-10, 10);
 		centerOffsets();
 		setPosition(x - width * 0.5, y - height * 0.5);
 	}

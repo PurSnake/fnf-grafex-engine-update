@@ -201,6 +201,7 @@ class Utils
 		PlayState.SONG = {
 			song: name,
 			postfix: '',
+			composedBy: '',
 			notes: [],
 			events: [],
 			bpm: 100,

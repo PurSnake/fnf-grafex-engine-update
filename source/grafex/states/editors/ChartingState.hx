@@ -96,6 +96,7 @@ class ChartingState extends MusicBeatState
 	var eventStuff:Array<Dynamic> =
 	[
 		['', "Nothing. Yep, that's right."],
+		['Forced Combo Check', "Yep, do combo check function"],
         ['Dadbattle Spotlight', "Used in Dad Battle,\nValue 1: 0/1 = ON/OFF,\n2 = Target Dad\n3 = Target BF"],
 		['Hey!', "Plays the \"Hey!\" animation from Bopeebo,\nValue 1: BF = Only Boyfriend, GF = Only Girlfriend,\nSomething else = Both.\nValue 2: Custom animation duration,\nleave it blank for 0.6s"],
 		['Set GF Speed', "Sets GF head bopping speed,\nValue 1: 1 = Normal speed,\n2 = 1/2 speed, 4 = 1/4 speed etc.\nUsed on Fresh during the beatbox parts.\n\nWarning: Value must be integer!"],
@@ -252,6 +253,7 @@ class ChartingState extends MusicBeatState
 			_song = {
 				song: 'Test',
 				postfix: '',
+				composedBy: '',
 				notes: [],
 				events: [],
 				bpm: 150.0,
@@ -443,6 +445,7 @@ class ChartingState extends MusicBeatState
 	var UI_songTitlePostfix:FlxUIInputText;
 	var noteSkinInputText:FlxUIInputText;
 	var noteSplashesInputText:FlxUIInputText;
+	var composersInputText:FlxUIInputText;
 	var stageDropDown:FlxUIDropDownMenuCustom;
 	function addSongUI():Void
 	{
@@ -637,7 +640,7 @@ var directories:Array<String> = [Paths.mods('stages/'), Paths.mods(Paths.current
 		stageDropDown.selectedLabel = _song.stage;
 		blockPressWhileScrolling.push(stageDropDown);
 
-	        // Utils.difficulties = Utils.defaultDifficulties.copy(); // okey?
+	        // Utils.difficulties = Utils.defaultDifficulties.copy(); //
 
 		var difficultyDropDown = new FlxUIDropDownMenuCustom(stageDropDown.x, gfVersionDropDown.y, FlxUIDropDownMenuCustom.makeStrIdLabelArray(Utils.difficulties, true), function(difficulty:String)
 		{
@@ -660,6 +663,11 @@ var directories:Array<String> = [Paths.mods('stages/'), Paths.mods(Paths.current
 	
 		noteSplashesInputText = new FlxUIInputText(noteSkinInputText.x, noteSkinInputText.y + 35, 150, _song.splashSkin, 8);
 		blockPressWhileTypingOn.push(noteSplashesInputText);
+
+		var composers = PlayState.SONG.composedBy;
+		if(composers == null) skin = '';
+		composersInputText = new FlxUIInputText(difficultyDropDown.x, player2DropDown.y, 350, composers, 10);
+		blockPressWhileTypingOn.push(composersInputText);
 
 		var reloadNotesButton:FlxButton = new FlxButton(noteSplashesInputText.x + 5, noteSplashesInputText.y + 20, 'Change Notes', function() {
 			_song.arrowSkin = noteSkinInputText.text;
@@ -685,6 +693,7 @@ var directories:Array<String> = [Paths.mods('stages/'), Paths.mods(Paths.current
 		tab_group_song.add(reloadNotesButton);
 		tab_group_song.add(noteSkinInputText);
 		tab_group_song.add(noteSplashesInputText);
+		tab_group_song.add(composersInputText);
 		tab_group_song.add(new FlxText(stepperBPM.x, stepperBPM.y - 15, 0, 'Song BPM:'));
 		tab_group_song.add(new FlxText(stepperSpeed.x, stepperSpeed.y - 15, 0, 'Song Speed:'));
 		tab_group_song.add(new FlxText(player2DropDown.x, player2DropDown.y - 15, 0, 'Opponent:'));
@@ -694,6 +703,11 @@ var directories:Array<String> = [Paths.mods('stages/'), Paths.mods(Paths.current
 		tab_group_song.add(new FlxText(stageDropDown.x, stageDropDown.y - 15, 0, 'Stage:'));
 		tab_group_song.add(new FlxText(noteSkinInputText.x, noteSkinInputText.y - 15, 0, 'Note Texture:'));
 		tab_group_song.add(new FlxText(noteSplashesInputText.x, noteSplashesInputText.y - 15, 0, 'Note Splashes Texture:'));
+
+		tab_group_song.add(new FlxText(composersInputText.x, composersInputText.y - 15, 0, 'Composed By:'));
+
+		tab_group_song.add(new FlxText(UI_songTitlePostfix.x, UI_songTitlePostfix.y - 12, 0, 'Files Postfix:'));
+
 		tab_group_song.add(player2DropDown);
 		tab_group_song.add(gfVersionDropDown);
 		tab_group_song.add(player1DropDown);
@@ -1568,6 +1582,9 @@ var directories:Array<String> = [Paths.mods('stages/'), Paths.mods(Paths.current
 		else if(id == FlxUIInputText.CHANGE_EVENT && (sender is FlxUIInputText)) {
 			if(sender == noteSplashesInputText) {
 				_song.splashSkin = noteSplashesInputText.text;
+			}
+			else if(sender == composersInputText) {
+				_song.composedBy = composersInputText.text;
 			}
 			else if(curSelectedNote != null)
 			{

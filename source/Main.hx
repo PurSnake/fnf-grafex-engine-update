@@ -145,7 +145,7 @@ class Main extends Sprite
 		initBaseGameSettings();
 
 		#if !mobile
-		FPSMem = new FPSMem(10, 3, 0xFFFFFF);
+		FPSMem = new FPSMem(4, 8, 0xFFFFFF);
 		addChild(FPSMem.shadow);
 		addChild(FPSMem);
 		#end
