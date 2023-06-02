@@ -15,6 +15,7 @@ import grafex.system.statesystem.MusicBeatState;
 import grafex.system.song.Section.SwagSection;
 import grafex.system.song.Song.SwagSong;
 import grafex.system.script.FunkinLua;
+import grafex.util.ClientPrefs;
 import flixel.group.FlxGroup.FlxTypedGroup;
 import flixel.addons.transition.FlxTransitionableState;
 import flixel.util.FlxColor;
@@ -31,7 +32,7 @@ import flixel.util.FlxSort;
 import flixel.util.FlxTimer;
 import flixel.input.keyboard.FlxKey;
 import openfl.events.KeyboardEvent;
-import grafex.util.ClientPrefs;
+import openfl.utils.Dictionary;
 
 using StringTools;
 
@@ -44,6 +45,11 @@ class EditorPlayState extends MusicBeatState
 	public var opponentStrums:FlxTypedGroup<StrumNote>;
 	public var playerStrums:FlxTypedGroup<StrumNote>;
 	public var grpNoteSplashes:FlxTypedGroup<NoteSplash>;
+
+	var skin:String='noteSplashes';
+	var hue:Float=0;
+	var sat:Float=0;
+	var brt:Float=0;
 
 	public var notes:FlxTypedGroup<Note>;
 	public var unspawnNotes:Array<Note> = [];
@@ -109,9 +115,9 @@ class EditorPlayState extends MusicBeatState
 		grpNoteSplashes = new FlxTypedGroup<NoteSplash>();
 		add(grpNoteSplashes);
 
-		var splash:NoteSplash = new NoteSplash(100, 100, 0);
-		grpNoteSplashes.add(splash);
+		var splash:NoteSplash = new NoteSplash(-2000, -2000, 0);
 		splash.alpha = 0.0;
+		grpNoteSplashes.add(splash);
 		
 		if (PlayState.SONG.needsVoices)
 			vocals = new FlxSound().loadEmbedded(Paths.voices(PlayState.SONG.song, PlayState.SONG.postfix));
@@ -200,6 +206,49 @@ class EditorPlayState extends MusicBeatState
 
 		var daBeats:Int = 0; // Not exactly representative of 'daBeats' lol, just how much it has looped
 
+        for (section in noteData) {
+            for (songNotes in section.sectionNotes) {
+                var daStrumTime = songNotes[0];
+				if(daStrumTime >= startPos) {
+            	    var daNoteData = Std.int(songNotes[1] % 4);
+            	    var gottaHitNote = section.mustHitSection;
+            	    if (songNotes[1] > 3) gottaHitNote = !section.mustHitSection;
+            	    var oldNote = unspawnNotes.length > 0 ? unspawnNotes[Std.int(unspawnNotes.length - 1)] : null;
+            	    var swagNote = new Note(daStrumTime, daNoteData, oldNote);
+            	    swagNote.mustPress = gottaHitNote;
+            	    swagNote.sustainLength = Math.round(songNotes[2] / Conductor.stepCrochet) * Conductor.stepCrochet;
+            	    swagNote.gfNote = (section.gfSection && (songNotes[1]<4));
+            	    swagNote.noteType = songNotes[3];
+            	    if(!Std.isOfType(songNotes[3], String)) swagNote.noteType = ChartingState.noteTypeList[songNotes[3]];
+            	    swagNote.scrollFactor.set();
+            	    swagNote.ID = unspawnNotes.length;
+            	    unspawnNotes.push(swagNote);
+            	    var floorSus = Math.round(swagNote.sustainLength / Conductor.stepCrochet);
+            	    if(floorSus > 0) {
+            	        if(floorSus == 1) floorSus++;
+            	        for (susNote in 0...floorSus) {
+            	            oldNote = unspawnNotes[Std.int(unspawnNotes.length - 1)];
+            	            var sustainNote = new Note(daStrumTime + (Conductor.stepCrochet * susNote) + (Conductor.stepCrochet / FlxMath.roundDecimal(PlayState.SONG.speed, 2)), daNoteData, oldNote, true);
+            	            sustainNote.mustPress = gottaHitNote;
+            	            sustainNote.gfNote = (section.gfSection && (songNotes[1]<4));
+            	            sustainNote.noteType = swagNote.noteType;
+            	            sustainNote.ID = unspawnNotes.length;
+            	            sustainNote.scrollFactor.set();
+            	            swagNote.tail.push(sustainNote);
+            	            sustainNote.parent = swagNote;
+            	            unspawnNotes.push(sustainNote);
+            	        }
+            	    }
+            	    if(!noteTypeMap.exists(swagNote.noteType)) {
+            	        noteTypeMap.set(swagNote.noteType, true);
+            	    }
+
+				}
+            }
+			daBeats ++;
+        }
+
+/*
 		for (section in noteData)
 		{
 			for (songNotes in section.sectionNotes)
@@ -282,7 +331,7 @@ class EditorPlayState extends MusicBeatState
 			}
 			daBeats += 1;
 		}
-
+*/
 		unspawnNotes.sort(sortByShit);
 		generatedMusic = true;
 	}
@@ -344,15 +393,23 @@ class EditorPlayState extends MusicBeatState
 			}
 		}
 		
+		grpNoteSplashes.forEachDead(function(splash:NoteSplash) {
+			if (grpNoteSplashes.length > 1) {
+				grpNoteSplashes.remove(splash, true);
+				splash.destroy();
+			}
+		});
+
 		if (generatedMusic)
 		{
 			var fakeCrochet:Float = (60 / PlayState.SONG.bpm) * 1000;
 			notes.forEachAlive(function(daNote:Note)
 			{
 				// i am so fucking sorry for this if condition
-				var strumX:Float = 0;
 				var strumY:Float = 0;
+				var strumX:Float = 0;
 				var strumAlpha:Float = 0;
+
 				if(daNote.mustPress) {
 					strumX = playerStrums.members[daNote.noteData].x;
 					strumY = playerStrums.members[daNote.noteData].y;
@@ -365,15 +422,12 @@ class EditorPlayState extends MusicBeatState
 
 				strumX += daNote.offsetX;
 				strumY += daNote.offsetY;
-				var center:Float = strumY + Note.swagWidth / 2;
 
-				if(daNote.copyAlpha) {
-					daNote.alpha = strumAlpha * daNote.multAlpha;
-				}
-				if(daNote.copyX) {
-					daNote.x = strumX;
-				}
+				daNote.alpha = strumAlpha * daNote.multAlpha;
+				daNote.x = strumX;
+
 				if(daNote.copyY) {
+					var center:Float = strumY + Note.swagWidth / 2;
 					if (ClientPrefs.downScroll) {
 						daNote.y = (strumY + 0.45 * (Conductor.songPosition - daNote.strumTime) * PlayState.SONG.speed);
 						if (daNote.isSustainNote) {
@@ -521,8 +575,11 @@ class EditorPlayState extends MusicBeatState
 
 		FlxG.sound.music.play();
 		Conductor.songPosition = FlxG.sound.music.time;
-		vocals.time = Conductor.songPosition;
-		vocals.play();
+		if (Conductor.songPosition <= vocals.length)
+		{
+			vocals.time = Conductor.songPosition;
+			vocals.play();
+		}
 	}
 	private function onKeyPress(event:KeyboardEvent):Void
 	{
@@ -963,27 +1020,38 @@ class EditorPlayState extends MusicBeatState
 	function spawnNoteSplashOnNote(note:Note) {
 		if(ClientPrefs.noteSplashes && note != null) {
 			var strum:StrumNote = playerStrums.members[note.noteData];
-			if(strum != null) {
-				spawnNoteSplash(strum.x, strum.y, note.noteData, note);
-			}
+			if(strum != null) 
+				spawnNoteSplash(strum.getMidpoint().x, strum.getMidpoint().y, note.noteData, note);
 		}
 	}
 
 	function spawnNoteSplash(x:Float, y:Float, data:Int, ?note:Note = null) {
-		var skin:String = 'noteSplashes';
-		if(PlayState.SONG.splashSkin != null && PlayState.SONG.splashSkin.length > 0) skin = PlayState.SONG.splashSkin;
-		
-		var hue:Float = ClientPrefs.arrowHSV[data % 4][0] / 360;
-		var sat:Float = ClientPrefs.arrowHSV[data % 4][1] / 100;
-		var brt:Float = ClientPrefs.arrowHSV[data % 4][2] / 100;
-		if(note != null) {
-			skin = note.noteSplashTexture;
-			hue = note.noteSplashHue;
-			sat = note.noteSplashSat;
-			brt = note.noteSplashBrt;
+		if(PlayState.SONG.splashSkin!=null &&PlayState.SONG.splashSkin.length>0) skin=PlayState.SONG.splashSkin;
+
+		var hueValues:Dictionary<Int,Float> = new Dictionary<Int,Float>();
+		var satValues:Dictionary<Int,Float> = new Dictionary<Int,Float>();
+		var brtValues:Dictionary<Int,Float> = new Dictionary<Int,Float>();
+	
+
+		if (data>-1&&data<ClientPrefs.arrowHSV.length){
+			if(!hueValues.exists(data))
+				hueValues[data]=ClientPrefs.arrowHSV[data][0]/360;
+			   hue=hueValues[data];
+		   if(!satValues.exists(data))
+			   satValues[data]=ClientPrefs.arrowHSV[data][1]/100;
+			   sat=satValues[data];
+		   if(!brtValues.exists(data))
+			   brtValues[data]=ClientPrefs.arrowHSV[data][2]/100;
+			   brt=brtValues[data];
+		   if(note!=null) {
+			   skin=note.noteSplashTexture;
+			   hue=note.noteSplashHue;
+			   sat=note.noteSplashSat;
+			   brt=note.noteSplashBrt;
+			}
 		}
 
-		var splash:NoteSplash = grpNoteSplashes.recycle(NoteSplash);
+		var splash:NoteSplash=grpNoteSplashes.recycle(NoteSplash);
 		splash.setupNoteSplash(x, y, data, skin, hue, sat, brt);
 		grpNoteSplashes.add(splash);
 	}

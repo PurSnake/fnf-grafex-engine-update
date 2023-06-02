@@ -15,49 +15,14 @@ import flixel.text.FlxText;
 using StringTools;
 
 class AchievementsGrfx {
-	public static var achievementsStuff:Array<Dynamic> = [ //Name, Description, Achievement save tag, image offsets, Hidden achievement
-		[
-			"We are rich, Walten!",
-			"Reach 50 clicks in Credits.",
-			'diamond',
-			[0, 0],
-			false
-		],
-		[
-			"Tadano-kun... Thank you...",
-			"Beat Komi Week on Hard with no Misses.",
-			'fc_komi',
-			[0, 0],
-			false
-		],
-		[
-			"Turkey's Beat!",
-			"Beat Week 5 on Hard with no Misses.",
-			'fc_week5',
-			[0, -17],
-			false
-		],
-		[
-			"Breathing Release",
-			"Listen Full GameOver on Komi Week.",
-			'full_gm',
-			[0, 0],
-			false
-		],
-		[
-			"Our Poor Lemon...",
-			"Beat No More Phone Song.",
-			'got_no_IPhone',
-			[0, 0],
-			false
-		],
-		[
-			"Bake you 'til Golden Brown.",
-			"Beat WinterHorrorland Song.",
-			'lemon',
-			[0, 0],
-			false
-		]
+	public static var achievementsStuff:Array<Dynamic> = [
+		/*[
+			"", // Name,
+			"" // Description,
+			'' / /Achievement save tag,
+			[0, 0] // image offsets,
+			false // Hidden achievement
+		]*/
 	];
 
 	public static function getAchievement(name:String) {

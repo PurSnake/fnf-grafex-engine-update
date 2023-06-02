@@ -2160,6 +2160,21 @@ class PlayState extends MusicBeatState
             {
                 Conductor.songPosition = -(Conductor.crochet * 1.5); //huh
             }
+
+			var introAssets:Map<String, Array<String>> = new Map<String, Array<String>>();
+			introAssets.set('default', ['ready', 'set', 'go']);
+			introAssets.set('pixel', ['pixelUI/ready-pixel', 'pixelUI/set-pixel', 'pixelUI/date-pixel']);
+
+			var introAlts:Array<String> = introAssets.get('default');
+			var antialias:Bool = ClientPrefs.globalAntialiasing;
+			if(PlayState.isPixelStage) {
+				introAlts = introAssets.get('pixel');
+				antialias = false;
+			}
+			
+            // stolen from week 7 source code lmao
+			var soundList:Array<String> = ["intro3", "intro2", "intro1", "introGo"];
+
             if (!skipCountdown)
             startTimer = new FlxTimer().start(Conductor.crochet / 1000 / playbackRate, function(tmr:FlxTimer)
             {
@@ -2168,17 +2183,6 @@ class PlayState extends MusicBeatState
 			        	character.dance();
 			        }
 		        }
-    
-                var introAssets:Map<String, Array<String>> = new Map<String, Array<String>>();
-                introAssets.set('default', ['ready', 'set', 'go']);
-                introAssets.set('pixel', ['pixelUI/ready-pixel', 'pixelUI/set-pixel', 'pixelUI/date-pixel']);
-    
-                var introAlts:Array<String> = introAssets.get('default');
-                var antialias:Bool = ClientPrefs.globalAntialiasing;
-                if(PlayState.isPixelStage) {
-                    introAlts = introAssets.get('pixel');
-                    antialias = false;
-                }
     
                 iconGroup.forEach(function(icon:HealthIcon)
                 {
@@ -2207,8 +2211,6 @@ class PlayState extends MusicBeatState
 					bottomBoppers.dance(true);
 					santa.dance(true);
 				}
-                // stolen from week 7 source code lmao
-				var soundList:Array<String> = ["intro3", "intro2", "intro1", "introGo"];
 
 				if(swagCounter > 0 && swagCounter < 4) {
 					var countSpr:FlxSprite = new FlxSprite().loadGraphic(Paths.image(introAlts[swagCounter - 1]));
@@ -2795,8 +2797,8 @@ class PlayState extends MusicBeatState
 		{
 			vocals.time = Conductor.songPosition;
 			vocals.pitch = playbackRate;
+			vocals.play();
 		}
-		if(Conductor.songPosition <= vocals.length) vocals.play();
 	}
 
 	public var paused:Bool = false;

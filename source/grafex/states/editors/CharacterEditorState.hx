@@ -218,15 +218,13 @@ class CharacterEditorState extends MusicBeatState
 		
 		//addOffsetsUI();
 		addSettingsUI();
-
 		addCharacterUI();
 		addPropertiesUI();
 		addIconUI();
 		addAnimationsUI();
 		UI_characterbox.selected_tab_id = 'Character';
-
-		reloadCharacterOptions();
-
+		loadChar(!char.isPlayer);
+		reloadCharacterDropDown();
 		super.create();
 	}
 
@@ -1092,22 +1090,20 @@ class CharacterEditorState extends MusicBeatState
 		}
 		charLayer.clear();
 
-                var funnyChar:String = '';
-                defaultChar ? {
-                    funnyChar = daAnim;
-                } : {
-                    if(charsLoaded.exists(daAnim)) funnyChar = charsLoaded.get(daAnim) + daAnim;
-                    else funnyChar = daAnim;
-                }
+		var funnyChar:String = '';
+		defaultChar ? {
+		    funnyChar = daAnim;
+		} : {
+		    if(charsLoaded.exists(daAnim)) funnyChar = charsLoaded.get(daAnim) + daAnim;
+		    else funnyChar = daAnim;
+		}
 
 		ghostChar = new Character(0, 0, funnyChar, !isDad);
 		ghostChar.debugMode = true;
 		ghostChar.alpha = 0.6;
 
 		char = new Character(0, 0, funnyChar, !isDad);
-		if(char.animationsArray[0] != null) {
-			char.playAnim(char.animationsArray[0].anim, true);
-		}
+		if(char.animationsArray[0] != null) char.playAnim(char.animationsArray[0].anim, true);
 		char.debugMode = true;
 
 		charLayer.add(ghostChar);
@@ -1163,13 +1159,13 @@ class CharacterEditorState extends MusicBeatState
 			singDurationStepper.value = char.singDuration;
 			iconOffsetX.value = char.iconOffsets[0];
 			iconOffsetY.value = char.iconOffsets[1];
-                        iconScaleStepper.value = char.iconScale;
+			iconScaleStepper.value = char.iconScale;
 			scaleStepper.value = char.jsonScale;
 			flipXCheckBox.checked = char.originalFlipX;
 			noAntialiasingCheckBox.checked = char.noAntialiasing;
 			resetHealthBarColor();
 			leHealthIcon.changeIcon(healthIconInputText.text, iconOffsetX.value, iconOffsetY.value, iconScaleStepper.value);
-		    leHealthIcon.changeOffsets(iconOffsetX.value, iconOffsetY.value);
+			leHealthIcon.changeOffsets(iconOffsetX.value, iconOffsetY.value);
 			positionXStepper.value = char.positionArray[0];
 			positionYStepper.value = char.positionArray[1];
 			positionCameraXStepper.value = char.cameraPosition[0];

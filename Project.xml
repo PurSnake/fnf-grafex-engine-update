@@ -95,7 +95,7 @@
 
 	<assets path='extra/readme.txt' rename='you MUST readme.txt' />
 
-	<haxelib name="actuate" />
+	<!--haxelib name="actuate" / animania thing-->
 
 	<assets path="plugins/" rename='' if="windows"/>
 	<assets path="dlls/" rename='' if="windows"/>
