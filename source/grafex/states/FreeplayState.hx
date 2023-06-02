@@ -73,6 +73,7 @@ class FreeplayState extends MusicBeatState
 	var bg:FlxSprite;
 	var intendedColor:Int;
 	var colorTween:FlxTween;
+	var forMouseClick:FlxTimer = null;
 	var acceptedSong:Bool = false;
 
 	var camZoom:FlxTween;
@@ -244,8 +245,13 @@ class FreeplayState extends MusicBeatState
 		var leWeek:WeekData = WeekData.weeksLoaded.get(name);
 		return (!leWeek.startUnlocked && leWeek.weekBefore.length > 0 && (!StoryMenuState.weekCompleted.exists(leWeek.weekBefore) || !StoryMenuState.weekCompleted.get(leWeek.weekBefore)));
 	}
-	
-        var holdTime:Float = 0;
+	override public function onFocus():Void
+    {
+		forMouseClick = new FlxTimer().start(0.1, function(tmr:FlxTimer){forMouseClick = null;});
+        super.onFocus();
+    }
+
+	var holdTime:Float = 0;
 	public static var vocals:FlxSound = null;
 	private static var ChooseSound:FlxSound = null;
 	override function update(elapsed:Float)
@@ -344,7 +350,7 @@ class FreeplayState extends MusicBeatState
 
 			        FlxG.sound.play(Paths.sound('cancelMenu'));
 			        MusicBeatState.switchState(new MainMenuState());
-			       });
+			    });
 		    }
 		}
 
@@ -409,7 +415,7 @@ class FreeplayState extends MusicBeatState
 			}
 		}
 
-		else if (accepted || FlxG.mouse.justPressed)
+		else if (accepted || (forMouseClick == null && FlxG.mouse.justPressed))
 		{
 			acceptSong();
 		}
