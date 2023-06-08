@@ -28,7 +28,7 @@ class StrumNote extends FlxSprite
 		}
 		return value;
 	}
-        var confirmOffsets:Array<Float> = [0, 0];
+    //var confirmOffsets:Array<Float> = [0, 0];
 
 	public function new(x:Float, y:Float, leData:Int, player:Int) {
 		colorSwap = new ColorSwap();
@@ -114,9 +114,9 @@ class StrumNote extends FlxSprite
 		//if(animation.curAnim != null){ //my bad i was upset
 		if(animation.curAnim.name == 'confirm' && !PlayState.isPixelStage) {
 			centerOffsets();
-            addConfirmOffsets();
-		//}
+            //addConfirmOffsets();
 		}
+		//}
 
 		super.update(elapsed);
 	}
@@ -142,9 +142,8 @@ class StrumNote extends FlxSprite
 			}
 		}
 	}
-        public function addConfirmOffsets()
-	{
+	/*public function addConfirmOffsets(){
 		offset.x -= confirmOffsets[0];
 		offset.y += confirmOffsets[1];
-	}
+	}*/
 }

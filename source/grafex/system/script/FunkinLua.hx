@@ -3098,23 +3098,23 @@ class FunkinLua {
 	}
 
 	public function blendModeFromString(blend:String):BlendMode {
-		switch(blend.toLowerCase().trim()) {
-			case 'add': return ADD;
-			case 'alpha': return ALPHA;
-			case 'darken': return DARKEN;
-			case 'difference': return DIFFERENCE;
-			case 'erase': return ERASE;
-			case 'hardlight': return HARDLIGHT;
-			case 'invert': return INVERT;
-			case 'layer': return LAYER;
-			case 'lighten': return LIGHTEN;
-			case 'multiply': return MULTIPLY;
-			case 'overlay': return OVERLAY;
-			case 'screen': return SCREEN;
-			case 'shader': return SHADER;
-			case 'subtract': return SUBTRACT;
+		return switch(blend.toLowerCase().trim()) {
+			case 'add': ADD;
+			case 'alpha': ALPHA;
+			case 'darken': DARKEN;
+			case 'difference': DIFFERENCE;
+			case 'erase': ERASE;
+			case 'hardlight': HARDLIGHT;
+			case 'invert': INVERT;
+			case 'layer': LAYER;
+			case 'lighten': LIGHTEN;
+			case 'multiply': MULTIPLY;
+			case 'overlay': OVERLAY;
+			case 'screen': SCREEN;
+			case 'shader': SHADER;
+			case 'subtract': SUBTRACT;
+			default: NORMAL;
 		}
-		return NORMAL;
 	}
 
 	function cameraFromString(cam:String):FlxCamera {
