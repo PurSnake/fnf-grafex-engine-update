@@ -55,8 +55,7 @@ class GrfxScriptHandler {
 
 	
 	public static function loadStateModule(path:String, ?extraParams:StringMap<Dynamic>) {
-        trace('Loading haxe file: ${Paths.hxModule(path)}');
-
+		trace('Loading haxe file: ${Paths.hxModule(path)}');
 		var modulePath:String = Paths.hxModule(path);
 		try {
 			return new GrfxStateModule(parser.parseString(File.getContent(modulePath), modulePath), extraParams);
@@ -66,7 +65,7 @@ class GrfxScriptHandler {
 	}
 
 	public static function loadModule(path:String, ?extraParams:StringMap<Dynamic>) {
-        trace('Loading haxe file: ${Paths.hxModule(path)}');
+		trace('Loading haxe file: ${Paths.hxModule(path)}');
 
 		var modulePath:String = Paths.hxModule(path);
 		try {
@@ -77,7 +76,7 @@ class GrfxScriptHandler {
 	}
 	
 	public static function noPathModule(path:String, ?extraParams:StringMap<Dynamic>) {
-        trace('Loading haxe file: $path');
+		trace('Loading haxe file: $path');
 		var modulePath:String = path;
 		try{
 			return new GrfxHxScript(parser.parseString(File.getContent(modulePath), modulePath), extraParams, path);
@@ -196,8 +195,16 @@ class GrfxModule
 	public var closed:Bool = false;
 	public var scriptName:String = '';
 
+	public static var Function_Stop:Dynamic = 1;
+	public static var Function_Continue:Dynamic = 0;
+	public static var Function_StopScript:Dynamic = 2;
+
 	public function new(?contents:Expr, ?extraParams:StringMap<Dynamic>, ?name:String) {
 		interp = new Interp();
+
+		interp.variables.set('Function_StopScript', Function_StopScript);
+		interp.variables.set('Function_Stop', Function_Stop);
+		interp.variables.set('Function_Continue', Function_Continue);
 
 		interp.variables.set('FlxG', FlxG);
 		interp.variables.set('FlxSprite', FlxSprite);

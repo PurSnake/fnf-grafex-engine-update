@@ -73,8 +73,10 @@ class PrelaunchingState extends MusicBeatState
         if(FlxG.save.data.noLaunchScreen == null)
             FlxG.save.data.noLaunchScreen = false;
 
-        if(FlxG.save.data.noLaunchScreen == true)
-            MusicBeatState.switchState(new TitleState());
+	if(FlxG.save.data.noLaunchScreen == true) {
+		FlxG.switchState(new TitleState());
+		return;
+	}
 
         txts.push(["Also, we wish you a pleasant game! \n  - Animania Crew", '']);
 

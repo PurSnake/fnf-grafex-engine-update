@@ -112,8 +112,11 @@ import sys.io.File;
 #end
 
 #if VIDEOS_ALLOWED
-import external.FlxVideo;
+#if (hxCodec >= "2.6.1") import hxcodec.VideoHandler as MP4Handler;
+#elseif (hxCodec == "2.6.0") import VideoHandler as MP4Handler;
+#else import vlc.MP4Handler; #end
 #end
+
 
 #if desktop
 import external.Discord.DiscordClient;
@@ -170,7 +173,7 @@ class PlayState extends MusicBeatState
     public static var curStage:String = '';
 	public static var isPixelStage:Bool = false;
     public static var NotesCanMoveCam:Bool = true;
-    public static var smoothCamera:Bool = true;
+    public var smoothCamera:Bool = true;
 	public static var SONG:SwagSong = null;
 	public static var isStoryMode:Bool = false;
 	public static var storyWeek:Int = 0;
@@ -2114,6 +2117,8 @@ class PlayState extends MusicBeatState
         Paths.sound('introGo' + introSoundsSuffix);
     }
 
+	public var skippedCountdownStartTime:Float = 0;
+
     public function startCountdown():Void
     {
         if(startedCountdown) {
@@ -2124,7 +2129,7 @@ class PlayState extends MusicBeatState
         }
     
         inCutscene = false;
-        var ret:Dynamic = callOnLuas('onStartCountdown', [], false);
+        var ret:Dynamic = (callOnLuas('onStartCountdown', [], false) || callOnHscript('onStartCountdown', [], false));
         if(ret != FunkinLua.Function_Stop) {
             if (skipCountdown || startOnTime > 0) skipArrowStartTween = true;
     
@@ -2146,20 +2151,26 @@ class PlayState extends MusicBeatState
             callOnLuas('onCountdownStarted', []);
             stageBuild.callFunction("onCountdownStarted", []);
             callOnHscript("onCountdownStarted", []);
-    
-            var swagCounter:Int = 0;
-    
-            if(startOnTime < 0) startOnTime = 0;
-    
-            if (startOnTime > 0) {
-                clearNotesBefore(startOnTime);
-                setSongTime(startOnTime - 350);
-                return;
-            }
-            else if (skipCountdown)
-            {
-                Conductor.songPosition = -(Conductor.crochet * 1.5); //huh
-            }
+
+		var swagCounter:Int = 0;
+
+		if(startOnTime < 0) startOnTime = 0;
+
+		if (startOnTime > 0) {
+			clearNotesBefore(startOnTime);
+			setSongTime(startOnTime - 350);
+			return;
+		}
+		else if (skipCountdown && skippedCountdownStartTime >= 0)
+		{
+			setSongTime(0);
+			return;
+		}
+		else if (skipCountdown && skippedCountdownStartTime < 0)
+		{
+			Conductor.songPosition = skippedCountdownStartTime;
+			return;
+		}
 
 			var introAssets:Map<String, Array<String>> = new Map<String, Array<String>>();
 			introAssets.set('default', ['ready', 'set', 'go']);
@@ -2172,10 +2183,8 @@ class PlayState extends MusicBeatState
 				antialias = false;
 			}
 			
-            // stolen from week 7 source code lmao
 			var soundList:Array<String> = ["intro3", "intro2", "intro1", "introGo"];
 
-            if (!skipCountdown)
             startTimer = new FlxTimer().start(Conductor.crochet / 1000 / playbackRate, function(tmr:FlxTimer)
             {
 		        for (character in characters) {
@@ -2820,7 +2829,7 @@ class PlayState extends MusicBeatState
         if(smoothCamera) {
             if((1 - ClientPrefs.framerate * 0.008) > 0) FlxG.camera.followLerp =  1 - (ClientPrefs.framerate * 0.008);
             else FlxG.camera.followLerp =  0.04;
-        }
+        } else FlxG.camera.followLerp = 60 / FlxG.updateFramerate;
 
         if(FlxG.keys.justPressed.F11) FlxG.fullscreen = !FlxG.fullscreen;
 
@@ -2978,7 +2987,7 @@ class PlayState extends MusicBeatState
 
 		if (controls.PAUSE && startedCountdown && canPause)
 		{
-			var ret:Dynamic = callOnLuas('onPause', [], false);
+			var ret:Dynamic = (callOnLuas('onPause', [], false) || callOnHscript('onPause', [], false));
 			if(ret != FunkinLua.Function_Stop) {
 				pauseState();
 			}
@@ -3249,8 +3258,7 @@ class PlayState extends MusicBeatState
 
     function pauseState()
     {
-        var ret:Dynamic = callOnLuas('onPause', [], false);
-        callOnHscript("onPause", []);
+	var ret:Dynamic = (callOnLuas('onPause', [], false) || callOnHscript('onPause', [], false));
         stageBuild.callFunction("onPause", []);
 
         if(ret != FunkinLua.Function_Stop) {
@@ -3294,7 +3302,7 @@ class PlayState extends MusicBeatState
 	function doDeathCheck(?skipHealthCheck:Bool = false) {
 		if (((skipHealthCheck && instakillOnMiss) || health <= 0) && !practiceMode && !isDead)
 		{
-			var ret:Dynamic = callOnLuas('onGameOver', [], false);
+			var ret:Dynamic = (callOnLuas('onGameOver', [], false) || callOnHscript('onGameOver', [], false));
 			if(ret != FunkinLua.Function_Stop) {
 				boyfriend.stunned = true;
 				deathCounter++;
@@ -3999,7 +4007,7 @@ class PlayState extends MusicBeatState
 		deathCounter = 0;
 		seenCutscene = false;
 		
-		var ret:Dynamic = callOnLuas('onEndSong', [], false);
+		var ret:Dynamic = (callOnLuas('onEndSong', [], false) || callOnHscript('onEndSong', [], false));
 
 		if(ret != FunkinLua.Function_Stop && !transitioning) {
 
@@ -4983,7 +4991,7 @@ class PlayState extends MusicBeatState
         {
             var strum:StrumNote = playerStrums.members[note.noteData];
 			if(char == 'dad') strum = opponentStrums.members[note.noteData];
-            if(strum != null && strum.alpha > 0.4) spawnNoteSplash(strum.getMidpoint().x, strum.getMidpoint().y, note.noteData, note);
+            if(strum != null && strum.alpha > 0.4 && strum.visible) spawnNoteSplash(strum.getMidpoint().x, strum.getMidpoint().y, note.noteData, note);
         }
     }
 	
@@ -5412,14 +5420,22 @@ class PlayState extends MusicBeatState
 	}
 
 	public function callOnHscript(eventName:String, args:Array<Dynamic>, ignoreStops = true, exclusions:Array<String> = null):Dynamic {
-		var smthVal:Dynamic = null;
-		if (exclusions == null) exclusions = [];
+		var returnVal:Dynamic = FunkinLua.Function_Continue;
+		if(exclusions == null) exclusions = [];
+		for (script in hscriptArray) {
+			if(exclusions.contains(script.scriptName))
+				continue;
 
-		if (hscriptArray.length > 0)
-			for (script in hscriptArray) {
-				smthVal = script.executeFunc(eventName, args);
+			var ret:Dynamic = script.executeFunc(eventName, args);
+			if(ret == FunkinLua.Function_StopLua && !ignoreStops)
+				break;
+
+			var bool:Bool = ret == FunkinLua.Function_Continue;
+			if(!bool && ret != 0) {
+				returnVal = cast ret;
 			}
-		return smthVal;
+		}
+		return returnVal;
 	}
 
 	public function closeScript(name:String):Bool {
@@ -5616,48 +5632,35 @@ class PlayState extends MusicBeatState
 		callOnHscript("onGetCamOffsets", []);
     }
 		
-	public function startVideo(name:String):Void
+	public function startVideo(name:String)
 	{
 		#if VIDEOS_ALLOWED
-		var foundFile:Bool = false;
-		var fileName:String = #if MODS_ALLOWED Paths.video(name); #else ''; #end
+		inCutscene = true;
+
+		var filepath:String = Paths.video(name);
 		#if sys
-		if(FileSystem.exists(fileName)) {
-			foundFile = true;
-		}
+		if(!FileSystem.exists(filepath))
+		#else
+		if(!OpenFlAssets.exists(filepath))
 		#end
-
-		if(!foundFile) {
-			fileName = Paths.video(name);
-			#if sys
-			if(FileSystem.exists(fileName)) {
-			#else
-			if(OpenFlAssets.exists(fileName)) {
-			#end
-				foundFile = true;
-			}
-		}
-
-		if(foundFile) {
-			inCutscene = true;
-			var bg = new FlxSprite(-FlxG.width, -FlxG.height).makeGraphic(FlxG.width * 3, FlxG.height * 3, FlxColor.BLACK);
-			bg.scrollFactor.set();
-			bg.cameras = [camHUD];
-			add(bg);
-
-			(new FlxVideo(fileName)).finishCallback = function() {
-				remove(bg);
-			        startAndEnd();
-            }
+		{
+			FlxG.log.warn('Couldnt find video file: ' + name);
+			startAndEnd();
 			return;
 		}
-		else
+
+		var video:MP4Handler = new MP4Handler();
+		video.playVideo(filepath);
+		video.finishCallback = function()
 		{
-			FlxG.log.warn('Couldnt find video file: ' + fileName);
 			startAndEnd();
+			return;
 		}
+		#else
+		FlxG.log.warn('Platform not supported!');
+		startAndEnd();
+		return;
 		#end
-			startAndEnd();
 	}
 
     function functionFormatter(func:String):Void
