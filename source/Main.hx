@@ -38,6 +38,9 @@ import sys.io.Process;
 import haxe.Json;
 import haxe.format.JsonParser;
 
+import openfl.display.StageScaleMode;
+
+
 using StringTools;
 
 typedef ConfigFile = {
@@ -112,9 +115,6 @@ class Main extends Sprite
 
 	private function init(?E:Event):Void
 	{
-		FlxTransitionableState.skipNextTransIn = true;
-        FlxTransitionableState.skipNextTransOut = true;
-
 		Application.current.window.focus();
 		
 		trace('Game launched');
@@ -148,6 +148,8 @@ class Main extends Sprite
 		FPSMem = new FPSMem(4, 8, 0xFFFFFF);
 		addChild(FPSMem.shadow);
 		addChild(FPSMem);
+		Lib.current.stage.align = "tl";
+		Lib.current.stage.scaleMode = StageScaleMode.NO_SCALE;
 		#end
 
 		achievementToatManager = new AchievementsToastManager();
@@ -175,13 +177,7 @@ class Main extends Sprite
 		GrfxScriptHandler.initialize();
 
 		final bgColor = 0xFF0D1211;
-		//FlxG.cameras.bgColor = bgColor;
 		FlxG.stage.color = bgColor;
-
-		/*#if (flixel >= "5.1.0")
-		FlxG.game.soundTray.volumeDownSound = Paths.getPath('sounds/volume/vol_down2.ogg', SOUND);
-		FlxG.game.soundTray.volumeUpSound = Paths.getPath('sounds/volume/vol_up2.ogg', SOUND);
-		#end*/
 
 		#if (flixel >= "5.1.0")
 		FlxG.game.soundTray.volumeUpSound = Paths.getPath('sounds/'+appConfig.appUpSound+'.ogg', SOUND);

@@ -2359,6 +2359,8 @@ class PlayState extends MusicBeatState
         vocals.play();
         if(startOnTime > 0) setSongTime(startOnTime - 500);
 
+	startOnTime = 0;
+
         if(paused) {
             FlxG.sound.music.pause();
             vocals.pause();
@@ -3663,7 +3665,7 @@ class PlayState extends MusicBeatState
 
 			case 'Change Character':
 				var charType:Int = 0;
-				switch(value1) {
+				switch(value1.toLowerCase().trim()) {
 					case 'gf' | 'girlfriend':
 						charType = 2;
 					case 'dad' | 'opponent':
