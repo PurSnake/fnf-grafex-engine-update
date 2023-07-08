@@ -678,7 +678,7 @@ var directories:Array<String> = [Paths.mods('stages/'), Paths.mods(Paths.current
 		composersInputText = new FlxUIInputText(difficultyDropDown.x, player2DropDown.y, 350, composers, 10);
 		blockPressWhileTypingOn.push(composersInputText);
 
-		var reloadNotesButton:FlxButton = new FlxButton(noteSplashesInputText.x + 5, noteSplashesInputText.y + 20, 'Change Notes', function() {
+		var reloadNotesButton:FlxButton = new FlxButton(noteExtraInputText.x + 5, noteExtraInputText.y + 20, 'Change Notes', function() {
 			_song.arrowSkin = noteSkinInputText.text;
 			_song.extrasSkin = noteExtraInputText.text;
 			updateGrid();
