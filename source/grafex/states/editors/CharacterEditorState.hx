@@ -416,12 +416,14 @@ class CharacterEditorState extends MusicBeatState
 			],
 			"no_antialiasing": false,
 			"image": "characters/DADDY_DEAREST",
+			"sing_anims_prefix": "sing",
 			"position": [
 				0,
 				0
 			],
 			"healthicon": "face",
-            "healthicon_scale": 1,
+			"healthicon_type": "duo",
+			"healthicon_scale": 1,
 			"flip_x": false,
 			"healthbar_colors": [
 				161,
@@ -507,14 +509,16 @@ class CharacterEditorState extends MusicBeatState
 				
 				character.imageFile = parsedJson.image;
 				character.jsonScale = parsedJson.scale;
+				character.singAnimsPrefix = parsedJson.sing_anims_prefix;
 
 				character.iconScale = parsedJson.healthicon_scale;
 
 				character.noAntialiasing = parsedJson.no_antialiasing;
 				character.originalFlipX = parsedJson.flip_x;
 				character.healthIcon = parsedJson.healthicon;
+				character.healthColorArray2 = parsedJson.healthbar_colors2;
+				character.healthIconType = parsedJson.healthicon_type;
 				character.healthColorArray = parsedJson.healthbar_colors;
-                character.healthColorArray2 = parsedJson.healthbar_colors2;
 				character.setPosition(character.positionArray[0] + OFFSET_X + 100, character.positionArray[1]);
 			}
 
@@ -972,29 +976,25 @@ class CharacterEditorState extends MusicBeatState
 			{
 				char.healthColorArray[1] = Math.round(healthColorStepperG.value);
 				healthBarBG.color = FlxColor.fromRGB(char.healthColorArray[0], char.healthColorArray[1], char.healthColorArray[2]);
-                                
 			}
 			else if(sender == healthColorStepperB)
 			{
 				char.healthColorArray[2] = Math.round(healthColorStepperB.value);
 				healthBarBG.color = FlxColor.fromRGB(char.healthColorArray[0], char.healthColorArray[1], char.healthColorArray[2]);
 			}
-		    else if(sender == healthColorStepper2R)
+			else if(sender == healthColorStepper2R)
 			{
-				
-                char.healthColorArray2[0] = Math.round(healthColorStepper2R.value);
+				char.healthColorArray2[0] = Math.round(healthColorStepper2R.value);
 				healthBarBG2.color = FlxColor.fromRGB(char.healthColorArray2[0], char.healthColorArray2[1], char.healthColorArray2[2]);
 			}
 			else if(sender == healthColorStepper2G)
 			{
-				
-                char.healthColorArray2[1] = Math.round(healthColorStepper2G.value);
+				char.healthColorArray2[1] = Math.round(healthColorStepper2G.value);
 				healthBarBG2.color = FlxColor.fromRGB(char.healthColorArray2[0], char.healthColorArray2[1], char.healthColorArray2[2]);
 			}
 			else if(sender == healthColorStepper2B)
 			{
-
-                char.healthColorArray2[2] = Math.round(healthColorStepper2B.value);
+				char.healthColorArray2[2] = Math.round(healthColorStepper2B.value);
 				healthBarBG2.color = FlxColor.fromRGB(char.healthColorArray2[0], char.healthColorArray2[1], char.healthColorArray2[2]);
 			}
                }
@@ -1263,7 +1263,7 @@ class CharacterEditorState extends MusicBeatState
 		healthColorStepperG.value = char.healthColorArray[1];
 		healthColorStepperB.value = char.healthColorArray[2];
 		healthBarBG.color = FlxColor.fromRGB(char.healthColorArray[0], char.healthColorArray[1], char.healthColorArray[2]);
-        healthColorStepper2R.value = char.healthColorArray2[0];
+		healthColorStepper2R.value = char.healthColorArray2[0];
 		healthColorStepper2G.value = char.healthColorArray2[1];
 		healthColorStepper2B.value = char.healthColorArray2[2];
 		healthBarBG2.color = FlxColor.fromRGB(char.healthColorArray2[0], char.healthColorArray2[1], char.healthColorArray2[2]);
@@ -1525,6 +1525,7 @@ class CharacterEditorState extends MusicBeatState
 			"image": char.imageFile,
 			"scale": char.jsonScale,
 			"sing_duration": char.singDuration,
+			"sing_anims_prefix": char.singAnimsPrefix,
 			"healthicon": char.healthIcon,
 			"healthicon_scale": char.iconScale,
 			"healthicon_offsets": char.iconOffsets,
@@ -1534,8 +1535,8 @@ class CharacterEditorState extends MusicBeatState
 		
 			"flip_x": char.originalFlipX,
 			"no_antialiasing": char.noAntialiasing,
-			"healthbar_colors": char.healthColorArray,
 			"healthbar_colors2": char.healthColorArray2,
+			"healthbar_colors": char.healthColorArray,
 			"gameover_properties": [char.deathChar, char.deathSound, char.deathMusic, char.deathConfirm],
 		};
 

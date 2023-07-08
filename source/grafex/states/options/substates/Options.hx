@@ -996,6 +996,35 @@ class ShowSplashes extends Option
 		return "NoteSplashes: < " + (ClientPrefs.noteSplashes ? "Enabled" : "Disabled") + " >";
 	} 
 }
+
+class ShowSusSplashes extends Option
+{
+	public function new(desc:String)
+	{
+		super();
+		description = desc;
+	}
+
+	public override function left():Bool
+	{
+		ClientPrefs.noteSusSplashes = !ClientPrefs.noteSusSplashes;
+		display = updateDisplay();
+		return true;
+	}
+
+	public override function right():Bool
+	{
+		left();
+		return true;
+	}
+
+	private override function updateDisplay():String
+	{
+		return "Sustain Notes Splash-Lights: < " + (ClientPrefs.noteSusSplashes ? "Enabled" : "Disabled") + " >";
+	} 
+}
+
+
 class QualityLow extends Option
 {
 	public function new(desc:String)

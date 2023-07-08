@@ -95,10 +95,9 @@
 
 	<assets path='extra/readme.txt' rename='you MUST readme.txt' />
 
-	<!--haxelib name="actuate" / animania thing-->
+	<!--haxelib name="actuate"-->
 
-	<assets path="plugins/" rename='' if="windows"/>
-	<assets path="dlls/" rename='' if="windows"/>
+	<assets path="static/" rename='' if="windows"/>
 
 	<assets path="assets/videos" exclude="*.mp3" if="web"/>
 	<assets path="assets/videos" exclude="*.ogg" unless="web"/>
@@ -120,6 +119,8 @@
 	<haxelib name="flixel-addons" />
 	<haxelib name="hscript"/>
 	<define name="hscriptPos"/>
+
+	<haxelib name="flixel-screenshot-plugin" />
 
 	<!--In case you want to use the ui package-->
 	<haxelib name="flixel-ui" />
@@ -157,6 +158,9 @@
 
 	<!--Disable the Flixel sound management code-->
 	<!--<haxedef name="FLX_NO_SOUND_SYSTEM" />-->
+
+	<!-- Show debug traces for hxCodec -->
+	<haxedef name="HXC_DEBUG_TRACE" if="debug" />
 
 	<!-- No deprecation warnings. -->
 	<haxedef name="no-deprecation-warnings"/>

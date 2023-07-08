@@ -53,7 +53,6 @@ class GrfxScriptHandler {
 		parser.allowTypes = true;
 	}
 
-	
 	public static function loadStateModule(path:String, ?extraParams:StringMap<Dynamic>) {
 		trace('Loading haxe file: ${Paths.hxModule(path)}');
 		var modulePath:String = Paths.hxModule(path);
@@ -78,25 +77,13 @@ class GrfxScriptHandler {
 	public static function noPathModule(path:String, ?extraParams:StringMap<Dynamic>) {
 		trace('Loading haxe file: $path');
 		var modulePath:String = path;
-		try{
+		try {
 			return new GrfxHxScript(parser.parseString(File.getContent(modulePath), modulePath), extraParams, path);
 		}catch(e:Dynamic){
 			return null;
 		}
 	}
 }
-
-
-class GrfxHxScript extends GrfxModule
-{
-    var smthVal:Dynamic;
-    public function executeFunc(eventName:String, args:Array<Dynamic>):Dynamic {
-        smthVal = null;
-		if (this.exists(eventName) && !closed) smthVal = Reflect.callMethod(interp.variables, this.get(eventName), args);
-		return smthVal;
-    } //callOnHscrip("onFunction", [arg1, arg2, arg3]);
-}
-
 
 class GrfxStateModule
 {
@@ -186,6 +173,15 @@ class GrfxStateModule
 	} 
 }
 
+class GrfxHxScript extends GrfxModule
+{
+    var smthVal:Dynamic;
+    public function executeFunc(eventName:String, args:Array<Dynamic>):Dynamic {
+        smthVal = null;
+		if (this.exists(eventName) && !closed) smthVal = Reflect.callMethod(interp.variables, this.get(eventName), args);
+		return smthVal;
+    } //callOnHscrip("onFunction", [arg1, array-arg2, some-val-arg3]);
+}
 
 class GrfxModule
 {
@@ -251,30 +247,11 @@ class GrfxModule
 
 		interp.variables.set("CutsceneHandler", CutsceneHandler);
 
-		interp.variables.set('addObjectGroup', function(object:FlxObject, group:FlxTypedGroup<FlxObject>) // I FUCKIN HATE HSCRIPT FOT THIS SHIT - PurSnake, bitch
-		{
-            if(group != null) {
-                group.add(object);
-			    return true;
-            }
 
-			errorTrace('Initialize group first, dumbass!', FlxColor.RED);
-			return false;
-		});
 		interp.variables.set('gameTrace', function(text:String, ?color:FlxColor = FlxColor.WHITE)
 		{
 			errorTrace(text, color);
 			return true;
-		});
-
-		interp.variables.set('setBlendMode', function(object:Dynamic, ?blend:BlendMode = null) // Bitch
-		{
-            if(object != null) {
-                object.blend = blend;
-			    return true;
-            }
-
-			return false;
 		});
 
 		interp.variables.set('gradeAchievement', function(name:String)
@@ -295,6 +272,98 @@ class GrfxModule
 			return true;
 		});
 		#end
+
+		interp.variables.set('addHxScript', function(hxFile:String, ?ignoreAlreadyRunning:Bool = false)
+		{
+			var cervix = hxFile + ".hx";
+			if(hxFile.endsWith(".hx"))cervix=hxFile;
+			var doPush = false;
+			#if MODS_ALLOWED
+			if(FileSystem.exists(Paths.modFolders(cervix)))
+			{
+				cervix = Paths.modFolders(cervix);
+				doPush = true;
+			}
+			else if(FileSystem.exists(cervix))
+			{
+				doPush = true;
+			}
+			else {
+				cervix = Paths.getPreloadPath(cervix);
+				if(FileSystem.exists(cervix)) {
+					doPush = true;
+				}
+			}
+			#else
+			cervix = Paths.getPreloadPath(cervix);
+			if(Assets.exists(cervix)) {
+				doPush = true;
+			}
+			#end
+			if(doPush)
+			{
+				if(!ignoreAlreadyRunning)
+				{
+					for (hxInstance in PlayState.instance.hscriptArray)
+					{
+						if(hxInstance.scriptName == cervix)
+						{
+							errorTrace('addHxScript: The script "' + cervix + '" is already running!');
+							return;
+						}
+					}
+				}
+				//PlayState.instance.hscriptArray.push(GrfxScriptHandler.noPathModule(cervix));
+				return;
+			}
+			errorTrace("addHxScript: Script doesn't exist!", FlxColor.RED);
+		});
+
+		interp.variables.set('removeHxScript', function(hxFile:String, ?ignoreAlreadyRunning:Bool = false)
+		{
+			var cervix = hxFile + ".hx";
+			if(hxFile.endsWith(".hx"))cervix=hxFile;
+			var doPush = false;
+			#if MODS_ALLOWED
+			if(FileSystem.exists(Paths.modFolders(cervix)))
+			{
+				cervix = Paths.modFolders(cervix);
+				doPush = true;
+			}
+			else if(FileSystem.exists(cervix))
+			{
+				doPush = true;
+			}
+			else {
+				cervix = Paths.getPreloadPath(cervix);
+				if(FileSystem.exists(cervix)) {
+					doPush = true;
+				}
+			}
+			#else
+			cervix = Paths.getPreloadPath(cervix);
+			if(Assets.exists(cervix)) {
+				doPush = true;
+			}
+			#end
+
+			if(doPush)
+			{
+				if(!ignoreAlreadyRunning)
+				{
+					for (hxInstance in PlayState.instance.hscriptArray)
+					{
+						if(hxInstance.scriptName == cervix)
+						{
+							PlayState.instance.hscriptArray.remove(hxInstance);
+							return;
+						}
+					}
+				}
+				return;
+			}
+			errorTrace("removeHxScript: Script doesn't exist!", FlxColor.RED);
+		});
 
 		interp.variables.set('setVar', function(name:String, value:Dynamic)
 		{

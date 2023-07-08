@@ -33,6 +33,7 @@ class ClientPrefs {
 	public static var flashing:Bool = true;
 	public static var globalAntialiasing:Bool = true;
 	public static var noteSplashes:Bool = true;
+	public static var noteSusSplashes:Bool = true;
 	public static var lowQuality:Bool = false;
 	public static var shaders:Bool = true;
 	public static var framerate:Int = 120;
@@ -131,6 +132,7 @@ class ClientPrefs {
 		FlxG.save.data.flashing = flashing;
 		FlxG.save.data.globalAntialiasing = globalAntialiasing;
 		FlxG.save.data.noteSplashes = noteSplashes;
+		FlxG.save.data.noteSusSplashes = noteSusSplashes;
 		FlxG.save.data.lowQuality = lowQuality;
 		FlxG.save.data.framerate = framerate;
 		FlxG.save.data.ColorBlindType = ColorBlindType;
@@ -206,6 +208,7 @@ class ClientPrefs {
 		} : showMEM = false;
 		FlxG.save.data.flashing != null ? flashing = FlxG.save.data.flashing : flashing = true;
 		FlxG.save.data.noteSplashes != null ? noteSplashes = FlxG.save.data.noteSplashes : noteSplashes = true;
+		FlxG.save.data.noteSusSplashes != null ? noteSusSplashes = FlxG.save.data.noteSusSplashes : noteSusSplashes = true;
 		FlxG.save.data.lowQuality != null ? lowQuality = FlxG.save.data.lowQuality : lowQuality = false;
 		FlxG.save.data.shaders != null ? shaders = FlxG.save.data.shaders : shaders = true;
 		FlxG.save.data.camZooms != null ? camZooms = FlxG.save.data.camZooms : camZooms = true;

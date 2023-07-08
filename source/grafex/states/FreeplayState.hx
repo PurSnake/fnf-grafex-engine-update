@@ -47,10 +47,8 @@ class FreeplayState extends MusicBeatState
 	var songs:Array<SongMetadata> = [];
 
 	private var camBackground:FlxCamera;
-
 	public var camINTERFACE:FlxCamera;
 
-	var selector:FlxText;
 	private static var curSelected:Int = 0;
 	private static var freeplayinstPlaying:Int = -1;
 	var curDifficulty:Int = -1;
@@ -253,6 +251,7 @@ class FreeplayState extends MusicBeatState
 
 	var holdTime:Float = 0;
 	public static var vocals:FlxSound = null;
+	public static var vocals2:FlxSound = null;
 	private static var ChooseSound:FlxSound = null;
 	override function update(elapsed:Float)
 	{
@@ -319,7 +318,7 @@ class FreeplayState extends MusicBeatState
 
 				if(holdTime > 0.5 && checkNewHold - checkLastHold > 0)
 				{
-					changeSelection((checkNewHold - checkLastHold) * (controls.UI_UP ? -shiftMult : shiftMult));
+					changeSelection((checkNewHold - checkLastHold) * (controls.UI_UP ? -shiftMult : shiftMult), false);
 					changeDiff();
 				}
 			}
@@ -378,17 +377,26 @@ class FreeplayState extends MusicBeatState
 				Application.current.window.title = Main.appTitle + ' - ' + listenin;
 				DiscordClient.changePresence(listenin, null);
 
-                if (PlayState.SONG.needsVoices)
-					vocals = new FlxSound().loadEmbedded(Paths.voices(PlayState.SONG.song, PlayState.SONG.postfix));
-				else
-					vocals = new FlxSound();
+		       		PlayState.SONG.needsVoices ? {
+		       			vocals = new FlxSound().loadEmbedded(Paths.voices(PlayState.SONG.song, PlayState.SONG.postfix));
+		       	 		vocals2 = new FlxSound().loadEmbedded(Paths.voices(PlayState.SONG.song, PlayState.SONG.postfix + '-Second'));
+        			} : {
+		        		vocals = new FlxSound();
+		        		vocals2 = new FlxSound();
+		        	}
+         
 				FlxG.sound.list.add(vocals);
+				FlxG.sound.list.add(vocals2);
 				FlxG.sound.playMusic(Paths.inst(PlayState.SONG.song, PlayState.SONG.postfix), 0.7);
 				trace('Started listening to song: "' + PlayState.SONG.song + PlayState.SONG.postfix + '"');
 				vocals.play();
 				vocals.persist = true;
 				vocals.looped = true;
 				vocals.volume = 0.7;
+				vocals2.play();
+				vocals2.persist = true;
+				vocals2.looped = true;
+				vocals2.volume = 0.7;
 				Conductor.changeBPM(PlayState.SONG.bpm);
 				freeplayinstPlaying = curSelected;
 				#end
@@ -551,6 +559,12 @@ class FreeplayState extends MusicBeatState
 			vocals.destroy();
 		}
 		vocals = null;
+
+		if(vocals2 != null) {
+			vocals2.stop();
+			vocals2.destroy();
+		}
+		vocals2 = null;
 	}
 
 	function changeDiff(change:Int = 0)
@@ -604,8 +618,6 @@ class FreeplayState extends MusicBeatState
 		    	});
 		    }
     
-		    // selector.y = (70 * curSelected) + 30;
-    
 		    #if !switch
 		    intendedScore = Highscore.getScore(songs[curSelected].songName, curDifficulty);
 		    intendedRating = Highscore.getRating(songs[curSelected].songName, curDifficulty);
@@ -638,42 +650,30 @@ class FreeplayState extends MusicBeatState
 		    var diffStr:String = WeekData.getCurrentWeek().difficulties;
 		    if(diffStr != null) diffStr = diffStr.trim(); //Fuck you HTML5
     
-		    if(diffStr != null && diffStr.length > 0)
-		    {
-		    	var diffs:Array<String> = diffStr.split(',');
-		    	var i:Int = diffs.length - 1;
-		    	while (i > 0)
-		    	{
-		    		if(diffs[i] != null)
-		    		{
-		    			diffs[i] = diffs[i].trim();
-		    			if(diffs[i].length < 1) diffs.remove(diffs[i]);
-		    		}
-		    		--i;
-		    	}
+			if(diffStr != null && diffStr.length > 0)
+			{
+				var diffs:Array<String> = diffStr.split(',');
+				var i:Int = diffs.length - 1;
+				while (i > 0)
+				{
+					if(diffs[i] != null)
+					{
+						diffs[i] = diffs[i].trim();
+						if(diffs[i].length < 1) diffs.remove(diffs[i]);
+					}
+					--i;
+				}
     
-		    	if(diffs.length > 0 && diffs[0].length > 0)
-		    	{
-		    		Utils.difficulties = diffs;
-		    	}
-		    }
+				if(diffs.length > 0 && diffs[0].length > 0) Utils.difficulties = diffs;
+			}
 		    
-		    curDifficulty = Math.round(Math.max(0, Utils.defaultDifficulties.indexOf(Utils.defaultDifficulty)));
-		    if(Utils.difficulties.contains(Utils.defaultDifficulty))
-		    	{
-		    		curDifficulty = Math.round(Math.max(0, Utils.defaultDifficulties.indexOf(Utils.defaultDifficulty)));
-		    	}
-		    	else
-		    	{
-		    		curDifficulty = 0;
-		    	}
-		    var newPos:Int = Utils.difficulties.indexOf(lastDifficultyName);
-		    //trace('Pos of ' + lastDifficultyName + ' is ' + newPos);
-		    if(newPos > -1)
-		    {
-		    	curDifficulty = newPos;
-		    }
-	    }
+			curDifficulty = Math.round(Math.max(0, Utils.defaultDifficulties.indexOf(Utils.defaultDifficulty)));
+			Utils.difficulties.contains(Utils.defaultDifficulty) ? curDifficulty = Math.round(Math.max(0, Utils.defaultDifficulties.indexOf(Utils.defaultDifficulty))) : curDifficulty = 0;
+
+			var newPos:Int = Utils.difficulties.indexOf(lastDifficultyName);
+			//trace('Pos of ' + lastDifficultyName + ' is ' + newPos);
+			if(newPos > -1) curDifficulty = newPos;
+		}
 	}
 
 	private function positionHighscore() {
@@ -693,11 +693,15 @@ class FreeplayState extends MusicBeatState
 	function resyncVocals():Void
 	{
 		vocals.pause();
+		vocals2.pause();
 
 		FlxG.sound.music.play();
 		Conductor.songPosition = FlxG.sound.music.time;
 		vocals.time = Conductor.songPosition;
 		vocals.play();
+
+		vocals2.time = Conductor.songPosition;
+		vocals2.play();
 	}
 }
 

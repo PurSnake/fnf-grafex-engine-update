@@ -17,6 +17,7 @@ class AttachedSprite extends FlxSprite
 	public var copyAngle:Bool = true;
 	public var copyAlpha:Bool = true;
 	public var copyVisible:Bool = false;
+	public var copyCameras:Bool = false;
 
 	public function new(?file:String = null, ?anim:String = null, ?library:String = null, ?loop:Bool = false)
 	{
@@ -48,6 +49,9 @@ class AttachedSprite extends FlxSprite
 
 			if(copyVisible) 
 				visible = sprTracker.visible;
+
+			if(copyCameras) 
+				cameras = sprTracker.cameras;
 		}
 	}
 }

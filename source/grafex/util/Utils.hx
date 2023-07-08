@@ -207,6 +207,7 @@ class Utils
 			bpm: 100,
 			needsVoices: true,
 			arrowSkin: '',
+			extrasSkin: '',
 	        splashSkin: 'noteSplashes',//idk it would crash if i didn't
 			player1: 'bf',
 			player2: 'dad',

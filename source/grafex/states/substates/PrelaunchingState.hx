@@ -24,49 +24,43 @@ using StringTools;
 
 class PrelaunchingState extends MusicBeatState
 {
-    public static var muteKeys:Array<FlxKey> = [FlxKey.ZERO];
+	public static var muteKeys:Array<FlxKey> = [FlxKey.ZERO];
 	public static var volumeDownKeys:Array<FlxKey> = [FlxKey.NUMPADMINUS, FlxKey.MINUS];
 	public static var volumeUpKeys:Array<FlxKey> = [FlxKey.NUMPADPLUS, FlxKey.PLUS];
 
-    public static var leftState:Bool = false;
-    private static var alreadySeen:Bool = false;
+	var leftState:Bool = false;
+	var curSelected = 0;
 
-    var connectionFailed:Bool = false;
-
-    var curSelected = 0;
-
-    public var arrowSine:Float = 0;
+	public var arrowSine:Float = 0;
 	public var arrowTxt:FlxText;
 
-    var txt:FlxText;
-    var txts:Array<Array<String>> = [
-        [
-            "Disclaimer!\nThis game contains some flashing lights!\nYou've been warned!\n\nYou can disable them in Options Menu", ""
-        ]
-    ];
+	var txt:FlxText;
+	var txts:Array<Array<String>> = [
+		[
+			"Disclaimer!\nThis game contains some flashing lights!\nYou've been warned!\n\nYou can disable them in Options Menu", ""
+		]
+	];
 
     override function create()
     {
         super.create();
 
-        Application.current.window.title = Main.appTitle;
+        Application.current.window.title = Main.appTitle + ' - Starting...';
         
-		FlxG.mouse.visible = false;
+	FlxG.mouse.visible = false;
         FlxG.game.focusLostFramerate = 60;
-		FlxG.sound.muteKeys = muteKeys;
-		FlxG.sound.volumeDownKeys = volumeDownKeys;
-		FlxG.sound.volumeUpKeys = volumeUpKeys;
-		FlxG.keys.preventDefaultKeys = [TAB];
+	FlxG.sound.muteKeys = muteKeys;
+	FlxG.sound.volumeDownKeys = volumeDownKeys;
+	FlxG.sound.volumeUpKeys = volumeUpKeys;
+	FlxG.keys.preventDefaultKeys = [TAB];
         FlxG.camera.zoom = 1;
 
-		PlayerSettings.init();
+	PlayerSettings.init();
 
         FlxG.save.bind('game', Utils.getSavePath());
-		ClientPrefs.loadPrefs();
+	ClientPrefs.loadPrefs();
 
-		Highscore.load();
-
-        connectionFailed = false;
+	Highscore.load();
 
         var version:Array<Int> = null;
         
@@ -78,7 +72,7 @@ class PrelaunchingState extends MusicBeatState
 		return;
 	}
 
-        txts.push(["Also, we wish you a pleasant game! \n  - Animania Crew", '']);
+        txts.push(["Also, we wish you a pleasant game! \n  - PurSnake", '']);
 
         txt = new FlxText(0, 300, FlxG.width, '', 32);
         txt.borderColor = FlxColor.BLACK;
@@ -101,6 +95,8 @@ class PrelaunchingState extends MusicBeatState
     override function update(elapsed:Float)
     {
         super.update(elapsed);
+
+        if(FlxG.save.data.noLaunchScreen == true) return;
 
         if(!leftState)
         {
@@ -129,9 +125,10 @@ class PrelaunchingState extends MusicBeatState
         curSelected += pos;
     
         if (curSelected <= 0)
-			curSelected = 0;
-		if (curSelected >= txts.length + 1)
-			curSelected = txts.length - 1;    
+		curSelected = 0;
+
+	if (curSelected >= txts.length + 1)
+		curSelected = txts.length - 1;    
 
         if(txts != null && curSelected < txts.length)
         {
@@ -155,18 +152,16 @@ class PrelaunchingState extends MusicBeatState
 
     function makeCoolTransition()
     {
+        FlxG.save.data.noLaunchScreen = true;
+        FlxG.save.flush();
         arrowTxt.alpha = 1;
         leftState = true;
-        alreadySeen = true;
-        //FlxG.camera.fade(FlxColor.BLACK, 3, true);
         FlxTween.tween(txt, {alpha: 0}, 3);
         FlxTween.tween(arrowTxt, {alpha: 0}, 3);
-        FlxG.sound.play(Paths.sound('titleShoot'), 0.8).fadeOut(4, 0);
+        FlxG.sound.play(Paths.sound('titleShoot'), 0.6).fadeOut(6, 0);
         FlxG.camera.flash(FlxColor.WHITE, 3, function() {
             FlxTransitionableState.skipNextTransIn = false;
             FlxTransitionableState.skipNextTransOut = false;
-            FlxG.save.data.noLaunchScreen = true;
-            FlxG.save.flush();
             MusicBeatState.switchState(new TitleState());
         });
     }

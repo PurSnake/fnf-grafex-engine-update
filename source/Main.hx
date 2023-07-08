@@ -143,6 +143,7 @@ class Main extends Sprite
 		addChild(new FlxGame(game.width, game.height, game.initialState, #if (flixel < "5.0.0") game.zoom, #end game.framerate, game.framerate, game.skipSplash, game.startFullscreen));
 
 		initBaseGameSettings();
+		flixel.FlxG.plugins.add(new flixel.addons.plugin.ScreenShotPlugin());
 
 		#if !mobile
 		FPSMem = new FPSMem(4, 8, 0xFFFFFF);

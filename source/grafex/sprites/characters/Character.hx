@@ -31,16 +31,19 @@ typedef CharacterFile = {
 	var scale:Float;
 	var sing_duration:Float;
 	var healthicon:String;
+	var healthicon_type:String;
 	var healthicon_scale:Float;
 	var healthicon_offsets:Array<Float>;
 
 	var position:Array<Float>;
 	var camera_position:Array<Float>;
 
+	var sing_anims_prefix:String;
+
 	var flip_x:Bool;
 	var no_antialiasing:Bool;
 	var healthbar_colors:Array<Int>;
-    var healthbar_colors2:Array<Int>;
+	var healthbar_colors2:Array<Int>;
 	var gameover_properties:Array<String>;
 }
 
@@ -71,10 +74,15 @@ class Character extends FlxSprite
 	public var stunned:Bool = false;
 	public var singDuration:Float = 4; //Multiplier of how long a character holds the sing pose
 	public var idleSuffix:String = '';
+	public var singAnimsPrefix:String = 'sing';
 	public var danceIdle:Bool = false; //Character use "danceLeft" and "danceRight" instead of "idle"
 	public var skipDance:Bool = false;
 
 	public var healthIcon:String = 'face';
+	public var healthIconType:String = 'duo';
+
+	public var healthIconTypes:Array<String> = ['solo', 'duo', 'trioWin', 'trioLose', 'quadro', 'custom'];
+
 	public var animationsArray:Array<AnimArray> = [];
 
 	public var positionArray:Array<Float> = [0, 0];
@@ -187,6 +195,13 @@ class Character extends FlxSprite
 					iconOffsets = [0, 0];
 
 				healthIcon = json.healthicon;
+
+				healthIconType = json.healthicon_type;
+				if (healthIconType.length < 1 && healthIconType == null) healthIconType = 'duo';
+
+				singAnimsPrefix = json.sing_anims_prefix;
+				if (singAnimsPrefix.length < 1 && singAnimsPrefix == null) singAnimsPrefix = 'sing';
+
 				singDuration = json.sing_duration;
 				flipX = json.flip_x;
 				if(json.no_antialiasing) {
@@ -237,7 +252,7 @@ class Character extends FlxSprite
 		}
 		originalFlipX = flipX;
 
-		if(animOffsets.exists('singLEFTmiss') || animOffsets.exists('singDOWNmiss') || animOffsets.exists('singUPmiss') || animOffsets.exists('singRIGHTmiss')) hasMissAnimations = true;
+		if(animOffsets.exists(singAnimsPrefix+'LEFTmiss') || animOffsets.exists(singAnimsPrefix+'DOWNmiss') || animOffsets.exists(singAnimsPrefix+'UPmiss') || animOffsets.exists(singAnimsPrefix+'RIGHTmiss')) hasMissAnimations = true;
 		recalculateDanceIdle();
 		dance();
 
@@ -298,7 +313,7 @@ class Character extends FlxSprite
 
 			if (!isPlayer)
 			{
-				if (animation.curAnim.name.startsWith('sing'))
+				if (animation.curAnim.name.startsWith(singAnimsPrefix))
 				{
 					holdTimer += elapsed;
 				}
@@ -313,10 +328,8 @@ class Character extends FlxSprite
 			{
 				if (!debugMode && animation.curAnim != null)
 				{
-					if (animation.curAnim.name.startsWith('sing'))
-					{
+					if (animation.curAnim.name.startsWith(singAnimsPrefix))
 						holdTimer += elapsed;
-					}
 					else
 						holdTimer = 0;
 
@@ -376,16 +389,16 @@ class Character extends FlxSprite
 
 		if (curCharacter.startsWith('gf'))
 		{
-			if (AnimName == 'singLEFT')
+			if (AnimName == singAnimsPrefix+'LEFT')
 			{
 				danced = true;
 			}
-			else if (AnimName == 'singRIGHT')
+			else if (AnimName == singAnimsPrefix+'RIGHT')
 			{
 				danced = false;
 			}
 
-			if (AnimName == 'singUP' || AnimName == 'singDOWN')
+			if (AnimName == singAnimsPrefix+'UP' || AnimName == singAnimsPrefix+'DOWN')
 			{
 				danced = !danced;
 			}

@@ -36,8 +36,6 @@ class MusicBeatState extends FlxUIState
 		return PlayerSettings.player1.controls;
 
 	override function create() {
-		Application.current.window.onFocusOut.add(onFocusLost);
-		Application.current.window.onFocusIn.add(onFocus);
 		camBeat = FlxG.camera;
 		var skip:Bool = FlxTransitionableState.skipNextTransOut;
 		super.create();
@@ -47,18 +45,6 @@ class MusicBeatState extends FlxUIState
 		
 		FlxTransitionableState.skipNextTransOut = false;
 	}
-
-	#if (VIDEOS_ALLOWED && windows)
-	override public function onFocus():Void
-	{
-		super.onFocus();
-	}
-	
-	override public function onFocusLost():Void
-	{
-		super.onFocusLost();
-	}
-	#end
 
 	override function update(elapsed:Float)
 	{
@@ -166,6 +152,8 @@ class MusicBeatState extends FlxUIState
 			cache.removeFont(key);
 		for (key=>_ in cache.sound)
 			cache.removeSound(key);
+
+		Assets.cache.clear();
 
 		FlxG.bitmap.dumpCache();
 

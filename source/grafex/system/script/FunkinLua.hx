@@ -255,6 +255,7 @@ class FunkinLua {
 				if(FlxG.sound.music != null) {
 					FlxG.sound.music.pause();
 					PlayState.instance.vocals.pause();
+					PlayState.instance.vocals2.pause();
 				}
 			}
 			PlayState.instance.openSubState(new CustomSubstate(name));
@@ -967,6 +968,12 @@ class FunkinLua {
 			{
 				PlayState.instance.vocals.pause();
 				PlayState.instance.vocals.volume = 0;
+			}
+
+			if(PlayState.instance.vocals2 != null)
+			{
+				PlayState.instance.vocals2.pause();
+				PlayState.instance.vocals2.volume = 0;
 			}
 		});
 
@@ -2010,6 +2017,9 @@ class FunkinLua {
 
 			PlayState.instance.healthBar.createFilledBar(left, right);
 			PlayState.instance.healthBar.updateBar();
+
+			PlayState.instance.healthBarWN.createFilledBar(left, right);
+			PlayState.instance.healthBarWN.updateBar();
 		});
 
 		Lua_helper.add_callback(lua, "setObjectCamera", function(obj:String, camera:String = '') {
