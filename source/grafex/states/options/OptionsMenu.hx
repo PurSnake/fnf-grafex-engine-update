@@ -156,6 +156,7 @@ class OptionsMenu extends MusicBeatSubstate
 				new ShowSplashes("Show particles on SICK hit."),
 				new NoteSplashesScale("Change NoteSplashes scale."),
 				new ShowSusSplashes("Show light on Sustain notes hit."),
+				new SustainNotesClipRectOption("Chooses a style for hold note clippings. StepMania: Holds under Receptors. FNF: Holds over receptors."),
 				new HealthBarOption("Toggles health bar visibility."),
 				new EnableTimeBar("Toggles time bar visibility."),
 				new HideHud("Shows to you hud."),

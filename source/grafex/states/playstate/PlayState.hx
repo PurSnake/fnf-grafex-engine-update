@@ -193,6 +193,10 @@ class PlayState extends MusicBeatState
 	public var characters = [];
 
 	public var notes:FlxTypedGroup<Note>;
+
+	public var sustainNotes:FlxTypedGroup<Note>;
+	public var regularNotes:FlxTypedGroup<Note>;
+
 	public var unspawnNotes:Array<Note> = [];
 	public var eventNotes:Array<EventNote> = [];
     
@@ -1133,9 +1137,16 @@ class PlayState extends MusicBeatState
 		if(ClientPrefs.downScroll) strumLine.y = FlxG.height - 150;
 		strumLine.scrollFactor.set();
 
-        strumLineNotes = new FlxTypedGroup<StrumNote>();
+		strumLineNotes = new FlxTypedGroup<StrumNote>();
+		notes = new FlxTypedGroup<Note>();
+		sustainNotes = new FlxTypedGroup<Note>();
+		regularNotes = new FlxTypedGroup<Note>();
+
 		add(grpSusSplashes);
+		//add(sustainNotes);
 		add(strumLineNotes);
+		insert(members.indexOf(strumLineNotes) + (ClientPrefs.sustainNotesClipRect ? 0 : 1), sustainNotes);
+		add(regularNotes);
 		add(grpNoteSplashes);
 
 		var splash:NoteSplash = new NoteSplash(-2000, -2000, 0);
@@ -1275,7 +1286,7 @@ class PlayState extends MusicBeatState
 		sub.scrollFactor.set();
 		add(sub);
 
-		for (object in [strumLineNotes, grpNoteSplashes, grpSusSplashes, notes, healthBar, healthBarWN, healthBarBG, iconP1, iconP2, scoreTxt, botplayTxt, doof, sub]) object.cameras = [camHUD];
+		for (object in [strumLineNotes, grpNoteSplashes, grpSusSplashes, notes, sustainNotes, regularNotes, healthBar, healthBarWN, healthBarBG, iconP1, iconP2, scoreTxt, botplayTxt, doof, sub]) object.cameras = [camHUD];
 		
 		startingSong = true;
 
@@ -2446,9 +2457,6 @@ class PlayState extends MusicBeatState
 
 		FlxG.sound.list.add(new FlxSound().loadEmbedded(Paths.inst(PlayState.SONG.song, PlayState.SONG.postfix)));
 
-		notes = new FlxTypedGroup<Note>();
-		add(notes);
-
 		var noteData:Array<SwagSection>;
 
 		// NEW SHIT
@@ -3100,6 +3108,9 @@ class PlayState extends MusicBeatState
 			{
 				var dunceNote:Note = unspawnNotes[0];
 				notes.insert(0, dunceNote);
+
+				dunceNote.isSustainNote ? sustainNotes.insert(0, dunceNote) : regularNotes.insert(0, dunceNote);
+
 				dunceNote.spawned=true;
 				callOnLuas('onSpawnNote', [notes.members.indexOf(dunceNote), dunceNote.noteData, dunceNote.noteType, dunceNote.isSustainNote]);
 				callOnHscript('onSpawnNote', [notes.members.indexOf(dunceNote), dunceNote.noteData, dunceNote.noteType, dunceNote.isSustainNote]);

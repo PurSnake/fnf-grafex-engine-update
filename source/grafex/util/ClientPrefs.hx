@@ -10,6 +10,7 @@ import external.FPSMem;
 
 class ClientPrefs {
 	public static var enableTimeBar:Bool = true;
+	public static var sustainNotesClipRect:Bool = true;
 	public static var noteSplashesScale:Float = 1;
 	public static var lightCpuStrums:Bool = true;
 	public static var classicScoreTxt:Bool = true;
@@ -111,6 +112,7 @@ class ClientPrefs {
 	public static function saveSettings() {
 		FlxG.save.data.enableTimeBar = enableTimeBar;
 		FlxG.save.data.noteSplashesScale = noteSplashesScale;
+		FlxG.save.data.sustainNotesClipRect = sustainNotesClipRect;
 		FlxG.save.data.achievements = achievements;
 		FlxG.save.data.hellAssTips = hellAssTips;
 		FlxG.save.data.lightCpuStrums = lightCpuStrums;
@@ -169,6 +171,8 @@ class ClientPrefs {
 		if(FlxG.save.data.enableTimeBar != null) enableTimeBar = FlxG.save.data.enableTimeBar;
 
 		if(FlxG.save.data.noteSplashesScale != null) noteSplashesScale = FlxG.save.data.noteSplashesScale;
+
+		if(FlxG.save.data.sustainNotesClipRect != null) sustainNotesClipRect = FlxG.save.data.sustainNotesClipRect;
 
 		if(FlxG.save.data.achievements != null) achievements = FlxG.save.data.achievements;
 		if(FlxG.save.data.hellAssTips != null) hellAssTips = FlxG.save.data.hellAssTips;

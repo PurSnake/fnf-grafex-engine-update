@@ -344,6 +344,38 @@ class DownscrollOption extends Option
 	}
 }
 
+class SustainNotesClipRectOption extends Option
+{
+	public function new(desc:String)
+	{
+		super();
+		description = desc;
+	}
+
+	public override function left():Bool
+	{
+		ClientPrefs.sustainNotesClipRect = !ClientPrefs.sustainNotesClipRect;
+
+		if (Type.getClass(FlxG.state) == PlayState) {
+			PlayState.instance.remove(PlayState.instance.sustainNotes, true);
+			PlayState.instance.insert(PlayState.instance.members.indexOf(PlayState.instance.strumLineNotes) + (ClientPrefs.sustainNotesClipRect ? 0 : 1), PlayState.instance.sustainNotes);
+		}
+		display = updateDisplay();
+		return true;
+	}
+
+	public override function right():Bool
+	{
+		left();
+		return true;
+	}
+
+	private override function updateDisplay():String
+	{
+		return "Sustain Notes Clip Style: < " + (ClientPrefs.sustainNotesClipRect ? "StepMania" : "FNF") + " >";
+	}
+}
+
 class GhostTapOption extends Option
 {
 	public function new(desc:String)
