@@ -966,6 +966,8 @@ class ClassicScoreTxt extends Option
                 PlayState.instance.scoreTxt.text = "Score:" + PlayState.instance.songScore;
                 PlayState.instance.scoreTxt.fieldWidth = 0;
                 PlayState.instance.scoreTxt.size = 20;
+				PlayState.instance.scoreTxt.borderSize = 1;
+				PlayState.instance.scoreTxt.borderQuality = 1;
 
 		        PlayState.instance.scoreTxt.setFormat(Paths.font("vcr.ttf"), 16, FlxColor.WHITE, RIGHT, OUTLINE, FlxColor.BLACK);
 		        PlayState.instance.scoreTxt.scrollFactor.set();
@@ -980,8 +982,8 @@ class ClassicScoreTxt extends Option
 		        PlayState.instance.scoreTxt.setFormat(Paths.font("vcr.ttf"), 18, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);	
 		        PlayState.instance.scoreTxt.screenCenter(X);	
 		        PlayState.instance.scoreTxt.scrollFactor.set();
-		        PlayState.instance.scoreTxt.borderSize = 1.75;
-		        PlayState.instance.scoreTxt.borderQuality = 2;
+				PlayState.instance.scoreTxt.borderSize = 2;
+				PlayState.instance.scoreTxt.borderQuality = 4;
 		        PlayState.instance.scoreTxt.visible = (!ClientPrefs.hideHud && !PlayState.instance.cpuControlled);
             } 
 		}

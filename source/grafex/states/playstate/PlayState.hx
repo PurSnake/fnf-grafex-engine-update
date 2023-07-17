@@ -460,29 +460,28 @@ class PlayState extends MusicBeatState
 		practiceMode = ClientPrefs.getGameplaySetting('practice', false);
 		cpuControlled = ClientPrefs.getGameplaySetting('botplay', false);
 
-        camGame = new FlxCamera();
-        camHUD = new FlxCamera();
-        camOther = new FlxCamera();
-        camHUD.bgColor.alpha = 0;
-        camOther.bgColor.alpha = 0;
-    
-        camPAUSE = new FlxCamera();
-        camPAUSE.bgColor.alpha = 0;
-    
-        FlxG.cameras.reset(camGame);
-	FlxG.cameras.add(camHUD, false);
-	FlxG.cameras.add(camOther, false);
-	FlxG.cameras.add(camPAUSE, false);
-	grpNoteSplashes = new FlxTypedGroup<NoteSplash>();
-	grpSusSplashes = new FlxTypedGroup<SusSplash>();
-    
-	    FlxG.cameras.setDefaultDrawTarget(camGame, true);
-	    CustomFadeTransition.nextCamera = camOther;
-    
-        persistentUpdate = true;
-        persistentDraw = true;
+		camGame = new FlxCamera();
+		camHUD = new FlxCamera();
+		camOther = new FlxCamera();
+		camHUD.bgColor.alpha = 0;
+		camOther.bgColor.alpha = 0;
 
-        if (SONG == null)
+		camPAUSE = new FlxCamera();
+		camPAUSE.bgColor.alpha = 0;
+
+		FlxG.cameras.reset(camGame);
+		FlxG.cameras.add(camHUD, false);
+		FlxG.cameras.add(camOther, false);
+		FlxG.cameras.add(camPAUSE, false);
+		grpNoteSplashes = new FlxTypedGroup<NoteSplash>();
+		grpSusSplashes = new FlxTypedGroup<SusSplash>();
+
+		FlxG.cameras.setDefaultDrawTarget(camGame, true);
+    
+		persistentUpdate = true;
+		persistentDraw = true;
+
+		if (SONG == null)
 			SONG = Song.loadFromJson('tutorial');
 
 		Conductor.mapBPMChanges(SONG);
@@ -1447,11 +1446,13 @@ class PlayState extends MusicBeatState
 
 		Paths.clearUnusedMemory();
 		FlxG.mouse.visible = false;
-		CustomFadeTransition.nextCamera = camPAUSE;
+	    CustomFadeTransition.nextCamera = camOther;
 
 		if(eventNotes.length < 1) checkEventNote();
 
 		super.create();
+		
+	    CustomFadeTransition.nextCamera = camOther;
     }
 
     #if (!flash && sys)
@@ -3052,7 +3053,6 @@ class PlayState extends MusicBeatState
             persistentUpdate = false;
             paused = true;
             cancelMusicFadeTween();
-            CustomFadeTransition.nextCamera = camPAUSE;
             MusicBeatState.switchState(new CharacterEditorState(dad.curCharacter));
         }
         #end
@@ -3332,7 +3332,6 @@ class PlayState extends MusicBeatState
         persistentUpdate = false;
         paused = true;
         cancelMusicFadeTween();
-        CustomFadeTransition.nextCamera = camPAUSE;
         MusicBeatState.switchState(new ChartingState());
         chartingMode = true;
     
@@ -4118,7 +4117,7 @@ class PlayState extends MusicBeatState
 					Conductor.changeBPM(TitleState.titleJSON.bpm);
 
 					cancelMusicFadeTween();
-					CustomFadeTransition.nextCamera = camPAUSE;
+					CustomFadeTransition.nextCamera = camOther;
 					if(FlxTransitionableState.skipNextTransIn) {
 						CustomFadeTransition.nextCamera = null;
 					}
@@ -4161,7 +4160,7 @@ class PlayState extends MusicBeatState
 			{
 				trace('Switching back to FreeplayState');
 				cancelMusicFadeTween();
-				CustomFadeTransition.nextCamera = camPAUSE;
+				CustomFadeTransition.nextCamera = camOther;
 				if(FlxTransitionableState.skipNextTransIn) {
 					CustomFadeTransition.nextCamera = null;
 				}
