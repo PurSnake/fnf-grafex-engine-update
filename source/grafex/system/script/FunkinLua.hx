@@ -1532,14 +1532,14 @@ class FunkinLua {
 			}
 			PlayState.instance.addCharacterToList(name, charType);
 		});
-		Lua_helper.add_callback(lua, "precacheImage", function(name:String) {
-			Paths.returnGraphic(name);
+		Lua_helper.add_callback(lua, "precacheImage", function(name:String, ?allowGPU:Bool = true) {
+			Paths.image(name, allowGPU);
 		});
 		Lua_helper.add_callback(lua, "precacheSound", function(name:String) {
-			Utils.precacheSound(name);
+			Paths.sound(name);
 		});
 		Lua_helper.add_callback(lua, "precacheMusic", function(name:String) {
-			Utils.precacheMusic(name);
+			Paths.music(name);
 		});
 		Lua_helper.add_callback(lua, "triggerEvent", function(name:String, arg1:Dynamic, arg2:Dynamic, arg3:Dynamic) {
 			var value1:String = arg1;
@@ -2118,18 +2118,14 @@ class FunkinLua {
 			return false;
 		});
 		Lua_helper.add_callback(lua, "getPixelColor", function(obj:String, x:Int, y:Int) {
-			var killMe:Array<String> = obj.split('.');
-			var spr:FlxSprite = getObjectDirectly(killMe[0]);
-			if(killMe.length > 1) {
-				spr = getVarInArray(getPropertyLoopThingWhatever(killMe), killMe[killMe.length-1]);
+			var split:Array<String> = obj.split('.');
+			var spr:FlxSprite = getObjectDirectly(split[0]);
+			if(split.length > 1) {
+				spr = getVarInArray(getPropertyLoopThingWhatever(split), split[split.length-1]);
 			}
 
-			if(spr != null)
-			{
-				if(spr.framePixels != null) spr.framePixels.getPixel32(x, y);
-				return spr.pixels.getPixel32(x, y);
-			}
-			return 0;
+			if(spr != null) return spr.pixels.getPixel32(x, y);
+			return FlxColor.BLACK;
 		});
 		Lua_helper.add_callback(lua, "getRandomInt", function(min:Int, max:Int = FlxMath.MAX_VALUE_INT, exclude:String = '') {
 			var excludeArray:Array<String> = exclude.split(',');
@@ -3352,12 +3348,11 @@ class ModchartText extends FlxText
 
 class DebugLuaText extends FlxText
 {
-	private var disableTime:Float = 6;
-	public var parentGroup:FlxTypedGroup<DebugLuaText>;
-	public function new(text:String, parentGroup:FlxTypedGroup<DebugLuaText>, color:FlxColor) {
-		this.parentGroup = parentGroup;
-		super(10, 10, 0, text, 16);
-		setFormat(Paths.font("vcr.ttf"), 16, color, LEFT, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
+	public var disableTime:Float = 6;
+	public function new() {
+		super(10, 10, 0, '', 16);
+
+		setFormat(Paths.font("vcr.ttf"), 16, FlxColor.WHITE, LEFT, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
 		scrollFactor.set();
 		borderSize = 1;
 	}
@@ -3367,6 +3362,8 @@ class DebugLuaText extends FlxText
 		disableTime -= elapsed;
 		if(disableTime < 0) disableTime = 0;
 		if(disableTime < 1) alpha = disableTime;
+
+		if(alpha == 0 || y >= FlxG.height) kill();
 	}
 }
 

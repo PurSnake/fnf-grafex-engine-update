@@ -185,11 +185,19 @@ class Main extends Sprite
 		FlxG.game.soundTray.volumeDownSound = Paths.getPath('sounds/'+appConfig.appDownSound+'.ogg', SOUND);
 		#end
 
-		FlxG.signals.postStateSwitch.add(clearCache);
+		FlxG.signals.preStateSwitch.add(function() {
+			Paths.clearStoredMemory();
+			clearCache();
+		});
+
+		FlxG.signals.postStateSwitch.add(function() {
+			//Paths.clearUnusedMemory();
+			clearCache();
+		});
+
 	}
 
-    public static function clearCache() {
-
+	public static function clearCache() {
 		@:privateAccess {
 			// clear uint8 pools
 			for(length=>pool in openfl.display3D.utils.UInt8Buff._pools) {
@@ -199,15 +207,15 @@ class Main extends Sprite
 			openfl.display3D.utils.UInt8Buff._pools.clear();
 		}
 
-        var cache = cast(Assets.cache, AssetCache);
-		for (key=>_ in cache.font)
-			cache.removeFont(key);
-		for (key=>_ in cache.sound)
-			cache.removeSound(key);
-
 		FlxG.bitmap.dumpCache();
 
-    }
+		var cache = cast(Assets.cache, AssetCache);
+		for (key=>_ in cache.font) cache.removeFont(key);
+
+		for (key=>_ in cache.sound) cache.removeSound(key);
+
+		Assets.cache.clear(); //lol
+	}
 
 	public function getFPS():Float
 	{
@@ -215,40 +223,40 @@ class Main extends Sprite
 	}
 
 	function onCrash(e:UncaughtErrorEvent):Void
-		{
-			var errMsg:String = "";
-			var path:String;
-			var callStack:Array<StackItem> = CallStack.exceptionStack(true);
-			var dateNow:String = Date.now().toString().replace(" ", "_").replace(":", "-");
+	{
+		var errMsg:String = "";
+		var path:String;
+		var callStack:Array<StackItem> = CallStack.exceptionStack(true);
+		var dateNow:String = Date.now().toString().replace(" ", "_").replace(":", "-");
 
-			path = './crash/Grafex_$dateNow.txt';
+		path = './crash/Grafex_$dateNow.txt';
 	
-			for (stackItem in callStack)
+		for (stackItem in callStack)
+		{
+			switch (stackItem)
 			{
-				switch (stackItem)
-				{
-					case FilePos(s, file, line, column):
-						errMsg += file + " (line " + line + ")\n";
-					default:
-						Sys.println(stackItem);
-				}
+				case FilePos(s, file, line, column):
+					errMsg += file + " (line " + line + ")\n";
+				default:
+					Sys.println(stackItem);
 			}
-	
-			errMsg += "\nUncaught Error: "
-				+ e.error
-				+ "\nPlease report this error to the PurSnake#4389 in Discord\n";
-				//+ "\nPlease report this error to #playtest-qa-testing.\n\n>Crash Handler written by: sqirra-rng";
-	
-			if (!FileSystem.exists("./crash/"))
-				FileSystem.createDirectory("./crash/");
-	
-			File.saveContent(path, errMsg + "\n");
-	
-			Sys.println(errMsg);
-			Sys.println("Crash dump saved in " + Path.normalize(path));
-	
-			Application.current.window.alert(errMsg, "Critical Error!");
-			DiscordClient.shutdown();
-			Sys.exit(1);
 		}
+	
+		errMsg += "\nUncaught Error: "
+			+ e.error
+			+ "\nPlease report this error to the PurSnake#4389 in Discord\n";
+			//+ "\nPlease report this error to #playtest-qa-testing.\n\n>Crash Handler written by: sqirra-rng";
+
+		if (!FileSystem.exists("./crash/"))
+			FileSystem.createDirectory("./crash/");
+	
+		File.saveContent(path, errMsg + "\n");
+	
+		Sys.println(errMsg);
+		Sys.println("Crash dump saved in " + Path.normalize(path));
+	
+		Application.current.window.alert(errMsg, "Critical Error!");
+		DiscordClient.shutdown();
+		Sys.exit(1);
+	}
 }

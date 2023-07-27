@@ -140,6 +140,7 @@ class CharacterEditorState extends MusicBeatState
  
 		leHealthIcon = new HealthIcon(char.healthIcon, false, 0, 0, 1, false);
 		leHealthIcon.gpuShit = false; // fix "Get Icon Color"
+		leHealthIcon = new HealthIcon(char.healthIcon, false, 0, 0, 1, false); //Bruh
 		leHealthIcon.y = FlxG.height - 150;
 		add(leHealthIcon);
 		leHealthIcon.updateHitbox();
@@ -886,7 +887,7 @@ class CharacterEditorState extends MusicBeatState
 	override function getEvent(id:String, sender:Dynamic, data:Dynamic, ?params:Array<Dynamic>) {
 		if(id == FlxUIInputText.CHANGE_EVENT && (sender is FlxUIInputText)) {
 			if(sender == healthIconInputText) {
-				leHealthIcon.changeIcon(healthIconInputText.text, char.iconOffsets[0], char.iconOffsets[1]);
+				leHealthIcon.changeIcon(healthIconInputText.text, char.iconOffsets[0], char.iconOffsets[1], char.iconScale, false);
 				leHealthIcon.updateHitbox();
 				leHealthIcon.changeOffsets(char.iconOffsets[0], char.iconOffsets[1]);
 				char.healthIcon = healthIconInputText.text;
@@ -1164,7 +1165,7 @@ class CharacterEditorState extends MusicBeatState
 			flipXCheckBox.checked = char.originalFlipX;
 			noAntialiasingCheckBox.checked = char.noAntialiasing;
 			resetHealthBarColor();
-			leHealthIcon.changeIcon(healthIconInputText.text, iconOffsetX.value, iconOffsetY.value, iconScaleStepper.value);
+			leHealthIcon.changeIcon(healthIconInputText.text, iconOffsetX.value, iconOffsetY.value, iconScaleStepper.value, false);
 			leHealthIcon.changeOffsets(iconOffsetX.value, iconOffsetY.value);
 			positionXStepper.value = char.positionArray[0];
 			positionYStepper.value = char.positionArray[1];

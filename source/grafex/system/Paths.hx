@@ -404,7 +404,7 @@ class Paths
         return 'assets/$key.hx';
 	}
 
-	inline static public function getSparrowAtlas(key:String, ?library:String, ?gpuRender:Bool = true):FlxAtlasFrames
+	inline static public function getSparrowAtlas(key:String, ?library:String = null, ?gpuRender:Bool = true):FlxAtlasFrames
 	{
 		#if MODS_ALLOWED
 		var imageLoaded:FlxGraphic = returnGraphic(key, library, gpuRender);
@@ -413,13 +413,13 @@ class Paths
 			xmlExists = true;
 		}
 
-		return FlxAtlasFrames.fromSparrow((imageLoaded != null ? imageLoaded : image(key, library)), (xmlExists ? File.getContent(modsXml(key)) : file('images/$key.xml', library)));
+		return FlxAtlasFrames.fromSparrow((imageLoaded != null ? imageLoaded : image(key, library, gpuRender)), (xmlExists ? File.getContent(modsXml(key)) : file('images/$key.xml', library)));
 		#else
-		return FlxAtlasFrames.fromSparrow(image(key, library), file('images/$key.xml', library));
+		return FlxAtlasFrames.fromSparrow(image(key, library, gpuRender), file('images/$key.xml', library));
 		#end
 	}
 
-	inline static public function getPackerAtlas(key:String, ?library:String, ?gpuRender:Bool = true)
+	inline static public function getPackerAtlas(key:String, ?library:String = null, ?gpuRender:Bool = true)
 	{
 		#if MODS_ALLOWED
 		var imageLoaded:FlxGraphic = returnGraphic(key, library, gpuRender);
@@ -428,9 +428,9 @@ class Paths
 			txtExists = true;
 		}
 	
-		return FlxAtlasFrames.fromSpriteSheetPacker((imageLoaded != null ? imageLoaded : image(key, library)), (txtExists ? File.getContent(modsTxt(key)) : file('images/$key.txt', library)));
+		return FlxAtlasFrames.fromSpriteSheetPacker((imageLoaded != null ? imageLoaded : image(key, library, gpuRender)), (txtExists ? File.getContent(modsTxt(key)) : file('images/$key.txt', library)));
 		#else
-		return FlxAtlasFrames.fromSpriteSheetPacker(image(key, library), file('images/$key.txt', library));
+		return FlxAtlasFrames.fromSpriteSheetPacker(image(key, library, gpuRender), file('images/$key.txt', library));
 		#end
 	}
 	

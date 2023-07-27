@@ -119,45 +119,20 @@ class MusicBeatState extends FlxUIState
 			leState.openSubState(new CustomFadeTransition(0.4, false));
 			if(nextState == FlxG.state) {
 				CustomFadeTransition.finishCallback = function() {
-                    clearCache();
 					FlxG.resetState();
 				};
 				//trace('resetted');
 			} else {
 				CustomFadeTransition.finishCallback = function() {
-                    clearCache();
 					FlxG.switchState(nextState);
 				};
 				//trace('changed state');
 			}
 			return;
 		}
-        clearCache();
 		FlxTransitionableState.skipNextTransIn = false;
 		FlxG.switchState(nextState);
 	}
-
-    public static function clearCache() {
-
-	    @:privateAccess {
-			for(length=>pool in openfl.display3D.utils.UInt8Buff._pools) {
-				for(b in pool.clear())
-					b.destroy();
-			}
-			openfl.display3D.utils.UInt8Buff._pools.clear();
-		}
-
-        var cache = cast(Assets.cache, AssetCache);
-		for (key=>_ in cache.font)
-			cache.removeFont(key);
-		for (key=>_ in cache.sound)
-			cache.removeSound(key);
-
-		Assets.cache.clear();
-
-		FlxG.bitmap.dumpCache();
-
-    }
 
 	public static function resetState() {
 		MusicBeatState.switchState(FlxG.state);

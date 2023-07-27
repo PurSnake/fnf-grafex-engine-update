@@ -34,8 +34,8 @@ class NoteSplash extends FlxSprite
 				kill();
 		}
 		animation.play('note' + note + '-' + FlxG.random.int(1, 2), true);
-		
-		alpha = 0.6;
+		alpha = 1;
+		alpha *= ClientPrefs.noteSplashesAlpha;
 
 		colorSwap.hue = hueColor;
 		colorSwap.saturation = satColor;

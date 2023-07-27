@@ -12,6 +12,7 @@ class ClientPrefs {
 	public static var enableTimeBar:Bool = true;
 	public static var sustainNotesClipRect:Bool = true;
 	public static var noteSplashesScale:Float = 1;
+	public static var noteSplashesAlpha:Float = 0.6;
 	public static var lightCpuStrums:Bool = true;
 	public static var classicScoreTxt:Bool = true;
     public static var playMissSounds:Bool = true;
@@ -35,6 +36,7 @@ class ClientPrefs {
 	public static var globalAntialiasing:Bool = true;
 	public static var noteSplashes:Bool = true;
 	public static var noteSusSplashes:Bool = true;
+	public static var noteSusSplashesAlpha:Float = 0.8;
 	public static var lowQuality:Bool = false;
 	public static var shaders:Bool = true;
 	public static var framerate:Int = 120;
@@ -112,6 +114,7 @@ class ClientPrefs {
 	public static function saveSettings() {
 		FlxG.save.data.enableTimeBar = enableTimeBar;
 		FlxG.save.data.noteSplashesScale = noteSplashesScale;
+		FlxG.save.data.noteSplashesAlpha = noteSplashesAlpha;
 		FlxG.save.data.sustainNotesClipRect = sustainNotesClipRect;
 		FlxG.save.data.achievements = achievements;
 		FlxG.save.data.hellAssTips = hellAssTips;
@@ -135,6 +138,7 @@ class ClientPrefs {
 		FlxG.save.data.globalAntialiasing = globalAntialiasing;
 		FlxG.save.data.noteSplashes = noteSplashes;
 		FlxG.save.data.noteSusSplashes = noteSusSplashes;
+		FlxG.save.data.noteSusSplashesAlpha = noteSusSplashesAlpha;
 		FlxG.save.data.lowQuality = lowQuality;
 		FlxG.save.data.framerate = framerate;
 		FlxG.save.data.ColorBlindType = ColorBlindType;
@@ -169,7 +173,9 @@ class ClientPrefs {
 
 	public static function loadPrefs() {
 		if(FlxG.save.data.enableTimeBar != null) enableTimeBar = FlxG.save.data.enableTimeBar;
+		if(FlxG.save.data.noteSusSplashesAlpha != null) noteSusSplashesAlpha = FlxG.save.data.noteSusSplashesAlpha;
 
+		if(FlxG.save.data.noteSplashesAlpha != null) noteSplashesAlpha = FlxG.save.data.noteSplashesAlpha;
 		if(FlxG.save.data.noteSplashesScale != null) noteSplashesScale = FlxG.save.data.noteSplashesScale;
 
 		if(FlxG.save.data.sustainNotesClipRect != null) sustainNotesClipRect = FlxG.save.data.sustainNotesClipRect;

@@ -36,7 +36,8 @@ class SusSplash extends FlxSprite
 
 		animation.play('note' + note + '-' + FlxG.random.int(1, 2), true);
 
-		alpha = 0.8;
+		alpha = 1;
+		alpha *= ClientPrefs.noteSusSplashesAlpha;
 
 		colorSwap.hue = hueColor;
 		colorSwap.saturation = satColor;

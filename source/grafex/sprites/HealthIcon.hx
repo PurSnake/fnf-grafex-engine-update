@@ -65,13 +65,14 @@ class HealthIcon extends FlxSprite
 
 	public var gpuShit:Bool = true; 
 
-	public function changeIcon(char:String, ?xd:Float = 0, ?yd:Float = 0, ?cusScale:Float = 1)
+	public function changeIcon(char:String, ?xd:Float = 0, ?yd:Float = 0, ?cusScale:Float = 1, ?gpuShieet:Bool = true)
 	{
+		gpuShit = gpuShieet;
 		customIconOffsets[0] = xd; // -
 		customIconOffsets[1] = yd; // +
         customIconScale = cusScale;
 
-        this.scale.set(this.customIconScale, this.customIconScale);
+        //this.scale.set(this.customIconScale, this.customIconScale);
 
 		if(this.char != char)
 		{
@@ -179,14 +180,14 @@ class HealthIcon extends FlxSprite
 					if(spriteType == "animated")
 					{
 						frames = Paths.getSparrowAtlas(name, null, gpuShit);
-					    animation.addByPrefix('win', 'win', 24, false, isPlayer);
+						animation.addByPrefix('win', 'win', 24, false, isPlayer);
 						animation.addByPrefix('win-loop', 'win-loop', 24, true, isPlayer);
 						animation.addByPrefix('normal', 'normal', 24, false, isPlayer);
 						animation.addByPrefix('normal-loop', 'normal-loop', 24, true, isPlayer);
 						animation.addByPrefix('loose', 'loose', 24, false, isPlayer);
 						animation.addByPrefix('loose-loop', 'loose-loop', 24, true, isPlayer);
 
-					    animation.addByPrefix('win-2', 'win-2', 24, false, isPlayer);
+						animation.addByPrefix('win-2', 'win-2', 24, false, isPlayer);
 						animation.addByPrefix('normal-2', 'normal-2', 24, false, isPlayer);
 						animation.addByPrefix('loose-2', 'loose-2', 24, false, isPlayer);
 
@@ -211,13 +212,12 @@ class HealthIcon extends FlxSprite
 
 	public function changeScale(?val:Float = 1) {
 		customIconScale = val;
-        this.scale.set(this.customIconScale, this.customIconScale);
+		this.scale.set(this.customIconScale, this.customIconScale);
 	}
 
 	public dynamic function updateAnim(health:Float){ // Dynamic to prevent having like 20 if statements
 		    switch(spriteType)
 		    {
-
 				case 'trio':
 				    if (health < 10)
 						animation.curAnim.curFrame = 2;

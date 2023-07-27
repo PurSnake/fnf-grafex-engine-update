@@ -61,8 +61,6 @@ class Character extends FlxSprite
 	public var animOffsets:Map<String, Array<Dynamic>>;
 	public var debugMode:Bool = false;
 
-    public var atlasCharacter:Bool = false;
-
 	public var isPlayer:Bool = false;
 	public var curCharacter:String = DEFAULT_CHARACTER;
 
@@ -112,6 +110,7 @@ class Character extends FlxSprite
 	public function new(x:Float, y:Float, ?character:String = 'bf', ?isPlayer:Bool = false)
 	{
 		super(x, y);
+
 
 		#if (haxe >= "4.0.0")
 		animOffsets = new Map();

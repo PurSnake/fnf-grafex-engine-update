@@ -288,12 +288,13 @@ class ChartingState extends MusicBeatState
 		gridLayer = new FlxTypedGroup<FlxSprite>();
 		add(gridLayer);
 
-		waveformSprite = new FlxSprite(GRID_SIZE, 0).makeGraphic(FlxG.width, FlxG.height, 0x00FFFFFF);
+		waveformSprite = new FlxSprite(GRID_SIZE, 0).makeGraphic(1, 1, 0x00FFFFFF);
 		add(waveformSprite);
 
 		var eventIcon:FlxSprite = new FlxSprite(-GRID_SIZE - 5, -90).loadGraphic(Paths.image('eventArrow'));
 		leftIcon = new HealthIcon('bf', 0, 0, 0.45);
 		rightIcon = new HealthIcon('dad', 0, 0, 0.45);
+		rightIcon.scale.set(.5, .5);
 		eventIcon.scrollFactor.set(1, 1);
 		leftIcon.scrollFactor.set(1, 1);
 		rightIcon.scrollFactor.set(1, 1);
@@ -316,11 +317,7 @@ class ChartingState extends MusicBeatState
 		nextRenderedSustains = new FlxTypedGroup<FlxSprite>();
 		nextRenderedNotes = new FlxTypedGroup<Note>();
 
-		if(curSec >= _song.notes.length) curSec = _song.notes.length - 1;
-
 		tempBpm = _song.bpm;
-
-		addSection();
 
 		// sections = _song.notes;
 
@@ -329,6 +326,7 @@ class ChartingState extends MusicBeatState
         reloadGridLayer();
 		Conductor.changeBPM(_song.bpm);
 		Conductor.mapBPMChanges(_song);
+		if(curSec >= _song.notes.length) curSec = _song.notes.length - 1;
 
 		bpmTxt = new FlxText(1000, 50, 0, "", 16);
 		bpmTxt.scrollFactor.set();
@@ -535,7 +533,7 @@ class ChartingState extends MusicBeatState
 		stepperBPM.name = 'song_bpm';
 		blockPressWhileTypingOnStepper.push(stepperBPM);
 
-		var stepperSpeed:FlxUINumericStepper = new FlxUINumericStepper(10, stepperBPM.y + 35, 0.1, 1, 0.1, 10, 1);
+		var stepperSpeed:FlxUINumericStepper = new FlxUINumericStepper(10, stepperBPM.y + 35, 0.1, 1, 0.1, 10, 2);
 		stepperSpeed.value = _song.speed;
 		stepperSpeed.name = 'song_speed';
 		blockPressWhileTypingOnStepper.push(stepperSpeed);
@@ -758,7 +756,7 @@ var directories:Array<String> = [Paths.mods('stages/'), Paths.mods(Paths.current
 		check_altAnim = new FlxUICheckBox(check_gfSection.x + 120, check_gfSection.y, null, null, "Alt Animation", 100);
 		check_altAnim.checked = _song.notes[curSec].altAnim;
 
-		stepperBeats = new FlxUINumericStepper(10, 100, 1, 4, 1, 6, 2);
+		stepperBeats = new FlxUINumericStepper(10, 100, 1, 4, 1, 7, 2);
 		stepperBeats.value = getSectionBeats();
 		stepperBeats.name = 'section_beats';
 		blockPressWhileTypingOnStepper.push(stepperBeats);
@@ -1547,6 +1545,18 @@ var directories:Array<String> = [Paths.mods('stages/'), Paths.mods(Paths.current
 		FlxG.sound.music.pause();
 		Conductor.songPosition = sectionStartTime();
 		FlxG.sound.music.time = Conductor.songPosition;
+
+		var curTime:Float = 0;
+		//trace(_song.notes.length);
+		if(_song.notes.length <= 1) //First load ever
+		{
+			trace('first load ever!!');
+			while(curTime < FlxG.sound.music.length)
+			{
+				addSection();
+				curTime += (60 / _song.bpm) * 4000;
+			}
+		}
 	}
 
 	function generateSong() {
@@ -1630,9 +1640,11 @@ var directories:Array<String> = [Paths.mods('stages/'), Paths.mods(Paths.current
 			}
 			else if (wname == 'song_bpm')
 			{
-				tempBpm = nums.value;
+				_song.bpm = nums.value;
 				Conductor.mapBPMChanges(_song);
 				Conductor.changeBPM(nums.value);
+				stepperSusLength.stepSize = Math.ceil(Conductor.stepCrochet / 2);
+				updateGrid();
 			}
 			else if (wname == 'note_susLength')
 			{
@@ -1852,6 +1864,10 @@ var directories:Array<String> = [Paths.mods('stages/'), Paths.mods(Paths.current
 		{
 			if (FlxG.keys.justPressed.ESCAPE)
 			{
+				FlxG.sound.music.pause();
+				if(vocals != null) vocals.pause();
+				if(vocals2 != null) vocals2.pause();
+
 				autosaveSong();
 				LoadingState.loadAndSwitchState(new EditorPlayState(sectionStartTime()));
 			}
@@ -2151,8 +2167,6 @@ var directories:Array<String> = [Paths.mods('stages/'), Paths.mods(Paths.current
 			}
 		}
 
-		_song.bpm = tempBpm;
-
 		strumLineNotes.visible = quant.visible = vortex;
 			
 		if(FlxG.sound.music.time < 0) {
@@ -2238,12 +2252,12 @@ var directories:Array<String> = [Paths.mods('stages/'), Paths.mods(Paths.current
                 {
 		    var s = (curDecBeat) % 1;
 		    leftIcon.scale.set(1 - (s * .25), 1 - (s * .25));
-		    leftIcon.scale.x *= .6;
-		    leftIcon.scale.y *= .6;
+		    leftIcon.scale.x *= .75;
+		    leftIcon.scale.y *= .75;
                 }
                 else
                 {
-		    leftIcon.scale.set(.45, .45);
+		    leftIcon.scale.set(.5, .5);
                 }
 		super.update(elapsed);
 	}
@@ -2317,11 +2331,21 @@ var directories:Array<String> = [Paths.mods('stages/'), Paths.mods(Paths.current
 
 	var waveformPrinted:Bool = true;
 	var wavData:Array<Array<Array<Float>>> = [[[0], [0]], [[0], [0]]];
+
+	var lastWaveformHeight:Int = 0;
 	function updateWaveform() {
 		#if desktop
 		if(waveformPrinted) {
-			waveformSprite.makeGraphic(Std.int(GRID_SIZE * 8), Std.int(gridBG.height), 0x00FFFFFF);
-			waveformSprite.pixels.fillRect(new Rectangle(0, 0, gridBG.width, gridBG.height), 0x00FFFFFF);
+			var width:Int = Std.int(GRID_SIZE * 8);
+			var height:Int = Std.int(gridBG.height);
+			if(lastWaveformHeight != height && waveformSprite.pixels != null)
+			{
+				waveformSprite.pixels.dispose();
+				waveformSprite.pixels.disposeImage();
+				waveformSprite.makeGraphic(width, height, 0x00FFFFFF);
+				lastWaveformHeight = height;
+			}
+			waveformSprite.pixels.fillRect(new Rectangle(0, 0, width, height), 0x00FFFFFF);
 		}
 		waveformPrinted = false;
 
@@ -2548,7 +2572,7 @@ var directories:Array<String> = [Paths.mods('stages/'), Paths.mods(Paths.current
 		{
 			if (curSelectedNote[2] != null)
 			{
-				curSelectedNote[2] += value;
+				curSelectedNote[2] += Math.ceil(value);
 				curSelectedNote[2] = Math.max(curSelectedNote[2], 0);
 			}
 		}
@@ -2607,6 +2631,7 @@ var directories:Array<String> = [Paths.mods('stages/'), Paths.mods(Paths.current
 
 	function changeSection(sec:Int = 0, ?updateMusic:Bool = true):Void
 	{
+		var waveformChanged:Bool = false;
 		if (_song.notes[sec] != null)
 		{
 			curSec = sec;
@@ -2633,6 +2658,7 @@ var directories:Array<String> = [Paths.mods('stages/'), Paths.mods(Paths.current
 			if(blah1 != lastSecBeats || blah2 != lastSecBeatsNext)
 			{
 				reloadGridLayer();
+				waveformChanged = true;
 			}
 			else
 			{
@@ -2646,7 +2672,7 @@ var directories:Array<String> = [Paths.mods('stages/'), Paths.mods(Paths.current
 			changeSection();
 		}
 		Conductor.songPosition = FlxG.sound.music.time;
-		updateWaveform();
+		if(!waveformChanged) updateWaveform();
 	}
 
 	function updateSectionUI():Void
@@ -2742,10 +2768,15 @@ var directories:Array<String> = [Paths.mods('stages/'), Paths.mods(Paths.current
 
 	function updateGrid():Void
 	{
+		curRenderedNotes.forEachAlive(function(spr:Note) spr.destroy());
 		curRenderedNotes.clear();
+		curRenderedSustains.forEachAlive(function(spr:FlxSprite) spr.destroy());
 		curRenderedSustains.clear();
+		curRenderedNoteType.forEachAlive(function(spr:FlxText) spr.destroy());
 		curRenderedNoteType.clear();
+		nextRenderedNotes.forEachAlive(function(spr:Note) spr.destroy());
 		nextRenderedNotes.clear();
+		nextRenderedSustains.forEachAlive(function(spr:FlxSprite) spr.destroy());
 		nextRenderedSustains.clear();
 
 		if (_song.notes[curSec].changeBPM && _song.notes[curSec].bpm > 0)
@@ -2780,7 +2811,7 @@ var directories:Array<String> = [Paths.mods('stages/'), Paths.mods(Paths.current
 				if(typeInt == null) theType = '?';
 
 				var daText:AttachedFlxText = new AttachedFlxText(0, 0, 100, theType, 24);
-				daText.setFormat(Paths.font("vcr.ttf"), 24, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
+				daText.setFormat(Paths.font("vcr.ttf"), 24, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE_FAST, FlxColor.BLACK);
 				daText.xAdd = -32;
 				daText.yAdd = 6;
 				daText.borderSize = 1;
@@ -3200,20 +3231,47 @@ var directories:Array<String> = [Paths.mods('stages/'), Paths.mods(Paths.current
 		return noteData;
 	}
 
+	var missingText:FlxText;
+	var missingTextTimer:FlxTimer;
 	function loadJson(song:String):Void
-		{
-			//make it look sexier if possible
+	{
+		try {
 			if (Utils.difficulties[PlayState.storyDifficulty] != Utils.defaultDifficulty) {
-		      if(Utils.difficulties[PlayState.storyDifficulty] == null){
-				PlayState.SONG = Song.loadFromJson(song.toLowerCase(), song.toLowerCase());
-			}else{
-				PlayState.SONG = Song.loadFromJson(song.toLowerCase() + "-" + Utils.difficulties[PlayState.storyDifficulty], song.toLowerCase());
+				if(Utils.difficulties[PlayState.storyDifficulty] == null){
+					PlayState.SONG = Song.loadFromJson(song.toLowerCase(), song.toLowerCase());
+				}else{
+					PlayState.SONG = Song.loadFromJson(song.toLowerCase() + "-" +  Utils.difficulties[PlayState.storyDifficulty], song.toLowerCase());
+				}
 			}
-			}else{
-			PlayState.SONG = Song.loadFromJson(song.toLowerCase(), song.toLowerCase());
-			}
+			else PlayState.SONG = Song.loadFromJson(song.toLowerCase(), song.toLowerCase());
 			MusicBeatState.resetState();
 		}
+		catch(e)
+		{
+			trace('ERROR! $e');
+
+			var errorStr:String = e.toString();
+			if(errorStr.startsWith('[file_contents,assets/data/')) errorStr = 'Missing file: ' + errorStr.substring(27, errorStr.length-1); //Missing chart
+
+			if(missingText == null)
+			{
+				missingText = new FlxText(50, 0, FlxG.width - 100, '', 24);
+				missingText.setFormat(Paths.font("vcr.ttf"), 24, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
+				missingText.scrollFactor.set();
+				add(missingText);
+			}
+			else missingTextTimer.cancel();
+
+			missingText.text = 'ERROR WHILE LOADING CHART:\n$errorStr';
+			missingText.screenCenter(Y);
+
+			missingTextTimer = new FlxTimer().start(5, function(tmr:FlxTimer) {
+				remove(missingText);
+				missingText.destroy();
+			});
+			FlxG.sound.play(Paths.sound('cancelMenu'));
+		}
+	}
 
 	function autosaveSong():Void
 	{

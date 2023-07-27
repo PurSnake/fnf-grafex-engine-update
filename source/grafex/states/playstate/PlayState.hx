@@ -46,7 +46,6 @@ import grafex.cutscenes.DialogueBox;
 import lime.app.Application;
 import openfl.filters.BitmapFilter;
 import flixel.FlxBasic;
-import flixel.FlxCamera;
 import flixel.FlxG;
 import flixel.FlxGame;
 import flixel.FlxObject;
@@ -460,29 +459,28 @@ class PlayState extends MusicBeatState
 		practiceMode = ClientPrefs.getGameplaySetting('practice', false);
 		cpuControlled = ClientPrefs.getGameplaySetting('botplay', false);
 
-        camGame = new FlxCamera();
-        camHUD = new FlxCamera();
-        camOther = new FlxCamera();
-        camHUD.bgColor.alpha = 0;
-        camOther.bgColor.alpha = 0;
-    
-        camPAUSE = new FlxCamera();
-        camPAUSE.bgColor.alpha = 0;
-    
-        FlxG.cameras.reset(camGame);
-	FlxG.cameras.add(camHUD, false);
-	FlxG.cameras.add(camOther, false);
-	FlxG.cameras.add(camPAUSE, false);
-	grpNoteSplashes = new FlxTypedGroup<NoteSplash>();
-	grpSusSplashes = new FlxTypedGroup<SusSplash>();
-    
-	    FlxG.cameras.setDefaultDrawTarget(camGame, true);
-	    CustomFadeTransition.nextCamera = camOther;
-    
-        persistentUpdate = true;
-        persistentDraw = true;
+		camGame = new FlxCamera();
+		camHUD = new FlxCamera();
+		camOther = new FlxCamera();
+		camHUD.bgColor.alpha = 0;
+		camOther.bgColor.alpha = 0;
 
-        if (SONG == null)
+		camPAUSE = new FlxCamera();
+		camPAUSE.bgColor.alpha = 0;
+
+		FlxG.cameras.reset(camGame);
+		FlxG.cameras.add(camHUD, false);
+		FlxG.cameras.add(camOther, false);
+		FlxG.cameras.add(camPAUSE, false);
+		grpNoteSplashes = new FlxTypedGroup<NoteSplash>();
+		grpSusSplashes = new FlxTypedGroup<SusSplash>();
+
+		FlxG.cameras.setDefaultDrawTarget(camGame, true);
+
+		persistentUpdate = true;
+		persistentDraw = true;
+
+		if (SONG == null)
 			SONG = Song.loadFromJson('tutorial');
 
 		Conductor.mapBPMChanges(SONG);
@@ -1078,7 +1076,7 @@ class PlayState extends MusicBeatState
             GameOverSubstate.endSoundName = boyfriend.deathConfirm;
         }
           		
-		var camPos:FlxPoint = new FlxPoint(girlfriendCameraOffset[0], girlfriendCameraOffset[1]);
+		var camPos:FlxPoint = FlxPoint.get(girlfriendCameraOffset[0], girlfriendCameraOffset[1]);
 		if(gf != null)
 		{
 			camPos.x += gf.getGraphicMidpoint().x + gf.cameraPosition[0] + girlfriendCameraOffset[0];
@@ -1175,6 +1173,7 @@ class PlayState extends MusicBeatState
 
 		camFollow = new FlxPoint();
 		camFollowPos = new FlxObject(0, 0, 1, 1);
+		camPos.put();
 
 		snapCamFollowToPos(camPos.x, camPos.y);
 		if (prevCamFollow != null)
@@ -1447,11 +1446,13 @@ class PlayState extends MusicBeatState
 
 		Paths.clearUnusedMemory();
 		FlxG.mouse.visible = false;
-		CustomFadeTransition.nextCamera = camPAUSE;
+		CustomFadeTransition.nextCamera = camOther;
 
 		if(eventNotes.length < 1) checkEventNote();
 
 		super.create();
+
+		CustomFadeTransition.nextCamera = camOther;
     }
 
     #if (!flash && sys)
@@ -1535,7 +1536,7 @@ class PlayState extends MusicBeatState
             for (note in unspawnNotes) note.resizeByRatio(ratio);
         }
         songSpeed = value;
-        noteKillOffset = 350 / songSpeed;
+	noteKillOffset = Math.max(Conductor.stepCrochet, 350 / songSpeed);
         return value;
     }
 
@@ -1557,16 +1558,17 @@ class PlayState extends MusicBeatState
 
 	public function addTextToDebug(text:String, color:FlxColor) {
 		#if LUA_ALLOWED
-		luaDebugGroup.forEachAlive(function(spr:DebugLuaText) {
-			spr.y += 20;
-		});
+		var newText:DebugLuaText = luaDebugGroup.recycle(DebugLuaText);
+		newText.text = text;
+		newText.color = color;
+		newText.disableTime = 6;
+		newText.alpha = 1;
+		newText.setPosition(10, 8 - newText.height);
 
-		if(luaDebugGroup.members.length > 34) {
-			var blah = luaDebugGroup.members[34];
-			blah.destroy();
-			luaDebugGroup.remove(blah, true);
-		}
-		luaDebugGroup.insert(0, new DebugLuaText(text, luaDebugGroup, color));
+		luaDebugGroup.forEachAlive(function(spr:DebugLuaText) {
+			spr.y += newText.height + 2;
+		});
+		luaDebugGroup.add(newText);
 		#end
 	}
 
@@ -2248,7 +2250,7 @@ class PlayState extends MusicBeatState
 
 					countSpr.screenCenter();
 					countSpr.antialiasing = antialias;
-					insert(members.indexOf(notes), countSpr);
+					insert(members.indexOf(grpNoteSplashes), countSpr);
 					FlxTween.tween(countSpr, {alpha: 0}, Conductor.crochet / 1000, {
 						ease: FlxEase.cubeInOut,
 						onComplete: function(twn:FlxTween)
@@ -3052,7 +3054,6 @@ class PlayState extends MusicBeatState
             persistentUpdate = false;
             paused = true;
             cancelMusicFadeTween();
-            CustomFadeTransition.nextCamera = camPAUSE;
             MusicBeatState.switchState(new CharacterEditorState(dad.curCharacter));
         }
         #end
@@ -3114,7 +3115,7 @@ class PlayState extends MusicBeatState
 				dunceNote.spawned=true;
 				callOnLuas('onSpawnNote', [notes.members.indexOf(dunceNote), dunceNote.noteData, dunceNote.noteType, dunceNote.isSustainNote]);
 				callOnHscript('onSpawnNote', [notes.members.indexOf(dunceNote), dunceNote.noteData, dunceNote.noteType, dunceNote.isSustainNote]);
-	            stageBuild.callFunction('onSpawnNote', [notes.members.indexOf(dunceNote), dunceNote.noteData, dunceNote.noteType, dunceNote.isSustainNote]);
+				stageBuild.callFunction('onSpawnNote', [notes.members.indexOf(dunceNote), dunceNote.noteData, dunceNote.noteType, dunceNote.isSustainNote]);
 				var index:Int = unspawnNotes.indexOf(dunceNote);
 				unspawnNotes.splice(index, 1);
 			}
@@ -3154,8 +3155,8 @@ class PlayState extends MusicBeatState
 
 					var angleDir = strumDirection * Math.PI / 180;
 
-				    if(daNote.isSustainNote)
-					    daNote.angle = strumDirection - 90;
+					if(daNote.isSustainNote)
+						daNote.angle = strumDirection - 90;
 
 					if (daNote.copyAngle)
 						daNote.angle = strumDirection - 90 + strumAngle;
@@ -3231,7 +3232,7 @@ class PlayState extends MusicBeatState
 					}
 	
 					// Kill extremely late notes and cause misses
-					if (Conductor.songPosition > noteKillOffset + daNote.strumTime)
+					if (Conductor.songPosition - daNote.strumTime > noteKillOffset)
 					{
 						if (daNote.mustPress && !cpuControlled &&!daNote.ignoreNote && !endingSong && (daNote.tooLate || !daNote.wasGoodHit)) {
 							noteMiss(daNote);
@@ -3332,7 +3333,6 @@ class PlayState extends MusicBeatState
         persistentUpdate = false;
         paused = true;
         cancelMusicFadeTween();
-        CustomFadeTransition.nextCamera = camPAUSE;
         MusicBeatState.switchState(new ChartingState());
         chartingMode = true;
     
@@ -4118,7 +4118,7 @@ class PlayState extends MusicBeatState
 					Conductor.changeBPM(TitleState.titleJSON.bpm);
 
 					cancelMusicFadeTween();
-					CustomFadeTransition.nextCamera = camPAUSE;
+					CustomFadeTransition.nextCamera = camOther;
 					if(FlxTransitionableState.skipNextTransIn) {
 						CustomFadeTransition.nextCamera = null;
 					}
@@ -4161,7 +4161,7 @@ class PlayState extends MusicBeatState
 			{
 				trace('Switching back to FreeplayState');
 				cancelMusicFadeTween();
-				CustomFadeTransition.nextCamera = camPAUSE;
+				CustomFadeTransition.nextCamera = camOther;
 				if(FlxTransitionableState.skipNextTransIn) {
 					CustomFadeTransition.nextCamera = null;
 				}
@@ -5267,13 +5267,15 @@ class PlayState extends MusicBeatState
 
 
 	override function destroy() {
-		for (lua in luaArray) {
+		for (i in 0...luaArray.length) {
+			var lua:FunkinLua = luaArray[0];
 			lua.call('onDestroy', []);
 			lua.stop();
 		}
-		for (script in hscriptArray) {
-			script.executeFunc('onDestroy', []);
-			script.dispose();
+		for (i in 0...hscriptArray.length) {
+			var hx:GrfxHxScript = hscriptArray[0];
+			hx.executeFunc('onDestroy', []);
+			hx.dispose();
 		}
 		luaArray = [];
 		hscriptArray = [];

@@ -957,33 +957,35 @@ class ClassicScoreTxt extends Option
 
 	public override function left():Bool
 	{
-        ClientPrefs.classicScoreTxt = !ClientPrefs.classicScoreTxt;
+        	ClientPrefs.classicScoreTxt = !ClientPrefs.classicScoreTxt;
 
-        if (Type.getClass(FlxG.state) == PlayState) {
-            ClientPrefs.classicScoreTxt ? {
-                PlayState.instance.scoreTxt.x = PlayState.instance.healthBarBG.x + PlayState.instance.healthBarBG.width - 190;
-                PlayState.instance.scoreTxt.y = PlayState.instance.healthBarBG.y + 30;
-                PlayState.instance.scoreTxt.text = "Score:" + PlayState.instance.songScore;
-                PlayState.instance.scoreTxt.fieldWidth = 0;
-                PlayState.instance.scoreTxt.size = 20;
+        	if (Type.getClass(FlxG.state) == PlayState) {
+           		ClientPrefs.classicScoreTxt ? {
+               			PlayState.instance.scoreTxt.x = PlayState.instance.healthBarBG.x + PlayState.instance.healthBarBG.width - 190;
+                		PlayState.instance.scoreTxt.y = PlayState.instance.healthBarBG.y + 30;
+                		PlayState.instance.scoreTxt.text = "Score:" + PlayState.instance.songScore;
+                		PlayState.instance.scoreTxt.fieldWidth = 0;
+				PlayState.instance.scoreTxt.size = 20;
+				PlayState.instance.scoreTxt.borderSize = 1;
+				PlayState.instance.scoreTxt.borderQuality = 1;
 
-		        PlayState.instance.scoreTxt.setFormat(Paths.font("vcr.ttf"), 16, FlxColor.WHITE, RIGHT, OUTLINE, FlxColor.BLACK);
-		        PlayState.instance.scoreTxt.scrollFactor.set();
-		        PlayState.instance.scoreTxt.visible = (!ClientPrefs.hideHud && !PlayState.instance.cpuControlled);
-            } : {
-                PlayState.instance.scoreTxt.x = PlayState.instance.healthBar.x - 205;
-                PlayState.instance.scoreTxt.y = PlayState.instance.healthBarBG.y + 52;
-                PlayState.instance.scoreTxt.text = 'Score: ' + PlayState.instance.songScore + ' | Misses: ' + PlayState.instance.songMisses + ' | Rating: ' + PlayState.instance.ratingName + (PlayState.instance.ratingName != '?' ? ' (${Highscore.floorDecimal(PlayState.instance.ratingPercent * 100, 2)}%) -  ${PlayState.instance.ratingFC}' : '');
-                PlayState.instance.scoreTxt.fieldWidth = 1000;
-                PlayState.instance.scoreTxt.size = 18;
+		        	PlayState.instance.scoreTxt.setFormat(Paths.font("vcr.ttf"), 16, FlxColor.WHITE, RIGHT, OUTLINE, FlxColor.BLACK);
+		        	PlayState.instance.scoreTxt.scrollFactor.set();
+		       		PlayState.instance.scoreTxt.visible = (!ClientPrefs.hideHud && !PlayState.instance.cpuControlled);
+            		} : {
+                		PlayState.instance.scoreTxt.x = PlayState.instance.healthBar.x - 205;
+                		PlayState.instance.scoreTxt.y = PlayState.instance.healthBarBG.y + 52;
+                		PlayState.instance.scoreTxt.text = 'Score: ' + PlayState.instance.songScore + ' | Misses: ' + PlayState.instance.songMisses + ' | Rating: ' + PlayState.instance.ratingName + (PlayState.instance.ratingName != '?' ? ' (${Highscore.floorDecimal(PlayState.instance.ratingPercent * 100, 2)}%) -  ${PlayState.instance.ratingFC}' : '');
+                		PlayState.instance.scoreTxt.fieldWidth = 1000;
+                		PlayState.instance.scoreTxt.size = 18;
 
-		        PlayState.instance.scoreTxt.setFormat(Paths.font("vcr.ttf"), 18, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);	
-		        PlayState.instance.scoreTxt.screenCenter(X);	
-		        PlayState.instance.scoreTxt.scrollFactor.set();
-		        PlayState.instance.scoreTxt.borderSize = 1.75;
-		        PlayState.instance.scoreTxt.borderQuality = 2;
-		        PlayState.instance.scoreTxt.visible = (!ClientPrefs.hideHud && !PlayState.instance.cpuControlled);
-            } 
+		       		PlayState.instance.scoreTxt.setFormat(Paths.font("vcr.ttf"), 18, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);	
+		        	PlayState.instance.scoreTxt.screenCenter(X);	
+		        	PlayState.instance.scoreTxt.scrollFactor.set();
+				PlayState.instance.scoreTxt.borderSize = 2;
+				PlayState.instance.scoreTxt.borderQuality = 4;
+		        	PlayState.instance.scoreTxt.visible = (!ClientPrefs.hideHud && !PlayState.instance.cpuControlled);
+            		} 
 		}
 		display = updateDisplay();
 		return true;
@@ -1474,6 +1476,66 @@ class NoteSplashesScale extends Option
 	}
 }
 
+
+class NoteSplashesAlpha extends Option
+{
+	public function new(desc:String)
+	{
+		super();
+		description = desc;
+		acceptValues = true;
+	}
+
+	private override function updateDisplay():String
+	{
+		return "NoteSplashes Alpha: < " + Utils.truncateFloat(ClientPrefs.noteSplashesAlpha, 1) + " >";
+	}
+
+	override function right():Bool
+	{
+		ClientPrefs.noteSplashesAlpha += 0.1;
+		if (ClientPrefs.noteSplashesAlpha > 1) ClientPrefs.noteSplashesAlpha = 1;
+		return true;
+
+	}
+
+	override function left():Bool
+	{
+		ClientPrefs.noteSplashesAlpha -= 0.1;
+		if (ClientPrefs.noteSplashesAlpha < 0.1) ClientPrefs.noteSplashesAlpha = 0.1;
+		return true;
+	}
+}
+
+class NoteSusSplashesAlpha extends Option
+{
+	public function new(desc:String)
+	{
+		super();
+		description = desc;
+		acceptValues = true;
+	}
+
+	private override function updateDisplay():String
+	{
+		return "Sustain Notes Splash-Lights Alpha: < " + Utils.truncateFloat(ClientPrefs.noteSusSplashesAlpha, 1) + " >";
+	}
+
+	override function right():Bool
+	{
+		ClientPrefs.noteSusSplashesAlpha += 0.1;
+		if (ClientPrefs.noteSusSplashesAlpha > 1) ClientPrefs.noteSusSplashesAlpha = 1;
+		return true;
+
+	}
+
+	override function left():Bool
+	{
+		ClientPrefs.noteSusSplashesAlpha -= 0.1;
+		if (ClientPrefs.noteSusSplashesAlpha < 0.1) ClientPrefs.noteSusSplashesAlpha = 0.1;
+		return true;
+	}
+}
 
 
 class HitSoundOption extends Option
