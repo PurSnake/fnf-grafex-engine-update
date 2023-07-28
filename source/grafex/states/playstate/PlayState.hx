@@ -28,6 +28,7 @@ import grafex.sprites.attached.*;
 import grafex.sprites.background.*;
 import grafex.sprites.HealthIcon;
 import grafex.sprites.characters.Character;
+import grafex.sprites.FixedCamera;
 
 import grafex.effects.WiggleEffect;
 import grafex.effects.WiggleEffect.WiggleEffectType;
@@ -271,8 +272,8 @@ class PlayState extends MusicBeatState
 
     public var classicHealthBar:Bool = false;
 
-	public var camGame:FlxCamera;
-	public var camHUD:FlxCamera;
+	public var camGame:FixedCamera;
+	public var camHUD:FixedCamera;
 	public var camPAUSE:FlxCamera;
 	public var camOther:FlxCamera;
 
@@ -459,8 +460,8 @@ class PlayState extends MusicBeatState
 		practiceMode = ClientPrefs.getGameplaySetting('practice', false);
 		cpuControlled = ClientPrefs.getGameplaySetting('botplay', false);
 
-		camGame = new FlxCamera();
-		camHUD = new FlxCamera();
+		camGame = new FixedCamera();
+		camHUD = new FixedCamera();
 		camOther = new FlxCamera();
 		camHUD.bgColor.alpha = 0;
 		camOther.bgColor.alpha = 0;
@@ -1447,6 +1448,7 @@ class PlayState extends MusicBeatState
 		Paths.clearUnusedMemory();
 		FlxG.mouse.visible = false;
 		CustomFadeTransition.nextCamera = camOther;
+
 
 		if(eventNotes.length < 1) checkEventNote();
 
@@ -3193,12 +3195,12 @@ class PlayState extends MusicBeatState
 						opponentNoteHit(daNote);
 					}
 	
-					if(!daNote.blockHit && daNote.mustPress && cpuControlled && daNote.canBeHit) {
+					if(cpuControlled && daNote.mustPress && !daNote.blockHit && daNote.canBeHit) {
 						if(daNote.isSustainNote) {
 							if(daNote.canBeHit) {
 								goodNoteHit(daNote);
 							}
-						} else if(daNote.strumTime <= Conductor.songPosition || daNote.isSustainNote) {
+						} else if(daNote.strumTime <= Conductor.songPosition) {
 							goodNoteHit(daNote);
 						}
 					}
@@ -4726,7 +4728,7 @@ class PlayState extends MusicBeatState
 		}
 
             if ((camFocus == 'bf' || camFocus == 'gf') && ClientPrefs.shouldCameraMove && (!daNote.noAnimation || daNote.specialNote))
-			triggerCamMovement(Math.abs(daNote.noteData));
+				triggerCamMovement(daNote.noteData);
 
 	        callOnLuas('noteMiss', [notes.members.indexOf(daNote), daNote.noteData, daNote.noteType, daNote.isSustainNote, daNote.ID]);
 	        callOnHscript("noteMiss", [notes.members.indexOf(daNote), daNote.noteData, daNote.noteType, daNote.isSustainNote, daNote.ID]);
@@ -4825,7 +4827,7 @@ class PlayState extends MusicBeatState
         }
 
         if ((camFocus == 'dad' || camFocus == 'gf') && ClientPrefs.shouldCameraMove && (!note.noAnimation || note.specialNote))
-            triggerCamMovement(Math.abs(note.noteData));
+            triggerCamMovement(note.noteData);
 
         if (SONG.needsVoices) {
 		vocals.volume = 1;
@@ -4927,23 +4929,23 @@ class PlayState extends MusicBeatState
                     }
                 }
             }
-            if(cpuControlled) {
-                var time:Float = 0.15;
-                if(note.isSustainNote && !note.animation.curAnim.name.endsWith('end')) {
-                    time += 0.15;
-                }
-                StrumPlayAnim(false, Std.int(Math.abs(note.noteData)), time, (note.isSustainNote && !note.animation.curAnim.name.endsWith('end')));
-            } else {
-		StrumPlayAnim(false, Std.int(Math.abs(note.noteData)), 0, (note.isSustainNote && !note.animation.curAnim.name.endsWith('end')));
-            }
             note.wasGoodHit = true;
             vocals.volume = 1;
             var isSus:Bool = note.isSustainNote; //GET OUT OF MY HEAD, GET OUT OF MY HEAD, GET OUT OF MY HEAD
             var leData:Int = note.noteData;
             var leType:String = note.noteType;
             if ((camFocus == 'bf' || camFocus == 'gf') && ClientPrefs.shouldCameraMove && (!note.noAnimation || note.specialNote))
-                triggerCamMovement(Math.abs(note.noteData));
+                triggerCamMovement(note.noteData);
 
+			if(cpuControlled) {
+				var time:Float = 0.15;
+				if(isSus && !note.animation.curAnim.name.endsWith('end'))
+					time += 0.15;
+				
+				StrumPlayAnim(false, leData, time, (isSus && !note.animation.curAnim.name.endsWith('end')));
+			}else{
+				StrumPlayAnim(false, leData, 0, (isSus && !note.animation.curAnim.name.endsWith('end')));
+			}
             callOnLuas('goodNoteHit', [notes.members.indexOf(note), leData, leType, isSus, note.ID]);
             callOnHscript("goodNoteHit", [notes.members.indexOf(note), leData, leType, isSus, note.ID]);
             stageBuild.callFunction('goodNoteHit', [notes.members.indexOf(note), leData, leType, isSus, note.ID]);
@@ -5545,15 +5547,14 @@ class PlayState extends MusicBeatState
 		}
 
 		if(spr != null) {
-			if (isSus && spr.alpha > 0.4 && spr.visible) spawnSusNoteSplash(spr.getMidpoint().x, spr.getMidpoint().y, id, spr);
+			if (ClientPrefs.noteSusSplashes && isSus && spr.alpha > 0.4 && spr.visible) spawnSusNoteSplash(spr.getMidpoint().x, spr.getMidpoint().y, id, spr);
 
-		     	spr.playAnim('confirm', true);
+			spr.playAnim('confirm', true);
 			if(time > 0) spr.resetAnim = time;
 		}
 	}
 
 	public function spawnSusNoteSplash(x:Float, y:Float, data:Int, ?strum:StrumNote = null) {
-		if(!ClientPrefs.noteSusSplashes) return;
 
 		var skinS:String = 'NOTE_assets-extra';
 		if(PlayState.SONG.extrasSkin!=null && PlayState.SONG.extrasSkin.length>0) skinS=PlayState.SONG.extrasSkin;
@@ -5565,13 +5566,13 @@ class PlayState extends MusicBeatState
 		if (data>-1&&data<ClientPrefs.arrowHSV.length){
 			if(!hueValues.exists(data))
 				hueValues[data]=ClientPrefs.arrowHSV[data][0]/360;
-			   hue=hueValues[data];
-		   if(!satValues.exists(data))
-			   satValues[data]=ClientPrefs.arrowHSV[data][1]/100;
-			   sat=satValues[data];
-		   if(!brtValues.exists(data))
-			   brtValues[data]=ClientPrefs.arrowHSV[data][2]/100;
-			   brt=brtValues[data];
+				hue=hueValues[data];
+			if(!satValues.exists(data))
+				satValues[data]=ClientPrefs.arrowHSV[data][1]/100;
+				sat=satValues[data];
+			if(!brtValues.exists(data))
+				brtValues[data]=ClientPrefs.arrowHSV[data][2]/100;
+				brt=brtValues[data];
 		}
 
 		var splash:SusSplash=grpSusSplashes.recycle(SusSplash);
@@ -5684,12 +5685,12 @@ class PlayState extends MusicBeatState
         } 
  	}
 
-     public var camFocus:String = "";
-     var dadPos:Array<Float> = [0, 0];
-     var bfPos:Array<Float> = [0, 0];
-     var gfPos:Array<Float> = [0, 0];
-     
-    public function triggerCamMovement(num:Float = 0)
+	public var camFocus:String = "";
+	var dadPos:Array<Float> = [0, 0];
+	var bfPos:Array<Float> = [0, 0];
+	var gfPos:Array<Float> = [0, 0];
+
+    public function triggerCamMovement(num:Int = 0)
     {
 	    callOnLuas("onTriggerCamMovement", [camFocus, num]);
         callOnHscript("onTriggerCamMovement", [camFocus, num]);
