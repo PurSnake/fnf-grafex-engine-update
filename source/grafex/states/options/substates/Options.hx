@@ -985,7 +985,6 @@ class ClassicScoreTxt extends Option
 				PlayState.instance.scoreTxt.borderQuality = 4;
 		        PlayState.instance.scoreTxt.visible = (!ClientPrefs.hideHud && !PlayState.instance.cpuControlled);
             } 
-
 		}
 		display = updateDisplay();
 		return true;

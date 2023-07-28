@@ -107,7 +107,7 @@ class CreditsState extends MusicBeatState
 			new CreditData('KerSive', 'KerSive', 'Funny Artist', 'https://twitter.com/KerSive0_0', '0xFFC2C04A')
 		];*/
 		creditsStuff.push(new CreditData('Grafex Engine', false));
-		creditsStuff.push(new CreditData('PurSnake', 'PurSnake', 'Main Programmer', 'https://twitter.com/PurSniki', '0xFF8C41B6'));
+		creditsStuff.push(new CreditData('PurSnake', 'PurSnake', 'Main Programmer', 'https://twitter.com/PurSnake', '0xFF8C41B6'));
 		creditsStuff.push(new CreditData('KerSive', 'KerSive', 'Funny Artist', 'https://twitter.com/KerSive0_0', '0xFFC2C04A'));
 		creditsStuff.push(new CreditData('Redar13', 'Redar13', 'Additional Coder', 'https://www.youtube.com/channel/UCs7LALj7ARfUm6jRB_A31Fw', '0xFFC0C0C0'));
 	
