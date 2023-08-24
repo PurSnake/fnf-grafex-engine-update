@@ -2208,7 +2208,7 @@ class PlayState extends MusicBeatState
             startTimer = new FlxTimer().start(Conductor.crochet / 1000 / playbackRate, function(tmr:FlxTimer)
             {
 		        for (character in characters) {
-			        if (character!=null && tmr.loopsLeft%Math.round(character.danceEveryNumBeats*(character==gf?gfSpeed:1))==0 && character.animation.curAnim!=null && !character.animation.curAnim.name.startsWith("sing") && !character.stunned){
+			        if (character!=null && tmr.loopsLeft%Math.round(character.danceEveryNumBeats*(character==gf?gfSpeed:1))==0 && character.animation.curAnim!=null && !character.animation.curAnim.name.startsWith(character.singAnimsPrefix) && !character.stunned){
 			        	character.dance();
 			        }
 		        }
@@ -3127,7 +3127,7 @@ class PlayState extends MusicBeatState
 		{
 			if(!cpuControlled) {
 				keyShit();
-			} else if(boyfriend.animation.curAnim != null && boyfriend.holdTimer > Conductor.stepCrochet * (0.0011 / FlxG.sound.music.pitch) * boyfriend.singDuration && boyfriend.animation.curAnim.name.startsWith('sing') && !boyfriend.animation.curAnim.name.endsWith('miss')) {
+			} else if(boyfriend.animation.curAnim != null && boyfriend.holdTimer > Conductor.stepCrochet * (0.0011 / FlxG.sound.music.pitch) * boyfriend.singDuration && boyfriend.animation.curAnim.name.startsWith(boyfriend.singAnimsPrefix) && !boyfriend.animation.curAnim.name.endsWith('miss')) {
 				boyfriend.dance();
 				//boyfriend.animation.curAnim.finish();
 			}
@@ -4649,7 +4649,7 @@ class PlayState extends MusicBeatState
                 }
             });
            if (parsedHoldArray.contains(true) && !endingSong) { }
-           else if (boyfriend.animation.curAnim != null && boyfriend.holdTimer > Conductor.stepCrochet * (0.0011 / FlxG.sound.music.pitch) * boyfriend.singDuration && boyfriend.animation.curAnim.name.startsWith('sing') && !boyfriend.animation.curAnim.name.endsWith('miss'))
+           else if (boyfriend.animation.curAnim != null && boyfriend.holdTimer > Conductor.stepCrochet * (0.0011 / FlxG.sound.music.pitch) * boyfriend.singDuration && boyfriend.animation.curAnim.name.startsWith(boyfriend.singAnimsPrefix) && !boyfriend.animation.curAnim.name.endsWith('miss'))
            {
                 boyfriend.dance();
            }
@@ -5362,7 +5362,7 @@ class PlayState extends MusicBeatState
 		}
 		
 		for (character in characters){
-			if (character!=null && curBeat % Math.round(character.danceEveryNumBeats*(character==gf?gfSpeed:1))==0 && character.animation.curAnim!=null && !character.animation.curAnim.name.startsWith("sing") && !character.stunned){
+			if (character!=null && curBeat % Math.round(character.danceEveryNumBeats*(character==gf?gfSpeed:1))==0 && character.animation.curAnim!=null && !character.animation.curAnim.name.startsWith(character.singAnimsPrefix) && !character.stunned){
 				character.dance();
 			}
 		}

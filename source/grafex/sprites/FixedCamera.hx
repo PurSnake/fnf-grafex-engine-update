@@ -6,11 +6,11 @@ import flixel.math.FlxPoint;
 import openfl.geom.Matrix;
 
 class FixedCamera extends FlxCamera{
-	public var fix(default, set):Bool = false;
+	public var fix(default, set):Bool = true;
 	public var rotationOffset(default, set):FlxPoint = new FlxPoint(0.5, 0.5);
 	var viewOffset:FlxPoint = FlxPoint.get();
 
-	public function new(X:Int = 0, Y:Int = 0, Width:Int = 0, Height:Int = 0, Zoom:Float = 0, fix:Bool = false) {
+	public function new(X:Int = 0, Y:Int = 0, Width:Int = 0, Height:Int = 0, Zoom:Float = 0, fix:Bool = true) {
 		super(X,Y,Width,Height,Zoom);
 		this.fix = !grafex.util.ClientPrefs.lowQuality && fix;
 	}
