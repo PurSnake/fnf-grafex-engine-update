@@ -1305,14 +1305,14 @@ var directories:Array<String> = [Paths.mods('stages/'), Paths.mods(Paths.current
 	var voicesVolume2:FlxUINumericStepper;
 
 	var playbackRate_Slider:FlxUISlider;
-	var playbackRate(default, set):Float = 1;
+	var PlaybackRate(default, set):Float = 1;
 
-	function set_playbackRate(value:Float):Float {
-		playbackRate = FlxMath.roundDecimal(value,2);
-		if(vocals != null) vocals.pitch = playbackRate;
-		if(vocals2 != null) vocals2.pitch = playbackRate;
+	function set_PlaybackRate(value:Float):Float {
+		PlaybackRate = FlxMath.roundDecimal(value,2);
+		if(vocals != null) vocals.pitch = PlaybackRate;
+		if(vocals2 != null) vocals2.pitch = PlaybackRate;
 		Conductor.safeZoneOffset = (ClientPrefs.safeFrames / 60) * 1000 * value;
-		FlxG.sound.music.pitch = playbackRate;
+		FlxG.sound.music.pitch = PlaybackRate;
 		return value;
 	}
 
@@ -1326,7 +1326,7 @@ var directories:Array<String> = [Paths.mods('stages/'), Paths.mods(Paths.current
 		if (FlxG.save.data.chart_waveformVoices == null) FlxG.save.data.chart_waveformVoices = false;
 		if (FlxG.save.data.chart_waveformVoices2 == null) FlxG.save.data.chart_waveformVoices2 = false;
 
-		waveformUseInstrumental = new FlxUICheckBox(10, 90, null, null, "Waveform for Instrumental", 100);
+		waveformUseInstrumental = new FlxUICheckBox(10, 80, null, null, "Waveform for Instrumental", 100);
 		waveformUseInstrumental.checked = FlxG.save.data.chart_waveformInst;
 		waveformUseInstrumental.callback = function()
 		{
@@ -1338,7 +1338,7 @@ var directories:Array<String> = [Paths.mods('stages/'), Paths.mods(Paths.current
 			updateWaveform();
 		};
 
-		waveformUseVoices = new FlxUICheckBox(waveformUseInstrumental.x + 120, waveformUseInstrumental.y, null, null, "Waveform for Voices", 100);
+		waveformUseVoices = new FlxUICheckBox(waveformUseInstrumental.x + 100, waveformUseInstrumental.y, null, null, "Waveform for Voices", 100);
 		waveformUseVoices.checked = FlxG.save.data.chart_waveformVoices;
 		waveformUseVoices.callback = function()
 		{
@@ -1354,7 +1354,7 @@ var directories:Array<String> = [Paths.mods('stages/'), Paths.mods(Paths.current
 			updateWaveform();
 		};
 
-		waveformUseVoices2 = new FlxUICheckBox(waveformUseVoices.x + 120, waveformUseVoices.y, null, null, "Waveform for Voices2", 100);
+		waveformUseVoices2 = new FlxUICheckBox(waveformUseVoices.x + 100, waveformUseVoices.y, null, null, "Waveform for Voices2", 100);
 		waveformUseVoices2.checked = FlxG.save.data.chart_waveformVoices2;
 		waveformUseVoices2.callback = function()
 		{
@@ -1371,7 +1371,7 @@ var directories:Array<String> = [Paths.mods('stages/'), Paths.mods(Paths.current
 		};
 		#end
 
-		check_mute_inst = new FlxUICheckBox(10, 310, null, null, "Mute Instrumental (in editor)", 100);
+		check_mute_inst = new FlxUICheckBox(10, 320, null, null, "Mute Instrumental (in editor)", 70);
 		check_mute_inst.checked = false;
 		check_mute_inst.callback = function()
 		{
@@ -1382,7 +1382,7 @@ var directories:Array<String> = [Paths.mods('stages/'), Paths.mods(Paths.current
 
 			FlxG.sound.music.volume = vol;
 		};
-		check_vortex = new FlxUICheckBox(10, 120, null, null, "Vortex Editor (BETA)", 100);
+		check_vortex = new FlxUICheckBox(waveformUseInstrumental.x, waveformUseInstrumental.y + 30, null, null, "Vortex Editor (BETA)", 100);
 		if (FlxG.save.data.chart_vortex == null) FlxG.save.data.chart_vortex = false;
 		check_vortex.checked = FlxG.save.data.chart_vortex;
 
@@ -1393,7 +1393,7 @@ var directories:Array<String> = [Paths.mods('stages/'), Paths.mods(Paths.current
 			reloadGridLayer();
 		};
 
-		var check_mute_vocals = new FlxUICheckBox(check_mute_inst.x + 120, check_mute_inst.y, null, null, "Mute Vocals (in editor)", 100);
+		var check_mute_vocals = new FlxUICheckBox(check_mute_inst.x + 100, check_mute_inst.y, null, null, "Mute Vocals (in editor)", 70);
 		check_mute_vocals.checked = false;
 		check_mute_vocals.callback = function()
 		{
@@ -1407,7 +1407,7 @@ var directories:Array<String> = [Paths.mods('stages/'), Paths.mods(Paths.current
 			}
 		};
 
-		var check_mute_vocals2 = new FlxUICheckBox(check_mute_vocals.x + 120, check_mute_vocals.y, null, null, "Mute Vocals2 (in editor)", 100);
+		var check_mute_vocals2 = new FlxUICheckBox(check_mute_vocals.x + 100, check_mute_inst.y, null, null, "Mute Vocals2 (in editor)", 70);
 		check_mute_vocals2.checked = false;
 		check_mute_vocals2.callback = function()
 		{
@@ -1421,7 +1421,7 @@ var directories:Array<String> = [Paths.mods('stages/'), Paths.mods(Paths.current
 			}
 		};
 
-		playSoundBf = new FlxUICheckBox(check_mute_inst.x, check_mute_vocals.y + 30, null, null, 'Play Sound (Boyfriend notes)', 100,
+		playSoundBf = new FlxUICheckBox(check_mute_inst.x, check_mute_inst.y + 40, null, null, 'Play Sound (Boyfriend notes)', 70,
 			function() {
 				FlxG.save.data.chart_playSoundBf = playSoundBf.checked;
 			}
@@ -1429,7 +1429,7 @@ var directories:Array<String> = [Paths.mods('stages/'), Paths.mods(Paths.current
 		if (FlxG.save.data.chart_playSoundBf == null) FlxG.save.data.chart_playSoundBf = false;
 		playSoundBf.checked = FlxG.save.data.chart_playSoundBf;
 
-		playSoundDad = new FlxUICheckBox(check_mute_inst.x + 120, playSoundBf.y, null, null, 'Play Sound (Opponent notes)', 100,
+		playSoundDad = new FlxUICheckBox(check_mute_vocals.x, playSoundBf.y, null, null, 'Play Sound (Opponent notes)', 70,
 			function() {
 				FlxG.save.data.chart_playSoundDad = playSoundDad.checked;
 			}
@@ -1450,7 +1450,7 @@ var directories:Array<String> = [Paths.mods('stages/'), Paths.mods(Paths.current
 		blockPressWhileTypingOnStepper.push(metronomeStepper);
 		blockPressWhileTypingOnStepper.push(metronomeOffsetStepper);
 		
-		disableAutoScrolling = new FlxUICheckBox(metronome.x + 120, metronome.y, null, null, "Disable Autoscroll (Not Recommended)", 120,
+		disableAutoScrolling = new FlxUICheckBox(metronome.x + 120, metronome.y, null, null, "Disable Autoscroll (Not Recommended)", 90,
 			function() {
 				FlxG.save.data.chart_noAutoScroll = disableAutoScrolling.checked;
 			}
@@ -1458,7 +1458,7 @@ var directories:Array<String> = [Paths.mods('stages/'), Paths.mods(Paths.current
 		if (FlxG.save.data.chart_noAutoScroll == null) FlxG.save.data.chart_noAutoScroll = false;
 		disableAutoScrolling.checked = FlxG.save.data.chart_noAutoScroll;
 
-		instVolume = new FlxUINumericStepper(metronomeStepper.x, 290, 0.1, 1, 0, 1, 1);
+		instVolume = new FlxUINumericStepper(metronomeStepper.x, 285, 0.1, 1, 0, 1, 1);
 		instVolume.value = FlxG.sound.music.volume;
 		instVolume.name = 'inst_volume';
 		blockPressWhileTypingOnStepper.push(instVolume);
@@ -1473,16 +1473,16 @@ var directories:Array<String> = [Paths.mods('stages/'), Paths.mods(Paths.current
 		voicesVolume2.name = 'voices2_volume';
 		blockPressWhileTypingOnStepper.push(voicesVolume2);
 
-		var shiftTrack = new FlxText(10, 140, 'Shift Chart Position');
+		var shiftTrack = new FlxText(7, 135, 'Shift Chart Position');
 
 		var shiftNoteDialLabel = new FlxText(10, 150, 'Shift Note FWD by (Section)');
-		var stepperShiftNoteDial:FlxUINumericStepper = new FlxUINumericStepper(10, 165, 1, 0, -1000, 1000, 0);
+		var stepperShiftNoteDial:FlxUINumericStepper = new FlxUINumericStepper(10, shiftNoteDialLabel.y + 15, 1, 0, -1000, 1000, 0);
 		stepperShiftNoteDial.name = 'song_shiftnote';
-		var shiftNoteDialLabel2 = new FlxText(10, 180, 'Shift Note FWD by (Step)');
-		var stepperShiftNoteDialstep:FlxUINumericStepper = new FlxUINumericStepper(10, 195, 1, 0, -1000, 1000, 0);
+		var shiftNoteDialLabel2 = new FlxText(10, shiftNoteDialLabel.y + 30, 'Shift Note FWD by (Step)');
+		var stepperShiftNoteDialstep:FlxUINumericStepper = new FlxUINumericStepper(10,  shiftNoteDialLabel2.y + 15, 1, 0, -1000, 1000, 0);
 		stepperShiftNoteDialstep.name = 'song_shiftnotems';
-		var shiftNoteDialLabel3 = new FlxText(10, 210, 'Shift Note FWD by (ms)');
-		var stepperShiftNoteDialms:FlxUINumericStepper = new FlxUINumericStepper(10, 225, 1, 0, -1000, 1000, 2);
+		var shiftNoteDialLabel3 = new FlxText(10, shiftNoteDialLabel2.y + 30, 'Shift Note FWD by (ms)');
+		var stepperShiftNoteDialms:FlxUINumericStepper = new FlxUINumericStepper(10,   shiftNoteDialLabel3.y + 15, 1, 0, -1000, 1000, 2);
 		stepperShiftNoteDialms.name = 'song_shiftnotems';
 
 		var shiftNoteButton:FlxButton = new FlxButton(8, 240, "Shift", function()
@@ -1490,11 +1490,15 @@ var directories:Array<String> = [Paths.mods('stages/'), Paths.mods(Paths.current
 			shiftNotes(Std.int(stepperShiftNoteDial.value),Std.int(stepperShiftNoteDialstep.value),Std.int(stepperShiftNoteDialms.value));
 		});
 
-		var playbackRate_Slider = new FlxUISlider(this, 'playbackRate', waveformUseVoices.x-5, check_vortex.y-15, 0.25, 3, 150, null, 5, FlxColor.WHITE, FlxColor.BLACK);
-		var default_playbackRate:FlxButton = new FlxButton(playbackRate_Slider.x , 200, 'Default Rate', function() {
-			set_playbackRate(1);
+		var playbackRate_Slider = new FlxUISlider(this, 'PlaybackRate', waveformUseVoices.x + 20, check_vortex.y - 4, 0.25, 3, 150, null, 5, FlxColor.WHITE, FlxColor.BLACK);
+		var default_playbackRate:FlxButton = new FlxButton(0, playbackRate_Slider.y + 50, 'Default Rate', function() {
+			set_PlaybackRate(1);
 		});
+		playbackRate_Slider.nameLabel.y += 5;
+		playbackRate_Slider.minLabel.y = playbackRate_Slider.valueLabel.y = playbackRate_Slider.maxLabel.y -= 5;
 
+		default_playbackRate.x = playbackRate_Slider.x + playbackRate_Slider.width / 2.5 - default_playbackRate.width;
+		
 		tab_group_chart.add(new FlxText(metronomeStepper.x, metronomeStepper.y - 15, 0, 'BPM:'));
 		tab_group_chart.add(new FlxText(metronomeOffsetStepper.x, metronomeOffsetStepper.y - 15, 0, 'Offset (ms):'));
 		tab_group_chart.add(new FlxText(instVolume.x, instVolume.y - 15, 0, 'Inst Volume'));
@@ -2230,7 +2234,7 @@ var directories:Array<String> = [Paths.mods('stages/'), Paths.mods(Paths.current
 					var noteDataToCheck:Int = note.noteData;
 					if(noteDataToCheck > -1 && note.mustPress != _song.notes[curSec].mustHitSection) noteDataToCheck += 4;
 						strumLineNotes.members[noteDataToCheck].playAnim('confirm', true);
-						strumLineNotes.members[noteDataToCheck].resetAnim = ((note.sustainLength / 1000) + 0.15) / playbackRate;
+						strumLineNotes.members[noteDataToCheck].resetAnim = ((note.sustainLength / 1000) + 0.15) / PlaybackRate;
 					if(!playedSound[data]) {
 						if((playSoundBf.checked && note.mustPress) || (playSoundDad.checked && !note.mustPress)){
 							var soundToPlay = 'ChartingTick';
@@ -2403,7 +2407,7 @@ var directories:Array<String> = [Paths.mods('stages/'), Paths.mods(Paths.current
 
 		if ((waveformUseInstrumental == null || !waveformUseInstrumental.checked) && (waveformUseVoices == null || !waveformUseVoices.checked) && (waveformUseVoices2 == null || !waveformUseVoices2.checked))
 		{
-			trace('Epic fail on the waveform lol');
+			// trace('Epic fail on the waveform lol');
 			return;
 		}
 		// if(!FlxG.save.data.chart_waveformInst && !FlxG.save.data.chart_waveformVoices && !FlxG.save.data.chart_waveformVoices2) {
@@ -2472,7 +2476,7 @@ var directories:Array<String> = [Paths.mods('stages/'), Paths.mods(Paths.current
 		@:privateAccess {
 			if (FlxG.save.data.chart_waveformVoices && vocals._sound != null && vocals._sound.length > 0)
 				wavsUsers.push(vocals2._sound != null && vocals2._sound.length > 0 ? 'dad' : 'voices');
-			trace(vocals._sound.length, vocals2._sound.length);
+			// trace(vocals._sound.length, vocals2._sound.length);
 		}
 		if (FlxG.save.data.chart_waveformVoices2 && wavsUsers[wavsUsers.length - 1] == 'dad')
 			wavsUsers.push('bf');
