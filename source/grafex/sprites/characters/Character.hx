@@ -13,12 +13,13 @@ import flixel.tweens.FlxTween;
 import flixel.util.FlxSort;
 import grafex.system.song.Section.SwagSection;
 import external.animateatlas.AtlasFrameMaker;
+import flixel.graphics.frames.FlxFramesCollection;
+import flixel.animation.FlxAnimationController;
 import sys.io.File;
 import sys.FileSystem;
 
 import openfl.utils.Assets;
-import haxe.Json;
-import haxe.format.JsonParser;
+import tjson.TJSON as Json;
 import grafex.util.ClientPrefs;
 
 import flixel.math.FlxMath;
@@ -54,12 +55,22 @@ typedef AnimArray = {
 	var loop:Bool;
 	var indices:Array<Int>;
 	var offsets:Array<Int>;
+	var image:String;
 }
 
 class Character extends FlxSprite
 {
-	public var animOffsets:Map<String, Array<Float>>;
+	public var animOffsets:Map<String, Array<Float>> = [];
 	public var debugMode:Bool = false;
+
+	// For swapping out huge sheets
+	public var framesList:Map<String, FlxFramesCollection> = []; // Image, Frames
+	public var imageNames:Map<String, String> = []; // Anim Name, Image
+	public var animStates:Map<String, FlxAnimationController> = []; // Image, Anim Controller
+	public var curImage:String; // Current image name
+	public static var tempAnimState:FlxAnimationController; // Just so that the real one won't be cleared (It crashes if it's null)
+
+	public var useAtlas:Bool;
 
 	public var isPlayer:Bool = false;
 	public var curCharacter:String = DEFAULT_CHARACTER;
@@ -107,16 +118,14 @@ class Character extends FlxSprite
 	public var properties:Map<String, Dynamic> = new Map<String, Dynamic>();
 
 	public static var DEFAULT_CHARACTER:String = 'bf'; //In case a character is missing, it will use BF on its place
-	public function new(x:Float, y:Float, ?character:String = 'bf', ?isPlayer:Bool = false)
+	public function new(x:Float, y:Float, ?character:String = 'none', ?isPlayer:Bool = false)
 	{
 		super(x, y);
 
-
-		#if (haxe >= "4.0.0")
-		animOffsets = new Map();
-		#else
-		animOffsets = new Map<String, Array<Dynamic>>();
-		#end
+		if (tempAnimState != null) {
+			tempAnimState.destroy();
+		}
+		tempAnimState = new FlxAnimationController(this);
 		curCharacter = character;
 		this.isPlayer = isPlayer;
 		antialiasing = ClientPrefs.globalAntialiasing;
@@ -151,7 +160,7 @@ class Character extends FlxSprite
 				#end
 
 				var json:CharacterFile = cast Json.parse(rawJson);
-				var useAtlas:Bool = false;
+				useAtlas = false;
 
 				#if MODS_ALLOWED
 				var modAnimToFind:String = Paths.modFolders('images/' + json.image + '/Animation.json');
@@ -162,10 +171,37 @@ class Character extends FlxSprite
 				#end
 					useAtlas = true;
 
-				if(!useAtlas)
+				if (!useAtlas) {
 					frames = Paths.getAtlas(json.image);
+					curImage = json.image;
+					framesList.set(json.image, frames);
+					animStates.set(json.image, animation);
+					for (anim in json.animations) {
+						if (anim.image != null && anim.image.length > 0 && !framesList.exists(anim.image)) {
+							framesList.set(anim.image, Paths.getAtlas(anim.image));
+							animStates.set(anim.image, new FlxAnimationController(this));
+						}
+						else if (anim.image == null)
+							anim.image = '';
+						imageNames.set(anim.anim, anim.image);
+					}
+				}
 				else
+				{
 					frames = AtlasFrameMaker.construct(json.image);
+					curImage = json.image;
+					framesList.set(json.image, frames);
+					animStates.set(json.image, animation);
+					for (anim in json.animations) {
+						if (anim.image != null && anim.image.length > 0 && !framesList.exists(anim.image)) {
+							framesList.set(anim.image, AtlasFrameMaker.construct(anim.image));
+							animStates.set(anim.image, new FlxAnimationController(this));
+						}
+						else if (anim.image == null)
+							anim.image = '';
+						imageNames.set(anim.anim, anim.image);
+					}
+				}
 
 				imageFile = json.image;
 				if(json.scale != 1) {
@@ -223,7 +259,20 @@ class Character extends FlxSprite
 						var animFps:Int = anim.fps;
 						var animLoop:Bool = anim.loop; //Bruh
 						var animIndices:Array<Int> = anim.indices;
-						if(animIndices != null && animIndices.length > 0) {
+						var animImage:String = anim.image;
+
+						if (animImage == null || animImage.length == 0) {
+							animImage = imageFile;
+						}
+						if (animImage != curImage) {
+							//trace(animImage + ', ' + curImage);
+							animation = tempAnimState;
+							frames = framesList.get(animImage);
+							animation = animStates.get(animImage);
+							curImage = animImage;
+						}
+
+						if (animIndices != null && animIndices.length > 0) {
 							animation.addByIndices(animAnim, animName, animIndices, "", animFps, animLoop);
 						} else {
 							animation.addByPrefix(animAnim, animName, animFps, animLoop);
@@ -236,6 +285,10 @@ class Character extends FlxSprite
 				} else {
 					quickAnimAdd('idle', 'BF idle dance');
 				}
+				animation = tempAnimState;
+				frames = framesList.get(json.image);
+				animation = animStates.get(json.image);
+				curImage = json.image;
 		}
 		originalFlipX = flipX;
 
@@ -259,6 +312,12 @@ class Character extends FlxSprite
 	{
 		if(!debugMode && animation.curAnim != null)
 		{
+			if (animation.curAnim.finished && imageNames.exists(animation.curAnim.name + '-loop')) {
+				var special = specialAnim;
+				playAnim(animation.curAnim.name + '-loop');
+				specialAnim = special;
+			}
+
 			if(heyTimer > 0)
 			{
 				heyTimer -= elapsed * PlayState.instance.playbackRate;
@@ -276,15 +335,11 @@ class Character extends FlxSprite
 				specialAnim = false;
 				dance();
 			}
+
 			else if (animation.curAnim.name.endsWith('miss') && animation.curAnim.finished)
 			{
 				dance();
 				animation.finish();
-			}
-		
-			else if (specialAnim && animation.curAnim.name == 'hairBlow' && animation.curAnim.finished) {
-				specialAnim = false;
-				playAnim('danceRight');
 			}
 
 			switch(curCharacter)
@@ -359,13 +414,26 @@ class Character extends FlxSprite
 					playAnim('danceLeft' + idleSuffix);
 			}
 			else if(animation.getByName('idle' + idleSuffix) != null) {
-					playAnim('idle' + idleSuffix);
+				playAnim('idle' + idleSuffix);
 			}
 		}
 	}
 
 	public function playAnim(AnimName:String, Force:Bool = false, Reversed:Bool = false, Frame:Int = 0):Void
 	{
+
+		var prevFrames = imageNames.get(AnimName);
+		if (prevFrames == null || prevFrames.length == 0) {
+			prevFrames = imageFile;
+		}
+		if (prevFrames != null && prevFrames != curImage) {
+			animation = tempAnimState;
+			frames = framesList.get(prevFrames);
+			animation = animStates.get(prevFrames);
+			curImage = prevFrames;
+		}
+
+
 		specialAnim = false;
 		animation.play(AnimName, Force, Reversed, Frame);
 
