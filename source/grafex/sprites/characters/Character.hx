@@ -330,12 +330,13 @@ class Character extends FlxSprite
 					}
 					heyTimer = 0;
 				}
-			} else if(specialAnim && animation.curAnim.finished)
+
+			}
+			else if(specialAnim && animation.curAnim.finished)
 			{
 				specialAnim = false;
 				dance();
 			}
-
 			else if (animation.curAnim.name.endsWith('miss') && animation.curAnim.finished)
 			{
 				dance();
@@ -388,9 +389,6 @@ class Character extends FlxSprite
 				}
 			}
 
-
-			if(animation.curAnim.finished && animation.getByName(animation.curAnim.name + '-loop') != null)
-				playAnim(animation.curAnim.name + '-loop');
 		}
 		super.update(elapsed);
 	}
