@@ -51,6 +51,7 @@ import flixel.FlxG;
 import flixel.FlxGame;
 import flixel.FlxObject;
 import flixel.FlxSprite;
+import flixel.FlxCamera;
 import flixel.util.FlxSave;
 import flixel.effects.particles.FlxEmitter;
 import flixel.effects.particles.FlxParticle;

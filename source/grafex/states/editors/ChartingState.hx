@@ -65,6 +65,7 @@ import haxe.io.Bytes;
 import flash.geom.Rectangle;
 import flixel.util.FlxSort;
 import lime.app.Application;
+import openfl.display.BitmapData;
 
 import sys.io.File;
 import sys.FileSystem;
@@ -218,7 +219,10 @@ class ChartingState extends MusicBeatState
 	private var blockPressWhileTypingOnStepper:Array<FlxUINumericStepper> = [];
 	private var blockPressWhileScrolling:Array<FlxUIDropDownMenuCustom> = [];
 
-	var waveformSprite:FlxSprite;
+	var waveformInstSprite:FlxSprite;
+	var waveformBoyfriendSprite:FlxSprite;
+	var waveformDadSprite:FlxSprite;
+	var waveformVoicesSprite:FlxSprite;
 	var gridLayer:FlxTypedGroup<FlxSprite>;
 
     public static var quantization:Int = 16;
@@ -288,8 +292,14 @@ class ChartingState extends MusicBeatState
 		gridLayer = new FlxTypedGroup<FlxSprite>();
 		add(gridLayer);
 
-		waveformSprite = new FlxSprite(GRID_SIZE, 0).makeGraphic(1, 1, 0x00FFFFFF);
-		add(waveformSprite);
+		waveformInstSprite = new FlxSprite(GRID_SIZE, 0).makeGraphic(1, 1, 0x00FFFFFF);
+		add(waveformInstSprite);
+		waveformBoyfriendSprite = new FlxSprite(GRID_SIZE, 0).makeGraphic(1, 1, 0x00FFFFFF);
+		add(waveformBoyfriendSprite);
+		waveformDadSprite = new FlxSprite(GRID_SIZE, 0).makeGraphic(1, 1, 0x00FFFFFF);
+		add(waveformDadSprite);
+		waveformVoicesSprite = new FlxSprite(GRID_SIZE, 0).makeGraphic(1, 1, 0x00FFFFFF);
+		add(waveformVoicesSprite);
 
 		var eventIcon:FlxSprite = new FlxSprite(-GRID_SIZE - 5, -90).loadGraphic(Paths.image('eventArrow'));
 		leftIcon = new HealthIcon('bf', 0, 0, 0.45);
@@ -413,7 +423,7 @@ class ChartingState extends MusicBeatState
 		addNoteUI();
 		addEventsUI();
 		addChartingUI();
-		updateHeads();
+		updateChars();
 		updateWaveform();
 		//UI_box.selected_tab = 4;
 
@@ -575,7 +585,8 @@ class ChartingState extends MusicBeatState
 		var player1DropDown = new FlxUIDropDownMenuCustom(10, stepperSpeed.y + 45, FlxUIDropDownMenuCustom.makeStrIdLabelArray(characters, true), function(character:String)
 		{
 			_song.player1 = characters[Std.parseInt(character)];
-			updateHeads();
+			updateChars();
+			updateWaveform();
 		});
 		player1DropDown.selectedLabel = _song.player1;
 		blockPressWhileScrolling.push(player1DropDown);
@@ -583,7 +594,8 @@ class ChartingState extends MusicBeatState
 		var gfVersionDropDown = new FlxUIDropDownMenuCustom(player1DropDown.x, player1DropDown.y + 40, FlxUIDropDownMenuCustom.makeStrIdLabelArray(characters, true), function(character:String)
 		{
 			_song.gfVersion = characters[Std.parseInt(character)];
-			updateHeads();
+			updateChars();
+			updateWaveform();
 		});
 		gfVersionDropDown.selectedLabel = _song.gfVersion;
 		blockPressWhileScrolling.push(gfVersionDropDown);
@@ -591,7 +603,8 @@ class ChartingState extends MusicBeatState
 		var player2DropDown = new FlxUIDropDownMenuCustom(player1DropDown.x, gfVersionDropDown.y + 40, FlxUIDropDownMenuCustom.makeStrIdLabelArray(characters, true), function(character:String)
 		{
 			_song.player2 = characters[Std.parseInt(character)];
-			updateHeads();
+			updateChars();
+			updateWaveform();
 		});
 		player2DropDown.selectedLabel = _song.player2;
 		blockPressWhileScrolling.push(player2DropDown);
@@ -1317,10 +1330,10 @@ var directories:Array<String> = [Paths.mods('stages/'), Paths.mods(Paths.current
 		waveformUseInstrumental.checked = FlxG.save.data.chart_waveformInst;
 		waveformUseInstrumental.callback = function()
 		{
-			waveformUseVoices.checked = false;
-			waveformUseVoices2.checked = false;
-			FlxG.save.data.chart_waveformVoices = false;
-			FlxG.save.data.chart_waveformVoices2 = false;
+			// waveformUseVoices.checked = false;
+			// waveformUseVoices2.checked = false;
+			// FlxG.save.data.chart_waveformVoices = false;
+			// FlxG.save.data.chart_waveformVoices2 = false;
 			FlxG.save.data.chart_waveformInst = waveformUseInstrumental.checked;
 			updateWaveform();
 		};
@@ -1329,13 +1342,13 @@ var directories:Array<String> = [Paths.mods('stages/'), Paths.mods(Paths.current
 		waveformUseVoices.checked = FlxG.save.data.chart_waveformVoices;
 		waveformUseVoices.callback = function()
 		{
-			waveformUseInstrumental.checked = false;
-			FlxG.save.data.chart_waveformInst = false;
+			// waveformUseInstrumental.checked = false;
+			// FlxG.save.data.chart_waveformInst = false;
 
-			waveformUseVoices2.checked = false;
+			// waveformUseVoices2.checked = false;
 
-			FlxG.save.data.chart_waveformInst = false;
-			FlxG.save.data.chart_waveformVoices2 = false;
+			// FlxG.save.data.chart_waveformInst = false;
+			// FlxG.save.data.chart_waveformVoices2 = false;
 
 			FlxG.save.data.chart_waveformVoices = waveformUseVoices.checked;
 			updateWaveform();
@@ -1345,13 +1358,13 @@ var directories:Array<String> = [Paths.mods('stages/'), Paths.mods(Paths.current
 		waveformUseVoices2.checked = FlxG.save.data.chart_waveformVoices2;
 		waveformUseVoices2.callback = function()
 		{
-			waveformUseInstrumental.checked = false;
-			waveformUseVoices.checked = false;
+			// waveformUseInstrumental.checked = false;
+			// waveformUseVoices.checked = false;
 
-			FlxG.save.data.chart_waveformInst = false;
+			// FlxG.save.data.chart_waveformInst = false;
 
-			FlxG.save.data.chart_waveformVoices = waveformUseVoices.checked;
-			FlxG.save.data.chart_waveformVoices = false;
+			// FlxG.save.data.chart_waveformVoices = waveformUseVoices.checked;
+			// FlxG.save.data.chart_waveformVoices = false;
 
 			FlxG.save.data.chart_waveformVoices2 = waveformUseVoices2.checked;
 			updateWaveform();
@@ -1611,12 +1624,14 @@ var directories:Array<String> = [Paths.mods('stages/'), Paths.mods(Paths.current
 
 					updateGrid();
 					updateHeads();
+					updateWaveform();
 
 				case 'GF section':
 					_song.notes[curSec].gfSection = check.checked;
 
 					updateGrid();
 					updateHeads();
+					updateWaveform();
 
 				case 'Change BPM':
 					_song.notes[curSec].changeBPM = check.checked;
@@ -2277,9 +2292,9 @@ var directories:Array<String> = [Paths.mods('stages/'), Paths.mods(Paths.current
 		gridBG = FlxGridOverlay.create(GRID_SIZE, GRID_SIZE, GRID_SIZE * 9, Std.int(GRID_SIZE * getSectionBeats() * 4 * zoomList[curZoom]));
 
 		#if desktop
-		if(FlxG.save.data.chart_waveformInst || FlxG.save.data.chart_waveformVoices || FlxG.save.data.chart_waveformVoices2) {
+		// if(FlxG.save.data.chart_waveformInst || FlxG.save.data.chart_waveformVoices || FlxG.save.data.chart_waveformVoices2) {
 			updateWaveform();
-		}
+		// }
 		#end
 
 		var leHeight:Int = Std.int(gridBG.height);
@@ -2329,40 +2344,77 @@ var directories:Array<String> = [Paths.mods('stages/'), Paths.mods(Paths.current
 		strumLine.y = getYfromStrum((Conductor.songPosition - sectionStartTime()) / zoomList[curZoom] % (Conductor.stepCrochet * 16)) / (getSectionBeats() / 4);
 	}
 
+	var bfData:CharacterFile;
+	var dadData:CharacterFile;
+	var gfData:CharacterFile;
+	function updateChars(){
+		bfData = loadFromCharacter(_song.player1);
+		dadData = loadFromCharacter(_song.player2);
+		gfData = loadFromCharacter(_song.gfVersion);
+		updateHeads();
+	}
+	function loadFromCharacter(char:String){
+		var characterPath:String = 'characters/' + char + '.json';
+		#if MODS_ALLOWED
+		var path:String = Paths.modFolders(characterPath);
+		if (!FileSystem.exists(path))
+			path = Paths.getPreloadPath(characterPath);
+
+		if (!FileSystem.exists(path))
+		#else
+		var path:String = Paths.getPreloadPath(characterPath);
+		if (!OpenFlAssets.exists(path))
+		#end
+			path = Paths.getPreloadPath('characters/' + Character.DEFAULT_CHARACTER +
+				'.json'); // If a character couldn't be found, change him to BF just to prevent a crash
+
+		#if MODS_ALLOWED
+		var rawJson = File.getContent(path);
+		#else
+		var rawJson = OpenFlAssets.getText(path);
+		#end
+
+		var json:CharacterFile = cast Json.parse(rawJson);
+		return json;
+	}
+
 	var waveformPrinted:Bool = true;
-	var wavData:Array<Array<Array<Float>>> = [[[0], [0]], [[0], [0]]];
 
 	var lastWaveformHeight:Int = 0;
 	function updateWaveform() {
 		#if desktop
+		
 		if(waveformPrinted) {
 			var width:Int = Std.int(GRID_SIZE * 8);
 			var height:Int = Std.int(gridBG.height);
-			if(lastWaveformHeight != height && waveformSprite.pixels != null)
-			{
-				waveformSprite.pixels.dispose();
-				waveformSprite.pixels.disposeImage();
-				waveformSprite.makeGraphic(width, height, 0x00FFFFFF);
-				lastWaveformHeight = height;
+			for (obj in [waveformInstSprite, waveformBoyfriendSprite, waveformDadSprite, waveformVoicesSprite]){
+				if(lastWaveformHeight != height && obj.pixels != null){
+					obj.pixels.image.data = null;
+					obj.pixels.dispose();
+					obj.pixels.disposeImage();
+					obj.makeGraphic(width, height, 0x00FFFFFF);
+					lastWaveformHeight = height;
+				}
+				obj.pixels.fillRect(new Rectangle(0, 0, gridBG.width, gridBG.height), 0x00ffffff);
+				obj.graphic.destroyOnNoUse = true; // idk
 			}
-			waveformSprite.pixels.fillRect(new Rectangle(0, 0, width, height), 0x00FFFFFF);
 		}
 		waveformPrinted = false;
 
-		if(!FlxG.save.data.chart_waveformInst && !FlxG.save.data.chart_waveformVoices && !FlxG.save.data.chart_waveformVoices2) {
-			//trace('Epic fail on the waveform lol');
+		if ((waveformUseInstrumental == null || !waveformUseInstrumental.checked) && (waveformUseVoices == null || !waveformUseVoices.checked) && (waveformUseVoices2 == null || !waveformUseVoices2.checked))
+		{
+			trace('Epic fail on the waveform lol');
 			return;
 		}
-		
-		wavData[0][0] = [];
-		wavData[0][1] = [];
-		wavData[1][0] = [];
-		wavData[1][1] = [];
+		// if(!FlxG.save.data.chart_waveformInst && !FlxG.save.data.chart_waveformVoices && !FlxG.save.data.chart_waveformVoices2) {
+		// 	//trace('Epic fail on the waveform lol');
+		// 	return;
+		// }
 		
 		var steps:Int = Math.round(getSectionBeats() * 4);
 		var st:Float = sectionStartTime();
 		var et:Float = st + (Conductor.stepCrochet * steps);
-		
+		/*
 		if (FlxG.save.data.chart_waveformInst) {
 			var sound:FlxSound = FlxG.sound.music;
 			if (sound._sound != null && sound._sound.__buffer != null) {
@@ -2413,41 +2465,109 @@ var directories:Array<String> = [Paths.mods('stages/'), Paths.mods(Paths.current
 				);
 			}
 		}
-		
-		
-		// Draws
-		var gSize:Int = Std.int(GRID_SIZE * 8);
-		var hSize:Int = Std.int(gSize / 2);
-		
-		var lmin:Float = 0;
-		var lmax:Float = 0;
-		
-		var rmin:Float = 0;
-		var rmax:Float = 0;
-		
-		var size:Float = 1;
-		
-		var leftLength:Int = (
-			wavData[0][0].length > wavData[0][1].length ? wavData[0][0].length : wavData[0][1].length
-		);
-		
-		var rightLength:Int = (
-			wavData[1][0].length > wavData[1][1].length ? wavData[1][0].length : wavData[1][1].length
-		);
-		
-		var length:Int = leftLength > rightLength ? leftLength : rightLength;
-		
-		var index:Int;
-		for (i in 0...length) {
-			index = i;
+		*/
+		var wavsUsers:Array<String> = [];
+		if (FlxG.save.data.chart_waveformInst)
+			wavsUsers.push('inst');
+		@:privateAccess {
+			if (FlxG.save.data.chart_waveformVoices && vocals._sound != null && vocals._sound.length > 0)
+				wavsUsers.push(vocals2._sound != null && vocals2._sound.length > 0 ? 'dad' : 'voices');
+			trace(vocals._sound.length, vocals2._sound.length);
+		}
+		if (FlxG.save.data.chart_waveformVoices2 && wavsUsers[wavsUsers.length - 1] == 'dad')
+			wavsUsers.push('bf');
+
+		for (typeOfSong in wavsUsers){
+			var wavData:Array<Array<Array<Float>>> = [[[0], [0]], [[0], [0]]];
 			
-			lmin = FlxMath.bound(((index < wavData[0][0].length && index >= 0) ? wavData[0][0][index] : 0) * (gSize / 1.12), -hSize, hSize) / 2;
-			lmax = FlxMath.bound(((index < wavData[0][1].length && index >= 0) ? wavData[0][1][index] : 0) * (gSize / 1.12), -hSize, hSize) / 2;
+			var diraction:Float = 0;
+			var waveformPixels:BitmapData = new BitmapData(waveformInstSprite.frameWidth, waveformInstSprite.frameHeight, true, 0x00ffffff);
+
+			// Draws
+			var gSize:Int = Std.int(GRID_SIZE * 8);
+			var hSize:Int = Std.int(gSize / 2);
 			
-			rmin = FlxMath.bound(((index < wavData[1][0].length && index >= 0) ? wavData[1][0][index] : 0) * (gSize / 1.12), -hSize, hSize) / 2;
-			rmax = FlxMath.bound(((index < wavData[1][1].length && index >= 0) ? wavData[1][1][index] : 0) * (gSize / 1.12), -hSize, hSize) / 2;
+			var lmin:Float = 0;
+			var lmax:Float = 0;
 			
-			waveformSprite.pixels.fillRect(new Rectangle(hSize - (lmin + rmin), i * size, (lmin + rmin) + (lmax + rmax), size), FlxColor.BLUE);
+			var rmin:Float = 0;
+			var rmax:Float = 0;
+			
+			var min:Float = 0;
+			var max:Float = 0;
+
+			var size:Float = 3;
+
+			var colocSwag:FlxColor = FlxColor.BLUE;
+			var sound:FlxSound;
+			switch (typeOfSong) {
+				case 'bf':
+					diraction = _song.notes[curSec].mustHitSection ? -1 : 1;
+					var preCharacter = _song.notes[curSec].gfSection && !_song.notes[curSec].mustHitSection ? gfData : bfData;
+					colocSwag = FlxColor.fromRGB(preCharacter.healthbar_colors[0], preCharacter.healthbar_colors[1], preCharacter.healthbar_colors[2]);
+					sound = vocals;
+					size /= 1.75;
+				case 'voices':
+					colocSwag = 0x88FF0000; // like a inverse of blue
+					sound = vocals;
+				case 'dad':
+					diraction = _song.notes[curSec].mustHitSection ? 1 : -1;
+					var preCharacter = _song.notes[curSec].gfSection && _song.notes[curSec].mustHitSection ? gfData : dadData;
+					colocSwag = FlxColor.fromRGB(preCharacter.healthbar_colors[0], preCharacter.healthbar_colors[1], preCharacter.healthbar_colors[2]);
+					sound = vocals2;
+					size /= 1.75;
+				default:
+					waveformPixels = waveformInstSprite.pixels;
+					sound = FlxG.sound.music;
+			}
+
+			if (sound._sound != null && sound._sound.__buffer != null){
+				var bytes:Bytes = sound._sound.__buffer.data.toBytes();
+
+				wavData = waveformData(sound._sound.__buffer, bytes, st, et, 1, wavData, Std.int(gridBG.height));
+			}
+			
+			var leftLength:Int = (
+				wavData[0][0].length > wavData[0][1].length ? wavData[0][0].length : wavData[0][1].length
+			);
+			
+			var rightLength:Int = (
+				wavData[1][0].length > wavData[1][1].length ? wavData[1][0].length : wavData[1][1].length
+			);
+			
+			var length:Int = leftLength > rightLength ? leftLength : rightLength;
+			
+			var index:Int;
+
+			for (i in 0...length) {
+				index = i;
+
+				lmin = FlxMath.bound(((index < wavData[0][0].length && index >= 0) ? wavData[0][0][index] : 0) * (gSize / 1.12), -hSize, hSize) / 4;
+				lmax = FlxMath.bound(((index < wavData[0][1].length && index >= 0) ? wavData[0][1][index] : 0) * (gSize / 1.12), -hSize, hSize) / 4;
+
+				rmin = FlxMath.bound(((index < wavData[1][0].length && index >= 0) ? wavData[1][0][index] : 0) * (gSize / 1.12), -hSize, hSize) / 4;
+				rmax = FlxMath.bound(((index < wavData[1][1].length && index >= 0) ? wavData[1][1][index] : 0) * (gSize / 1.12), -hSize, hSize) / 4;
+
+				min = lmin + rmin;
+				max = lmax + rmax;
+
+				waveformPixels.fillRect(new Rectangle(
+					Math.max(hSize - min * size + hSize / 2 * diraction, -1), // x position
+					i,
+					Math.min((min + max) * size, waveformPixels.width),
+					1),
+					colocSwag);
+			}
+			switch (typeOfSong) {
+				case 'bf':
+					waveformBoyfriendSprite.pixels = waveformPixels;
+				case 'dad':
+					waveformDadSprite.pixels = waveformPixels;
+				case 'voices':
+					waveformVoicesSprite.pixels = waveformPixels;
+				default:
+					waveformInstSprite.pixels = waveformPixels;
+			}
 		}
 		
 		waveformPrinted = true;
@@ -2691,51 +2811,20 @@ var directories:Array<String> = [Paths.mods('stages/'), Paths.mods(Paths.current
 
 	function updateHeads():Void
 	{
-		var healthIconP1:String = loadHealthIconFromCharacter(_song.player1);
-		var healthIconP2:String = loadHealthIconFromCharacter(_song.player2);
-		var healthIconGF:String = loadHealthIconFromCharacter(_song.gfVersion);
-
 		if (_song.notes[curSec].mustHitSection)
 		{
-			leftIcon.changeIcon(healthIconP1, 0, 0, 0.45);
-			rightIcon.changeIcon(healthIconP2, 0, 0, 0.45);
-			if (_song.notes[curSec].gfSection) leftIcon.changeIcon(healthIconGF, 0, 0, 0.45);
+			leftIcon.changeIcon(bfData.healthicon, 0, 0, 0.45);
+			rightIcon.changeIcon(dadData.healthicon, 0, 0, 0.45);
+			if (_song.notes[curSec].gfSection) leftIcon.changeIcon(gfData.healthicon, 0, 0, 0.45);
 		}
 		else
 		{
-			leftIcon.changeIcon(healthIconP2, 0, 0, 0.45);
-			rightIcon.changeIcon(healthIconP1, 0, 0, 0.45);
-			if (_song.notes[curSec].gfSection) leftIcon.changeIcon(healthIconGF, 0, 0, 0.45);
+			leftIcon.changeIcon(dadData.healthicon, 0, 0, 0.45);
+			rightIcon.changeIcon(bfData.healthicon, 0, 0, 0.45);
+			if (_song.notes[curSec].gfSection) leftIcon.changeIcon(gfData.healthicon, 0, 0, 0.45);
 		}
                 leftIcon.alpha = 1;
                 rightIcon.alpha = 0.33;
-	}
-
-	function loadHealthIconFromCharacter(char:String) {
-		var characterPath:String = 'characters/' + char + '.json';
-		#if MODS_ALLOWED
-		var path:String = Paths.modFolders(characterPath);
-		if (!FileSystem.exists(path)) {
-			path = Paths.getPreloadPath(characterPath);
-		}
-
-		if (!FileSystem.exists(path))
-		#else
-		var path:String = Paths.getPreloadPath(characterPath);
-		if (!OpenFlAssets.exists(path))
-		#end
-		{
-			path = Paths.getPreloadPath('characters/' + Character.DEFAULT_CHARACTER + '.json'); //If a character couldn't be found, change him to BF just to prevent a crash
-		}
-
-		#if MODS_ALLOWED
-		var rawJson = File.getContent(path);
-		#else
-		var rawJson = OpenFlAssets.getText(path);
-		#end
-
-		var json:CharacterFile = cast Json.parse(rawJson);
-		return json.healthicon;
 	}
 
 
