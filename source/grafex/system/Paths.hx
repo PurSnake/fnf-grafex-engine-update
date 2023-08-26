@@ -20,6 +20,7 @@ import haxe.Http;
 import haxe.io.BytesOutput;
 
 import openfl.display3D.textures.Texture;
+import openfl.display3D.textures.RectangleTexture;
 
 import flash.media.Sound;
 
@@ -180,13 +181,20 @@ class Paths
 		stageShitFUCK = doit;
 	}
 
-	public static function getPath(file:String, type:AssetType, ?library:Null<String> = null)
+	public static function getPath(file:String, ?type:AssetType = TEXT, ?library:Null<String> = null, ?modsAllowed:Bool = false):String
 	{
 		file = file.replace("\\", "/");
 		while(file.contains("//")) {
 			file = file.replace("//", "/");
 		}
-		//while(file.startsWith("/")) file = file.substr(1);
+
+		#if MODS_ALLOWED
+		if(modsAllowed)
+		{
+			var modded:String = modFolders(file);
+			if(FileSystem.exists(modded)) return modded;
+		}
+		#end
 		
 		if (library != null)
 			return getLibraryPath(file, library);
@@ -220,9 +228,11 @@ class Paths
 		return if (library == "preload" || library == "default") getPreloadPath(file); else getLibraryPathForce(file, library);
 	}
 
-	inline static function getLibraryPathForce(file:String, library:String)
+	inline static function getLibraryPathForce(file:String, library:String, ?level:String)
 	{
-		return '$library:assets/$library/$file';
+		if(level == null) level = library;
+		var returnPath = '$library:assets/$level/$file';
+		return returnPath;
 	}
 
 	inline public static function getPreloadPath(file:String = '')
@@ -250,8 +260,7 @@ class Paths
 		return getPath('data/$key.json', TEXT, library);
 	}
 
-
-    inline static public function shaderFragment(key:String, ?library:String)
+	inline static public function shaderFragment(key:String, ?library:String)
 	{
 		return getPath('shaders/$key.frag', TEXT, library);
 	}
@@ -315,7 +324,7 @@ class Paths
 	}
 
 	#if MODS_ALLOWED
-    public static var currentTrackedSounds:Map<String, Sound> = [];
+	public static var currentTrackedSounds:Map<String, Sound> = [];
 	inline static private function returnSongFile(file:String):Sound
 	{
 		if(FileSystem.exists(file)) {
@@ -328,42 +337,84 @@ class Paths
 	}
 	#end
 
-	inline static public function image(key:String, ?library:String, ?gpuRender:Bool = true):FlxGraphic
+	static public function image(key:String, ?library:String, ?gpuRender:Bool = true):FlxGraphic
+	{
+		var bitmap:BitmapData = null;
+		var file:String = null;
+
+		#if MODS_ALLOWED
+		file = modsImages(key);
+		if (currentTrackedAssets.exists(file))
 		{
-			// streamlined the assets process more
-			var returnAsset:FlxGraphic = returnGraphic(key, library, gpuRender);
-			return returnAsset;
+			localTrackedAssets.push(file);
+			return currentTrackedAssets.get(file);
 		}
+		else if (FileSystem.exists(file))
+			bitmap = BitmapData.fromFile(file);
+		else
+		#end
+		{
+			file = getPath('images/$key.png', IMAGE, library);
+			if (currentTrackedAssets.exists(file))
+			{
+				localTrackedAssets.push(file);
+				return currentTrackedAssets.get(file);
+			}
+			else if (OpenFlAssets.exists(file, IMAGE))
+				bitmap = OpenFlAssets.getBitmapData(file);
+		}
+
+		if (bitmap != null)
+		{
+			localTrackedAssets.push(file);
+			if (ClientPrefs.gpuRender && gpuRender)
+			{
+				var texture:RectangleTexture = FlxG.stage.context3D.createRectangleTexture(bitmap.width, bitmap.height, BGRA, true);
+				texture.uploadFromBitmapData(bitmap);
+				bitmap.image.data = null;
+				bitmap.dispose();
+				bitmap.disposeImage();
+				bitmap = BitmapData.fromTexture(texture);
+			}
+			var newGraphic:FlxGraphic = FlxGraphic.fromBitmapData(bitmap, false, file);
+			newGraphic.persist = true;
+			newGraphic.destroyOnNoUse = false;
+			currentTrackedAssets.set(file, newGraphic);
+			return newGraphic;
+		}
+
+		trace('oh no its returning null NOOOO ($file)');
+		return null;
+	}
 	
 	static public function getTextFromFile(key:String, ?ignoreMods:Bool = false):String
+	{
+		#if sys
+		#if MODS_ALLOWED
+		if (!ignoreMods && FileSystem.exists(modFolders(key)))
+			return File.getContent(modFolders(key));
+		#end
+	
+		if (FileSystem.exists(getPreloadPath(key)))
+			return File.getContent(getPreloadPath(key));
+	
+		if (currentLevel != null)
 		{
-			#if sys
-			#if MODS_ALLOWED
-			if (!ignoreMods && FileSystem.exists(modFolders(key)))
-				return File.getContent(modFolders(key));
-			#end
-	
-			if (FileSystem.exists(getPreloadPath(key)))
-				return File.getContent(getPreloadPath(key));
-	
-			if (currentLevel != null)
-			{
-				var levelPath:String = '';
-				if(currentLevel != 'shared') {
-					levelPath = getLibraryPathForce(key, currentLevel);
-					if (FileSystem.exists(levelPath))
-						return File.getContent(levelPath);
-				}
-	
-				levelPath = getLibraryPathForce(key, 'shared');
+			var levelPath:String = '';
+			if(currentLevel != 'shared') {
+				levelPath = getLibraryPathForce(key, currentLevel);
 				if (FileSystem.exists(levelPath))
 					return File.getContent(levelPath);
 			}
-			#end
-			return Assets.getText(getPath(key, TEXT));
-		}
-		
 
+			levelPath = getLibraryPathForce(key, 'shared');
+			if (FileSystem.exists(levelPath))
+				return File.getContent(levelPath);
+		}
+		#end
+		return Assets.getText(getPath(key, TEXT));
+	}
+		
 	inline static public function font(key:String)
 	{
 		#if MODS_ALLOWED
@@ -376,15 +427,21 @@ class Paths
 	}
 
 
-	inline static public function fileExists(key:String, type:AssetType, ?ignoreMods:Bool = false, ?library:String)
+	public static function fileExists(key:String, type:AssetType, ?ignoreMods:Bool = false, ?library:String = null)
 	{
 		#if MODS_ALLOWED
-		if(FileSystem.exists(mods(currentModDirectory + '/' + key)) || FileSystem.exists(mods(key))) {
-			return true;
+		if(!ignoreMods)
+		{
+			for(mod in getGlobalMods())
+				if (FileSystem.exists(mods('$mod/$key')))
+					return true;
+
+			if (FileSystem.exists(mods(currentModDirectory + '/' + key)) || FileSystem.exists(mods(key)))
+				return true;
 		}
 		#end
 
-		if(OpenFlAssets.exists(getPath(key, type))) {
+		if(OpenFlAssets.exists(getPath(key, type, library, false))) {
 			return true;
 		}
 		return false;
@@ -395,19 +452,34 @@ class Paths
 		#if MODS_ALLOWED
 		//var file:String = modFolders('$key.hx');
 
-        //if(fileExists('$key.hx', TEXT))
+		//if(fileExists('$key.hx', TEXT))
 		if(FileSystem.exists(mods(currentModDirectory + '/' + key + '.hx')) || FileSystem.exists(mods('$key.hx'))) {
-            return modFolders('$key.hx');
-        }
+			return modFolders('$key.hx');
+		}
 		#end
 
-        return 'assets/$key.hx';
+        	return 'assets/$key.hx';
 	}
+
+	// less optimized but automatic handling
+	static public function getAtlas(key:String, ?library:String = null):FlxAtlasFrames
+	{
+		#if MODS_ALLOWED
+		if(FileSystem.exists(modsXml(key)) || OpenFlAssets.exists(getPath('images/$key.xml', library), TEXT))
+		#else
+		if(OpenFlAssets.exists(getPath('images/$key.xml', library)))
+		#end
+		{
+			return getSparrowAtlas(key, library);
+		}
+		return getPackerAtlas(key, library);
+	}
+
 
 	inline static public function getSparrowAtlas(key:String, ?library:String = null, ?gpuRender:Bool = true):FlxAtlasFrames
 	{
 		#if MODS_ALLOWED
-		var imageLoaded:FlxGraphic = returnGraphic(key, library, gpuRender);
+		var imageLoaded:FlxGraphic = image(key, library, gpuRender);
 		var xmlExists:Bool = false;
 		if(FileSystem.exists(modsXml(key))) {
 			xmlExists = true;
@@ -422,7 +494,7 @@ class Paths
 	inline static public function getPackerAtlas(key:String, ?library:String = null, ?gpuRender:Bool = true)
 	{
 		#if MODS_ALLOWED
-		var imageLoaded:FlxGraphic = returnGraphic(key, library, gpuRender);
+		var imageLoaded:FlxGraphic = image(key, library, gpuRender);
 		var txtExists:Bool = false;
 		if(FileSystem.exists(modsTxt(key))) {
 			txtExists = true;
@@ -619,74 +691,10 @@ class Paths
 		return currentTrackedSounds.get(gottenPath);
 	}
 
-	public static function returnGraphic(key:String, ?library:String, ?gpuRender:Bool = true) {
-		#if MODS_ALLOWED
-		var modKey:String = modsImages(key);
-		if(FileSystem.exists(modKey)) {
-			if(!currentTrackedAssets.exists(modKey)) {
-
-				var newBitmap:BitmapData = BitmapData.fromFile(modKey);
-				var newGraphic:FlxGraphic;
-
-				(ClientPrefs.gpuRender && gpuRender) ? {
-					var newTexture:Texture = FlxG.stage.context3D.createTexture(newBitmap.width, newBitmap.height, BGRA, false);
-					newTexture.uploadFromBitmapData(newBitmap);
-					currentTrackedTextures.set(modKey, newTexture);
-					newBitmap.dispose();
-					newBitmap.disposeImage();
-					newBitmap = null;
-					newGraphic = FlxG.bitmap.add(BitmapData.fromTexture(newTexture), false, modKey);
-				} : {
-					newGraphic = FlxG.bitmap.add(modKey, false, modKey);
-				}
-				//var newGraphic:FlxGraphic = FlxGraphic.fromBitmapData(newBitmap, false, modKey);
-				newGraphic.persist = true;
-				currentTrackedAssets.set(modKey, newGraphic);
-			}
-			localTrackedAssets.push(modKey);
-			return currentTrackedAssets.get(modKey);
-		}
-		#end
-
-		var path = getPath('images/$key.png', IMAGE, library);
-		if (OpenFlAssets.exists(path, IMAGE)) {
-			if(!currentTrackedAssets.exists(path)) {
-	
-     			var newBitmap:BitmapData = OpenFlAssets.getBitmapData(path);
-				var newGraphic:FlxGraphic;
-
-				(ClientPrefs.gpuRender && gpuRender) ? {
-					var newTexture:Texture = FlxG.stage.context3D.createTexture(newBitmap.width, newBitmap.height, BGRA, false);
-					newTexture.uploadFromBitmapData(newBitmap);
-					currentTrackedTextures.set(path, newTexture);
-					newBitmap.dispose();
-					newBitmap.disposeImage();
-					newBitmap = null;
-					newGraphic = FlxG.bitmap.add(BitmapData.fromTexture(newTexture), false, path);
-				} : {
-					newGraphic = FlxG.bitmap.add(path, false, path);
-				}
-
-				newGraphic.persist = true;
-				currentTrackedAssets.set(path, newGraphic);
-			}
-			localTrackedAssets.push(path);
-			return currentTrackedAssets.get(path);
-		}
-		trace('oh no ' + key + ' returning null NOOOO, path: ' + path);
-		return null;
-	}
-
 	static public function voiceline(key:String):Sound
 	{
 		var sound:Sound = returnCutsceneSound('voicelines', key);
 		return sound;
-	}
-
-	inline static public function cutscenePic(key:String):FlxGraphic
-	{
-		var returnAsset:FlxGraphic = returnGraphic(key, 'cutscenes');
-		return returnAsset;
 	}
 
 	public static function returnCutsceneSound(path:String, key:String) {

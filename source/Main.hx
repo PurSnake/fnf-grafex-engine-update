@@ -19,7 +19,11 @@ import flixel.util.FlxSave;
 
 import grafex.windows.WindowsAPI;
 
+import grafex.system.loader.AudioSwitchFix;
+
 import grafex.system.script.GrfxScriptHandler;
+
+import cpp.vm.Gc;
 
 import lime.app.Application;
 import openfl.events.UncaughtErrorEvent;
@@ -143,7 +147,6 @@ class Main extends Sprite
 		addChild(new FlxGame(game.width, game.height, game.initialState, #if (flixel < "5.0.0") game.zoom, #end game.framerate, game.framerate, game.skipSplash, game.startFullscreen));
 
 		initBaseGameSettings();
-		flixel.FlxG.plugins.add(new flixel.addons.plugin.ScreenShotPlugin());
 
 		#if !mobile
 		FPSMem = new FPSMem(4, 8, 0xFFFFFF);
@@ -155,6 +158,8 @@ class Main extends Sprite
 
 		achievementToatManager = new AchievementsToastManager();
 		addChild(achievementToatManager);
+
+		flixel.FlxG.plugins.add(new flixel.addons.plugin.ScreenShotPlugin());
 
 		Lib.current.loaderInfo.uncaughtErrorEvents.addEventListener(UncaughtErrorEvent.UNCAUGHT_ERROR, onCrash);
 		#if DEVS_BUILD
@@ -172,10 +177,14 @@ class Main extends Sprite
 
 	public static var changeID:Int = 0;
 
+	@:dox(hide)
+	public static var audioDisconnected:Bool = false;
+
 	public static function initBaseGameSettings() {
 		WindowsAPI.setDarkMode(true);
 		ClientPrefs.loadDefaultKeys();
 		GrfxScriptHandler.initialize();
+		AudioSwitchFix.init();
 
 		final bgColor = 0xFF0D1211;
 		FlxG.stage.color = bgColor;
@@ -188,11 +197,25 @@ class Main extends Sprite
 		FlxG.signals.preStateSwitch.add(function() {
 			Paths.clearStoredMemory();
 			clearCache();
+			gc();
 		});
 
 		FlxG.signals.postStateSwitch.add(function() {
 			//Paths.clearUnusedMemory();
 			clearCache();
+			gc();
+		});
+		FlxG.signals.gameResized.add(function (w, h) {
+		     if (FlxG.cameras != null) {
+			   for (cam in FlxG.cameras.list) {
+				@:privateAccess
+				if (cam != null && cam._filters != null)
+					resetSpriteCache(cam.flashSprite);
+			   }
+		     }
+
+		     if (FlxG.game != null)
+			 resetSpriteCache(FlxG.game);
 		});
 
 	}
@@ -222,6 +245,21 @@ class Main extends Sprite
 		return FPSMem.currentFPS;
 	}
 
+	static function resetSpriteCache(sprite:Sprite):Void {
+		@:privateAccess {
+		        sprite.__cacheBitmap = null;
+			sprite.__cacheBitmapData = null;
+		}
+	}
+
+	public static function gc() {
+		#if cpp
+		Gc.run(true);
+		#else
+		openfl.system.System.gc();
+		#end
+	}
+
 	function onCrash(e:UncaughtErrorEvent):Void
 	{
 		var errMsg:String = "";
@@ -244,7 +282,7 @@ class Main extends Sprite
 	
 		errMsg += "\nUncaught Error: "
 			+ e.error
-			+ "\nPlease report this error to the PurSnake#4389 in Discord\n";
+			+ "\nPlease report this error to the pursnake in Discord\n";
 			//+ "\nPlease report this error to #playtest-qa-testing.\n\n>Crash Handler written by: sqirra-rng";
 
 		if (!FileSystem.exists("./crash/"))

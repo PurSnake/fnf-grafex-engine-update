@@ -1,0 +1,2 @@
+﻿UpScroll 20 40
+DownScroll 20 0

@@ -368,7 +368,7 @@ class FreeplayState extends MusicBeatState
 			{
 				if(sys.FileSystem.exists(Paths.inst(songLowercase + '/' + poop)) || sys.FileSystem.exists(Paths.json(songLowercase + '/' + poop)) || sys.FileSystem.exists(Paths.modsJson(songLowercase + '/' + poop))) {
 				#if PRELOAD_ALL
-                destroyFreeplayVocals();
+                		destroyFreeplayVocals();
 				FlxG.sound.music.volume = 0;
 				Paths.currentModDirectory = songs[curSelected].folder;
 				PlayState.SONG = Song.loadFromJson(poop, songs[curSelected].songName.toLowerCase());
@@ -428,8 +428,8 @@ class FreeplayState extends MusicBeatState
 			acceptSong();
 		}
 		else if(controls.RESET)
-        {
-            persistentUpdate = false;
+		{
+			persistentUpdate = false;
 			openSubState(new ResetScoreSubState(songs[curSelected].songName, curDifficulty, songs[curSelected].songCharacter));
 			FlxG.sound.play(Paths.sound('scrollMenu'));
 		}
@@ -483,9 +483,7 @@ class FreeplayState extends MusicBeatState
             
 		            FlxTween.tween(camINTERFACE, {alpha: 0}, 0.3, {ease: FlxEase.linear, startDelay: 0.4});
         
-			        freeplayinstPlaying = -1;
-
-                    LoadingState.amTake = false;
+		            LoadingState.amTake = false;
 		            new FlxTimer().start(1.1, function(tmr:FlxTimer)
 		            {	
 	                    if (FlxG.keys.pressed.SHIFT){
@@ -542,15 +540,15 @@ class FreeplayState extends MusicBeatState
 			if (Math.abs(FlxG.sound.music.time - (Conductor.songPosition - Conductor.offset)) > 20 || (PlayState.SONG.needsVoices && Math.abs(vocals.time - (Conductor.songPosition - Conductor.offset)) > 20))
 				resyncVocals();
 
-		    iconArray[freeplayinstPlaying].doIconSize();
-            iconArray[freeplayinstPlaying].doIconAnim(); //Reasons - PurSnake
-	    } : {
-           for (i in 0...iconArray.length)
-		    {
+			iconArray[freeplayinstPlaying].doIconSize();
+			iconArray[freeplayinstPlaying].doIconAnim(); //Reasons - PurSnake
+		} : {
+			for (i in 0...iconArray.length)
+			{
 				iconArray[i].doIconSize();
-                iconArray[i].doIconAnim(); //Reasons - PurSnake
-		    }
-	    }
+				iconArray[i].doIconAnim(); //Reasons - PurSnake
+			}
+		}
 	}
 	
 	public static function destroyFreeplayVocals() {
@@ -567,9 +565,13 @@ class FreeplayState extends MusicBeatState
 		vocals2 = null;
 	}
 
+	override function destroy() {
+		freeplayinstPlaying = -1;
+		super.destroy();
+	}
+
 	function changeDiff(change:Int = 0)
 	{
-
 		if (!acceptedSong)
 		{
 		    curDifficulty = Math.round(Math.max(0, Math.min(curDifficulty + change, Utils.difficulties.length - 1)));

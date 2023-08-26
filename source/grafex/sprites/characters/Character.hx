@@ -149,37 +149,25 @@ class Character extends FlxSprite
 				#else
 				var rawJson = Assets.getText(path);
 				#end
+
 				var json:CharacterFile = cast Json.parse(rawJson);
-				var spriteType = "sparrow";
-				//sparrow
-				//packer
-				//texture
+				var useAtlas:Bool = false;
+
 				#if MODS_ALLOWED
-				var modTxtToFind:String = Paths.modsTxt(json.image);
-				var txtToFind:String = Paths.getPath('images/' + json.image + '.txt', TEXT);
-				
-				if (FileSystem.exists(modTxtToFind) || FileSystem.exists(txtToFind) || Assets.exists(txtToFind))
+				var modAnimToFind:String = Paths.modFolders('images/' + json.image + '/Animation.json');
+				var animToFind:String = Paths.getPath('images/' + json.image + '/Animation.json', TEXT);
+				if (FileSystem.exists(modAnimToFind) || FileSystem.exists(animToFind) || Assets.exists(animToFind))
 				#else
-				if (Assets.exists(Paths.getPath('images/' + json.image + '.txt', TEXT)))
+				if (Assets.exists(Paths.getPath('images/' + json.image + '/Animation.json', TEXT)))
 				#end
-				{	
-					spriteType = "packer";	
-				}
+					useAtlas = true;
 
-				switch (spriteType){
-					
-					case "packer":
-						frames = Paths.getPackerAtlas(json.image);
-					
-					case "sparrow":
-						frames = Paths.getSparrowAtlas(json.image);
+				if(!useAtlas)
+					frames = Paths.getAtlas(json.image);
+				else
+					frames = AtlasFrameMaker.construct(json.image);
 
-                    case "texture":
-						frames = AtlasFrameMaker.construct(json.image);
-				}
-				
 				imageFile = json.image;
-
 				if(json.scale != 1) {
 					jsonScale = json.scale;
 					setGraphicSize(Std.int(width * jsonScale));
@@ -216,12 +204,12 @@ class Character extends FlxSprite
 					deathConfirm = json.gameover_properties[3];
 				}
 
-			    iconScale = json.healthicon_scale;
-                if(Math.isNaN(iconScale) || iconScale == 0) iconScale = 1;
+				iconScale = json.healthicon_scale;
+				if(Math.isNaN(iconScale) || iconScale == 0) iconScale = 1;
 	
 				if(json.healthbar_colors != null && json.healthbar_colors.length > 2) healthColorArray = json.healthbar_colors;
                                 
-                if(json.healthbar_colors2 != null && json.healthbar_colors2.length > 2) healthColorArray2 = json.healthbar_colors2;  
+				if(json.healthbar_colors2 != null && json.healthbar_colors2.length > 2) healthColorArray2 = json.healthbar_colors2;  
 				else healthColorArray2 = healthColorArray;
 
 				antialiasing = !noAntialiasing;
@@ -288,13 +276,18 @@ class Character extends FlxSprite
 				specialAnim = false;
 				dance();
 			}
+			else if (animation.curAnim.name.endsWith('miss') && animation.curAnim.finished)
+			{
+				dance();
+				animation.finish();
+			}
 		
-		  else if (specialAnim && animation.curAnim.name == 'hairBlow' && animation.curAnim.finished) {
-			specialAnim = false;
-			playAnim('danceRight');
-		}
+			else if (specialAnim && animation.curAnim.name == 'hairBlow' && animation.curAnim.finished) {
+				specialAnim = false;
+				playAnim('danceRight');
+			}
 
-            switch(curCharacter)
+			switch(curCharacter)
 			{
 				case 'pico-speaker':
 					if(animationNotes.length > 0 && Conductor.songPosition > animationNotes[0][0])
@@ -342,9 +335,7 @@ class Character extends FlxSprite
 
 
 			if(animation.curAnim.finished && animation.getByName(animation.curAnim.name + '-loop') != null)
-			{
 				playAnim(animation.curAnim.name + '-loop');
-			}
 		}
 		super.update(elapsed);
 	}
@@ -404,7 +395,7 @@ class Character extends FlxSprite
 		}
 	}
 
-    function loadMappedAnims():Void
+	function loadMappedAnims():Void
 	{
 		var noteData:Array<SwagSection> = Song.loadFromJson('picospeaker', Paths.formatToSongPath(PlayState.SONG.song)).notes;
 		for (section in noteData) {
@@ -421,13 +412,13 @@ class Character extends FlxSprite
 		return FlxSort.byValues(FlxSort.ASCENDING, Obj1[0], Obj2[0]);
 	}
 
-    public var danceEveryNumBeats:Int = 2;
+	public var danceEveryNumBeats:Int = 2;
 	private var settingCharacterUp:Bool = true;
 	public function recalculateDanceIdle() {
-	var lastDanceIdle:Bool = danceIdle;
+		var lastDanceIdle:Bool = danceIdle;
 		danceIdle = (animation.getByName('danceLeft' + idleSuffix) != null && animation.getByName('danceRight' + idleSuffix) != null);
 
-        if(settingCharacterUp)
+		if(settingCharacterUp)
 		{
 			danceEveryNumBeats = (danceIdle ? 1 : 2);
 		}

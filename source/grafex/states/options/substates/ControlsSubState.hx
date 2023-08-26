@@ -3,7 +3,7 @@ package grafex.states.options.substates;
 import grafex.system.Paths;
 import grafex.sprites.attached.AttachedText;
 import grafex.sprites.Alphabet;
-import grafex.system.statesystem.MusicBeatSubstate;
+import grafex.system.statesystem.MusicBeatState;
 #if desktop
 import external.Discord.DiscordClient;
 #end
@@ -33,7 +33,7 @@ import grafex.util.Utils;
 
 using StringTools;
 
-class ControlsSubState extends MusicBeatSubstate {
+class ControlsSubState extends MusicBeatState {
 	private static var curSelected:Int = -1;
 	private static var curAlt:Bool = false;
 	public static var fromcontrols:Bool = false;
@@ -299,7 +299,7 @@ class ControlsSubState extends MusicBeatSubstate {
 
 	private function getKeyName(key:FlxKey):String {
 		var keyName:String = FlxKey.toStringMap.get(key);
-        return keyName.toUpperCase().replace("NUMPAD", "N").replace("BACKSPACE", "BACK");
+        	return keyName.toUpperCase().replace("NUMPAD", "N").replace("BACKSPACE", "BACK");
 	}
 
 	function reloadKeys() {

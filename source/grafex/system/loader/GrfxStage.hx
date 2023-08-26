@@ -20,8 +20,8 @@ class GrfxStage extends FlxTypedGroup<FlxSprite> {
         public var exist:Bool = true;
 	public var customModFolder:Int = 0;
 
-    public function new(?stage:String = 'stage') {
-        super();
+	public function new(?stage:String = 'stage') {
+		super();
 
 		this.curStage = stage;
 
@@ -29,12 +29,11 @@ class GrfxStage extends FlxTypedGroup<FlxSprite> {
 
 		var exposure:StringMap<Dynamic> = new StringMap<Dynamic>();
 		exposure.set('this', PlayState.instance);
-		exposure.set('add', add);
 		exposure.set('foreground', foreground);
 		exposure.set('stage', this);
-        exposure.set('curStage', this.curStage);
+		exposure.set('curStage', this.curStage);
 		exposure.set('boyfriend', PlayState.instance.boyfriend);
-        exposure.set('gf', PlayState.instance.gf);
+		exposure.set('gf', PlayState.instance.gf);
 		exposure.set('dad', PlayState.instance.dad);
 		exposure.set('dadOpponent', PlayState.instance.dad);
 
@@ -61,14 +60,7 @@ class GrfxStage extends FlxTypedGroup<FlxSprite> {
         return smthVal;
     }
 
-    public function set(field:String, value:Dynamic)
+	public function set(field:String, value:Dynamic)
 		stageBuild.set(field, value);
-
-	override function add(Object:FlxSprite):FlxSprite
-	{
-		if (!ClientPrefs.globalAntialiasing)
-			cast(Object, FlxSprite).antialiasing = false;
-		return super.add(Object);
-	}
 }
 

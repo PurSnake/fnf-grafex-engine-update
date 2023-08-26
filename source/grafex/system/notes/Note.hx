@@ -36,7 +36,7 @@ class Note extends FlxSprite
 	public var noteWasHit:Bool = false;
 	public var prevNote:Note;
 
-    public var nextNote:Note;
+	public var nextNote:Note;
 
 	public var spawned:Bool = false;
 
@@ -96,12 +96,12 @@ class Note extends FlxSprite
 
 	public var noAnimation:Bool = false;
 	public var specialNote:Bool = false;
-    public var noMissAnimation:Bool = false;
+	public var noMissAnimation:Bool = false;
 	public var hitCausesMiss:Bool = false;
 	public var distance:Float = 2000; //plan on doing scroll directions soon -bb
-    public var multSpeed(default, set):Float = 1;
+	public var multSpeed(default, set):Float = 1;
 
-    private function set_multSpeed(value:Float):Float {
+	private function set_multSpeed(value:Float):Float {
 		resizeByRatio(value / multSpeed);
 		multSpeed = value;
 		return value;
@@ -109,21 +109,12 @@ class Note extends FlxSprite
 
 	public function resizeByRatio(ratio:Float) //haha funny twitter shit
 	{
-		if(isSustainNote && !animation.curAnim.name.endsWith('end'))
+		if(isSustainNote && animation.curAnim != null && !animation.curAnim.name.endsWith('end'))
 		{
 			scale.y *= ratio;
 			updateHitbox();
 		}
 	}
-    public static var holdArrowScales:Map<String, Float> = [
-		'Future'	=> 0.565,
-		'Chip'		=> 0.565
-	];
-
-	public static var downScrollHoldEndOffset:Map<String, Float> = [
-		'Future'	=> -12.2,
-		'Chip'		=> 13
-	];
 
 	private function set_texture(value:String):String {
 		if(texture != value) {
@@ -240,17 +231,11 @@ class Note extends FlxSprite
 				prevNote.animation.play(colArray[prevNote.noteData % 4] + 'hold');
 
 				prevNote.scale.y *= Conductor.stepCrochet / 100 * 1.05;
-				if(PlayState.instance != null)
-				{
-					prevNote.scale.y *= PlayState.instance.songSpeed;
-				}
+				if(PlayState.instance != null) prevNote.scale.y *= PlayState.instance.songSpeed;
 
 				if(PlayState.isPixelStage) {
 					prevNote.scale.y *= 1.19;
-                    prevNote.scale.y *= (6 / height); //Auto adjust note size
-				} else {
-					var holdScale:Float = 1;
-					prevNote.scale.y *= holdScale;
+					prevNote.scale.y *= (6 / height); //Auto adjust note size
 				}
 				prevNote.updateHitbox();
 				// prevNote.setGraphicSize();

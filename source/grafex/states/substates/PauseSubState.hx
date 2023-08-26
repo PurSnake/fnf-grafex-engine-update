@@ -538,7 +538,7 @@ class PauseSubState extends MusicBeatSubstate
 
 				countSpr.screenCenter();
 				countSpr.antialiasing = antialias;
-				insert(PlayState.instance.members.indexOf(PlayState.instance.notes), countSpr);
+				insert(PlayState.instance.members.indexOf(PlayState.instance.grpNoteSplashes), countSpr);
 				FlxTween.tween(countSpr, {alpha: 0}, Conductor.crochet / 1000, {
 					ease: FlxEase.cubeInOut,
 					onComplete: function(twn:FlxTween)

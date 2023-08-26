@@ -3435,9 +3435,17 @@ class HScript
 		#if (!flash && sys)
 		interp.variables.set('FlxRuntimeShader', FlxRuntimeShader);
 		#end
+		interp.variables.set('FlxColor', grafex.system.script.GrfxScriptHandler.CustomFlxColor.instance);
 		interp.variables.set('ShaderFilter', openfl.filters.ShaderFilter);
 		interp.variables.set('StringTools', StringTools);
 		interp.variables.set("CutsceneHandler", CutsceneHandler);
+
+		interp.variables.set('add', function(obj:FlxBasic) PlayState.instance.add(obj));
+		interp.variables.set('insert', function(pos:Int, obj:FlxBasic) PlayState.instance.insert(pos, obj));
+		interp.variables.set('remove', function(obj:FlxBasic, splice:Bool = false) PlayState.instance.remove(obj, splice));
+		interp.variables.set('addBehindGF', function(obj:FlxBasic) PlayState.instance.addBehindGF(obj));
+		interp.variables.set('addBehindDad', function(obj:FlxBasic) PlayState.instance.addBehindDad(obj));
+		interp.variables.set('addBehindBF', function(obj:FlxBasic) PlayState.instance.addBehindBF(obj));
 
 		interp.variables.set('gradeAchievement', function(name:String)
 		{
