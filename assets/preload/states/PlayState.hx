@@ -7,8 +7,8 @@ function onCreate() {
 }
 
 function onCreatePost() {
- healthBarGroup.remove(healthBarBG, true);
- healthBarGroup.add(healthBarBG);
+ //healthBarGroup.remove(healthBarBG, true);
+ //healthBarGroup.add(healthBarBG);
 }
 
 function onIconsBeat() {
