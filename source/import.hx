@@ -1,3 +1,5 @@
+#if (!macro)
+
 import grafex.states.playstate.PlayState;
 import grafex.system.Paths;
 import grafex.util.ClientPrefs;
@@ -29,5 +31,7 @@ import flixel.tweens.FlxEase;
 import flixel.tweens.FlxTween;
 import flixel.group.FlxSpriteGroup;
 import flixel.group.FlxGroup.FlxTypedGroup;
+
+#end
 
 using StringTools;

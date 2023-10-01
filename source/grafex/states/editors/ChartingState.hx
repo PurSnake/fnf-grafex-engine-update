@@ -302,8 +302,8 @@ class ChartingState extends MusicBeatState
 		add(waveformVoicesSprite);
 
 		var eventIcon:FlxSprite = new FlxSprite(-GRID_SIZE - 5, -90).loadGraphic(Paths.image('eventArrow'));
-		leftIcon = new HealthIcon('bf', 0, 0, 0.45);
-		rightIcon = new HealthIcon('dad', 0, 0, 0.45);
+		leftIcon = new HealthIcon('bf', {type: "duo", offsets: [0, 0], scale: 0.45});
+		rightIcon = new HealthIcon('dad', {type: "duo", offsets: [0, 0], scale: 0.45});
 		rightIcon.scale.set(.5, .5);
 		eventIcon.scrollFactor.set(1, 1);
 		leftIcon.scrollFactor.set(1, 1);
@@ -1578,7 +1578,7 @@ var directories:Array<String> = [Paths.mods('stages/'), Paths.mods(Paths.current
 
 	function generateSong() {
 
-		FlxG.sound.playMusic(Paths.inst(currentSongName, _song.postfix), 0.6);
+		FlxG.sound.playMusic(Paths.inst(currentSongName, _song.postfix), 0.9);
 		if (instVolume != null) FlxG.sound.music.volume = instVolume.value;
 		if (check_mute_inst != null && check_mute_inst.checked) FlxG.sound.music.volume = 0;
 
@@ -2276,7 +2276,7 @@ var directories:Array<String> = [Paths.mods('stages/'), Paths.mods(Paths.current
                 }
                 else
                 {
-		    leftIcon.scale.set(.5, .5);
+		    leftIcon.scale.set(leftIcon.customScale, leftIcon.customScale);
                 }
 		super.update(elapsed);
 	}
@@ -2379,6 +2379,9 @@ var directories:Array<String> = [Paths.mods('stages/'), Paths.mods(Paths.current
 		#end
 
 		var json:CharacterFile = cast Json.parse(rawJson);
+		if (json.healthicon_type != 'solo' && json.healthicon_type != 'duo' && json.healthicon_type != 'trioWin' && json.healthicon_type != 'trioLose' && json.healthicon_type != 'quadro' && json.healthicon_type != 'classic-animated' && json.healthicon_type != 'modern-animated' && json.healthicon_type != 'custom') json.healthicon_type = 'duo';
+		if (Math.isNaN(json.healthicon_scale) || json.healthicon_scale == 0) json.healthicon_scale = 1;
+		if (json.healthicon_offsets == null) json.healthicon_offsets = [0, 0];
 		return json;
 	}
 
@@ -2817,15 +2820,15 @@ var directories:Array<String> = [Paths.mods('stages/'), Paths.mods(Paths.current
 	{
 		if (_song.notes[curSec].mustHitSection)
 		{
-			leftIcon.changeIcon(bfData.healthicon, 0, 0, 0.45);
-			rightIcon.changeIcon(dadData.healthicon, 0, 0, 0.45);
-			if (_song.notes[curSec].gfSection) leftIcon.changeIcon(gfData.healthicon, 0, 0, 0.45);
+			leftIcon.changeIcon(bfData.healthicon, {type: bfData.healthicon_type, offsets: bfData.healthicon_offsets, scale: 0.45}, true, true);
+			rightIcon.changeIcon(dadData.healthicon, {type: dadData.healthicon_type, offsets: dadData.healthicon_offsets, scale: 0.45}, true, true);
+			if (_song.notes[curSec].gfSection) leftIcon.changeIcon(gfData.healthicon, {type: gfData.healthicon_type, offsets: gfData.healthicon_offsets, scale: 0.45}, true, true);
 		}
 		else
 		{
-			leftIcon.changeIcon(dadData.healthicon, 0, 0, 0.45);
-			rightIcon.changeIcon(bfData.healthicon, 0, 0, 0.45);
-			if (_song.notes[curSec].gfSection) leftIcon.changeIcon(gfData.healthicon, 0, 0, 0.45);
+			leftIcon.changeIcon(dadData.healthicon, {type: dadData.healthicon_type, offsets: dadData.healthicon_offsets, scale: 0.45}, true, true);
+			rightIcon.changeIcon(bfData.healthicon, {type: bfData.healthicon_type, offsets: bfData.healthicon_offsets, scale: 0.45}, true, true);
+			if (_song.notes[curSec].gfSection) leftIcon.changeIcon(gfData.healthicon, {type: gfData.healthicon_type, offsets: gfData.healthicon_offsets, scale: 0.45}, true, true);
 		}
                 leftIcon.alpha = 1;
                 rightIcon.alpha = 0.33;

@@ -149,8 +149,7 @@ class Main extends Sprite
 		initBaseGameSettings();
 
 		#if !mobile
-		FPSMem = new FPSMem(4, 8, 0xFFFFFF);
-		addChild(FPSMem.shadow);
+		FPSMem = new FPSMem(6, 6, 0xFFFFFF);
 		addChild(FPSMem);
 		Lib.current.stage.align = "tl";
 		Lib.current.stage.scaleMode = StageScaleMode.NO_SCALE;
@@ -159,7 +158,7 @@ class Main extends Sprite
 		achievementToatManager = new AchievementsToastManager();
 		addChild(achievementToatManager);
 
-		flixel.FlxG.plugins.add(new flixel.addons.plugin.ScreenShotPlugin());
+		//flixel.FlxG.plugins.add(new flixel.addons.plugin.ScreenShotPlugin());
 
 		Lib.current.loaderInfo.uncaughtErrorEvents.addEventListener(UncaughtErrorEvent.UNCAUGHT_ERROR, onCrash);
 		#if DEVS_BUILD
@@ -183,7 +182,6 @@ class Main extends Sprite
 	public static function initBaseGameSettings() {
 		WindowsAPI.setDarkMode(true);
 		ClientPrefs.loadDefaultKeys();
-		GrfxScriptHandler.initialize();
 		AudioSwitchFix.init();
 
 		final bgColor = 0xFF0D1211;

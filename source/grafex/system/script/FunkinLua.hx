@@ -41,7 +41,7 @@ import flixel.FlxCamera;
 import flixel.util.FlxColor;
 import flixel.FlxBasic;
 import flixel.FlxObject;
-import flixel.FlxSprite;
+//import flixel.FlxSprite;
 import openfl.display.BlendMode;
 import openfl.utils.Assets;
 import flixel.math.FlxMath;

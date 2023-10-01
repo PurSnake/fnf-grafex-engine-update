@@ -54,6 +54,8 @@ import lime.app.Application;
 import openfl.Assets;
 import lime.ui.WindowAttributes;
 
+import haxe.ds.StringMap;
+
 import grafex.system.script.GrfxScriptHandler;
 
 using StringTools;
@@ -93,14 +95,7 @@ class TitleState extends MusicBeatState
 	
 	public static var updateVersion:String = '';
 
-	public var stateScript:GrfxStateModule = null;
-
 	public var switchTime:Float = 1;
-
-	public function callScript(eventName:String, args:Array<Dynamic>):Dynamic {
-		if (stateScript != null) return stateScript.executeFunc(eventName, args);
-		else return null;
-	}
 
 	override public function create():Void
 	{
@@ -113,17 +108,12 @@ class TitleState extends MusicBeatState
 		Paths.pushGlobalMods();
 		#end
 
-		if(Paths.fileExists('states/TitleState.hx', TEXT)) {
-		    stateScript = GrfxScriptHandler.loadStateModule('states/TitleState');
-			stateScript.set('game', TitleState);
-			stateScript.set('this', this);
-			callScript("onCreate", []);
-		}
 
 		Application.current.window.title = Main.appTitle;
-        WeekData.loadTheFirstEnabledMod();
+		WeekData.loadTheFirstEnabledMod();
 
-    	FlxG.watch.addQuick("beatShit", curBeat);
+		FlxG.watch.addQuick("sectionShit", curSection);
+		FlxG.watch.addQuick("beatShit", curBeat);
 		FlxG.watch.addQuick("stepShit", curStep);
 		
 		titleJSON = getTitleData();
@@ -182,14 +172,14 @@ class TitleState extends MusicBeatState
 			});
 		} 
 		
-		callScript("onCreatePost", []);
+		call("onCreatePost", []);
 	}
 
 	var exitText:FlxText;
 
 	function startIntro()
 	{
-		callScript("onIntroPreStart", []);
+		call("onIntroPreStart", []);
 		ColorblindFilters.applyFiltersOnGame();
                 if(!initialized && FlxG.sound.music == null) FlxG.sound.playMusic(Paths.music('freakyMenu'), 0);
 
@@ -209,7 +199,7 @@ class TitleState extends MusicBeatState
 		logo.antialiasing = ClientPrefs.globalAntialiasing;
 		add(logo);
 
-		callScript("onIntroStart", []);
+		call("onIntroStart", []);
 
 		credGroup = new FlxGroup();
 		add(credGroup);
@@ -240,7 +230,7 @@ class TitleState extends MusicBeatState
 		else
 			initialized = true; 
 
-		callScript("onIntroPost", []);
+		call("onIntroPost", []);
 	}
 
 	function getIntroTextShit():Array<Array<String>>
@@ -263,11 +253,11 @@ class TitleState extends MusicBeatState
 
 	override function update(elapsed:Float)
 	{
+		super.update(elapsed);
+
+		FlxG.watch.addQuick("sectionShit", curSection);
 		FlxG.watch.addQuick("beatShit", curBeat);
 		FlxG.watch.addQuick("stepShit", curStep);
-		callScript("onUpdate", [elapsed]);
-
-		if(FlxG.keys.justPressed.F11) FlxG.fullscreen = !FlxG.fullscreen;
 
 		var pressedEnter:Bool = FlxG.keys.justPressed.ENTER || controls.ACCEPT;
         var tryExitGame:Bool = FlxG.keys.justPressed.ESCAPE || controls.BACK;
@@ -294,7 +284,7 @@ class TitleState extends MusicBeatState
 		{		
 			if(pressedEnter)
 			{
-                                callScript("onPressedEnter", []);				
+                                call("onPressedEnter", []);				
                            			
 				transitioning = true;
 				new FlxTimer().start(switchTime, function(tmr:FlxTimer)
@@ -324,8 +314,7 @@ class TitleState extends MusicBeatState
 			skipIntro();
 		}
 
-		callScript("onUpdatePost", [elapsed]);
-		super.update(elapsed);
+		call("onUpdatePost", [elapsed]);
 	}
 
 	public function createCoolText(textArray:Array<String>, ?offset:Float = 0)
@@ -366,6 +355,11 @@ class TitleState extends MusicBeatState
 		}
 	}
 
+	override function stepHit()
+	{
+		super.stepHit();
+	}
+
 	private var sickBeats:Int = 0; //Basically curBeat but won't be skipped if you hold the tab or resize the screen
 	public static var closedState:Bool = false;
 	override function beatHit()
@@ -373,9 +367,17 @@ class TitleState extends MusicBeatState
 		super.beatHit();
 		if(!closedState) {
 			sickBeats++;
-			callScript("onCoolTextBeat", [sickBeats]);
+			call("onCoolTextBeat", [sickBeats]);
 		}
-		callScript("onBeatHit", [curBeat]);
+	}
+
+	override function sectionHit()
+	{
+		super.sectionHit();
+	}
+
+	override function destroy() {
+		super.destroy();
 	}
 
 	public static function getTitleData()
@@ -423,12 +425,11 @@ class TitleState extends MusicBeatState
 
 	public function skipIntro():Void
 	{
-		callScript("onSkipIntro", [skippedIntro]);
+		call("onSkipIntro", [skippedIntro]);
 		if (!skippedIntro)
 		{
 			skippedIntro = true;
 			remove(credGroup);
 		}
 	}
-
 }

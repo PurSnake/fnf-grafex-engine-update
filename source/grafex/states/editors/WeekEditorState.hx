@@ -621,7 +621,7 @@ class WeekEditorFreeplayState extends MusicBeatState
 			songText.targetY = i;
 			grpSongs.add(songText);
 
-			var icon:HealthIcon = new HealthIcon(weekFile.songs[i][1]);
+			var icon:HealthIcon = new HealthIcon(weekFile.songs[i][1], {type: "duo", offsets: [0, 0], scale: 1});
 			icon.sprTracker = songText;
 
 			// using a FlxGroup is too much fuss!

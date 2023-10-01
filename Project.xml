@@ -10,7 +10,11 @@
 	<app preloader="flixel.system.FlxPreloader" />
 
 	<!--Switch Export with Unique ApplicationID and Icon-->
-	<set name="APP_ID" value="885223855327698985" />
+	<set name="APP_ID" value="0x0100f6c013bbc000" />
+
+	<!-- NOTE TO SELF: DISABLE THIS IF ISSUES ARE FOUND -->
+	<haxedef name="LINC_LUA_RELATIVE_DYNAMIC_LIB"/> <!-- stable luas PUT AFTER FIRST LINE WITH APP NAME AND ETC -->
+
 
 	<!--Minimum without FLX_NO_GAMEPAD: 11.8, without FLX_NO_NATIVE_CURSOR: 11.2-->
 	<set name="SWF_VERSION" value="11.8" />
@@ -47,6 +51,9 @@
 	<define name="VIDEOS_ALLOWED" if="web || windows" unless="32bits"/>
 
 	<define name="DEVS_BUILD" unless="final"/>
+
+	<!-- Turn on Crash Handler -->
+	<define name="CRASH_HANDLER" if="desktop" />
 
 	<!-- <define name="PRELOAD_ALL" /> -->
 	<define name="PRELOAD_ALL" unless="web" />
@@ -121,8 +128,10 @@
 
 	<!--In case you want to use the addons package-->
 	<haxelib name="flixel-addons" />
-	<haxelib name="hscript"/>
-	<define name="hscriptPos"/>
+	<!--haxelib name="hscript"/-->
+	<haxelib name="hscript-improved"/>
+	<haxedef name="hscriptPos" />
+	<haxedef name="openflPos" />
 
 	<haxelib name="flixel-screenshot-plugin" />
 
@@ -177,6 +186,17 @@
 
 	<!--Enable this for Nape release builds for a serious peformance improvement-->
 	<haxedef name="NAPE_RELEASE_BUILD" unless="debug" />
+
+	<!--Used for Izzy Engine's crash handler-->
+	<haxedef name="HXCPP_CHECK_POINTER" if="CRASH_HANDLER" />
+	<haxedef name="HXCPP_STACK_LINE" if="CRASH_HANDLER" />
+	<haxedef name="HXCPP_STACK_TRACE" if="CRASH_HANDLER" />
+	<haxedef name='no-deprecation-warnings' />
+
+	<!--Macro fixes-->
+	<haxeflag name="--macro" value="allowPackage('flash')" />
+	<haxeflag name="--macro" value="include('my.pack')" />
+
 
 	<!-- _________________________________ Custom _______________________________ -->
 

@@ -346,6 +346,7 @@ class Note extends FlxSprite
 		}
 	}
 
+	var ogMultAlpha:Float = 0;
 	override function update(elapsed:Float)
 	{
 		super.update(elapsed);
@@ -372,12 +373,11 @@ class Note extends FlxSprite
 			}
 		}
 
-		if (tooLate) multSpeed += FlxG.elapsed * 50;
-
-		if (tooLate && !inEditor)
+		if (tooLate && !inEditor && ogMultAlpha == 0)
 		{
-			if (alpha > 0.3)
-				alpha = 0.3;
+			multSpeed += FlxG.elapsed * 100;
+			ogMultAlpha = multAlpha;
+			multAlpha *= 0.3;
 		}
 	}
 }

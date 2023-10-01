@@ -14,6 +14,7 @@ class OptionsDirect extends MusicBeatState
 {
 	override function create()
 	{
+		super.create();
 		transIn = FlxTransitionableState.defaultTransIn;
 		transOut = FlxTransitionableState.defaultTransOut;
 
@@ -27,10 +28,6 @@ class OptionsDirect extends MusicBeatState
 		menuBg.scale.set(1, 1);
 		add(menuBg);
 
-		openSubState(new CustomFadeTransition(0.8, true)); // WHAT'S WRONG WITH THIS SHIT, IT ISN'T WORKING
-		new FlxTimer().start(0.8, function(tmr:FlxTimer)
-		{
-			openSubState(new OptionsMenu());
-		});		
+		openSubState(new OptionsMenu());
 	}
 }

@@ -202,26 +202,25 @@ class PauseSubState extends MusicBeatSubstate
 
 		cameras = [FlxG.cameras.list[FlxG.cameras.list.length - 1]];
 		FlxG.cameras.list[FlxG.cameras.list.length - 1].visible = true;
+
+		call("newPost", []);
 	}
 
 	var holdTime:Float = 0;
 
 	override function update(elapsed:Float)
 	{
+		super.update(elapsed);
+
 		if (pauseMusic.volume < 0.5)
 			pauseMusic.volume += 0.01 * elapsed;
 
-		super.update(elapsed);
 		updateSkipTextStuff();
 
 		var upP = controls.UI_UP_P;
 		var downP = controls.UI_DOWN_P;
 		var accepted = controls.ACCEPT;
 		var escaped = controls.BACK;
-		if (FlxG.keys.justPressed.F11)
-		{
-			FlxG.fullscreen = !FlxG.fullscreen;
-		}
 
 		if (escaped)
 		{
@@ -373,6 +372,7 @@ class PauseSubState extends MusicBeatSubstate
 					Conductor.changeBPM(TitleState.titleJSON.bpm);
 			}
 		}
+		call("onUpdatePost", [elapsed]);
 	}
 
 	function deleteSkipTimeText()
@@ -415,6 +415,7 @@ class PauseSubState extends MusicBeatSubstate
 
 	function changeSelection(change:Int = 0):Void
 	{
+		call("onChangeSelection", [change]);
 		curSelected += change;
 
 		FlxG.sound.play(Paths.sound('scrollMenu'), 0.4);
@@ -445,6 +446,7 @@ class PauseSubState extends MusicBeatSubstate
 				}
 			}
 		}
+		call("onChangeSelectionPost", [change]);
 	}
 
 	function regenMenu():Void
@@ -477,6 +479,7 @@ class PauseSubState extends MusicBeatSubstate
 		}
 		curSelected = 0;
 		changeSelection();
+		call("onRegenMenu", []);
 	}
 
 	function updateSkipTextStuff()

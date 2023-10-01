@@ -71,6 +71,8 @@ class StoryMenuState extends MusicBeatState
 	{
 		Paths.clearStoredMemory();
 
+		super.create();
+
 		trace('Switched state to: ' + Type.getClassName(Type.getClass(this)));
 		
 		//TODO: add stateSwitching log (via Type.getClass)
@@ -221,7 +223,7 @@ class StoryMenuState extends MusicBeatState
 
 		changeWeek();
 
-		super.create();
+		call("onCreatePost", []);
 	}
 
 	override function closeSubState() {
@@ -232,8 +234,9 @@ class StoryMenuState extends MusicBeatState
 
 	override function update(elapsed:Float)
 	{
-		if(FlxG.keys.justPressed.F11)
-        	FlxG.fullscreen = !FlxG.fullscreen;
+
+		super.update(elapsed);
+
         // scoreText.setFormat('VCR OSD Mono', 32);
 		lerpScore = Math.floor(FlxMath.lerp(lerpScore, intendedScore, Utils.boundTo(elapsed * 30, 0, 1)));
 		if(Math.abs(intendedScore - lerpScore) < 10) lerpScore = intendedScore;
@@ -306,12 +309,12 @@ class StoryMenuState extends MusicBeatState
 			MusicBeatState.switchState(new MainMenuState());
 		}
 
-		super.update(elapsed);
-
 		grpLocks.forEach(function(lock:FlxSprite)
 		{
 			lock.y = grpWeekText.members[lock.ID].y;
 		});
+
+		call("onUpdatePost", [elapsed]);
 	}
 
 	var movedBack:Bool = false;
@@ -320,6 +323,7 @@ class StoryMenuState extends MusicBeatState
 
 	function selectWeek()
 	{
+		call("onSelectWeek", []);
 		//TODO: add curSelectedWeek log
 		if (!weekIsLocked(loadedWeeks[curWeek].fileName))
 		{
@@ -374,11 +378,13 @@ class StoryMenuState extends MusicBeatState
 		} else {
 			FlxG.sound.play(Paths.sound('cancelMenu'));
 		}
+		call("onSelectWeekPost", []);
 	}
 
 	var tweenDifficulty:FlxTween;
 	function changeDifficulty(change:Int = 0):Void
 	{
+		call("onChangeDifficulty", [change]);
 		curDifficulty += change;
 
 		if (curDifficulty < 0)
@@ -411,6 +417,7 @@ class StoryMenuState extends MusicBeatState
 		#if !switch
 		intendedScore = Highscore.getWeekScore(loadedWeeks[curWeek].fileName, curDifficulty);
 		#end
+		call("onChangeDifficultyPost", [change]);
 	}
 
 	var lerpScore:Int = 0;
@@ -418,6 +425,7 @@ class StoryMenuState extends MusicBeatState
 
 	function changeWeek(change:Int = 0):Void
 	{
+		call("onChangeWeek", [change]);
 		curWeek += change;
 
 		if (curWeek >= loadedWeeks.length)
@@ -488,6 +496,7 @@ class StoryMenuState extends MusicBeatState
 			curDifficulty = newPos;
 		}
 		updateText();
+		call("onChangeWeek", [change]);
 	}
 
 	function weekIsLocked(name:String):Bool {
@@ -522,5 +531,6 @@ class StoryMenuState extends MusicBeatState
 		#if !switch
 		intendedScore = Highscore.getWeekScore(loadedWeeks[curWeek].fileName, curDifficulty);
 		#end
+		call("onUpdateText", []);
 	}
 }

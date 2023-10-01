@@ -1,8 +1,8 @@
 package grafex.system.script;
 
 import flixel.FlxG;
-import flixel.FlxSprite;
 import flixel.group.FlxGroup;
+import flixel.group.FlxSpriteGroup;
 import flixel.FlxCamera;
 import flixel.math.FlxMath;
 import flixel.math.FlxPoint;
@@ -19,7 +19,6 @@ import hscript.Expr;
 import hscript.Interp;
 import hscript.Parser;
 import grafex.sprites.background.BGSprite;
-import grafex.util.RealColor;
 import grafex.states.playstate.PlayState;
 import grafex.states.substates.GameOverSubstate;
 import sys.FileSystem;
@@ -40,146 +39,80 @@ import flixel.system.FlxSound;
 import flixel.text.FlxText;
 import flixel.group.FlxGroup.FlxTypedGroup;
 
+import openfl.Lib;
+import flixel.util.FlxAxes;
+
 import grafex.cutscenes.CutsceneHandler;
 
 using StringTools;
 
 class GrfxScriptHandler {
-	public static var parser:Parser = new Parser();
 
 	public static var scriptExts:Array<String> = ['hx', 'hxs', 'hscript', 'hxc'];
 
-	public static function initialize() {
-		parser.allowTypes = true;
-	}
-
 	public static function loadStateModule(path:String, ?extraParams:StringMap<Dynamic>) {
-		trace('Loading haxe file: ${Paths.hxModule(path)}');
-		var modulePath:String = Paths.hxModule(path);
-		try {
-			return new GrfxStateModule(parser.parseString(File.getContent(modulePath), modulePath), extraParams);
-		}catch(e:Dynamic){
-			return null;
-		}
+
+		var code = getParsedCode(Paths.hxModule(path));
+		return new GrfxStateModule(code, extraParams);
 	}
 
 	public static function loadModule(path:String, ?extraParams:StringMap<Dynamic>) {
-		trace('Loading haxe file: ${Paths.hxModule(path)}');
-		var modulePath:String = Paths.hxModule(path);
-		try {
-			return new GrfxHxScript(parser.parseString(File.getContent(modulePath), modulePath), extraParams);
-		}catch(e:Dynamic){
-			return null;
-		}
+
+		var code = getParsedCode(Paths.hxModule(path));
+		return new GrfxModule(code, extraParams);
 	}
 	
 	public static function noPathModule(path:String, ?extraParams:StringMap<Dynamic>) {
-		trace('Loading haxe file: $path');
-		var modulePath:String = path;
+        var code = getParsedCode(path);
+		return new GrfxHxScript(code, extraParams, path);
+	}
+
+	private static function getParsedCode(path:String) {
+		trace('Loading haxe file: $path'); 
+
+		var rawFileData = File.getContent(path);
+
+		var parser:Parser = new Parser();
+		parser.allowJSON = true;
+		parser.allowTypes = true;
+		parser.allowMetadata = true;
+		var codeToExecute = null;
 		try {
-			return new GrfxHxScript(parser.parseString(File.getContent(modulePath), modulePath), extraParams, path);
-		}catch(e:Dynamic){
-			return null;
+			codeToExecute = parser.parseString(rawFileData);
+		} catch(e) {
+			Lib.application.window.alert(e.message + "\nIn Script: " + path, "Script Error!");
+			codeToExecute = parser.parseString('');
 		}
+		return codeToExecute;
 	}
-}
-
-class GrfxStateModule
-{
-	public var interp:Interp;
-	public var scriptName:String = '';
-
-	public function new(?contents:Expr, ?extraParams:StringMap<Dynamic>, ?name:String) {
-		interp = new Interp();
-
-		set('FlxG', FlxG);
-		set('FlxSprite', FlxSprite);
-		set('FlxCamera', FlxCamera);
-		set('FlxTimer', FlxTimer);
-		set('FlxTween', FlxTween);
-		set('FlxEase', FlxEase);
-		set('Conductor', Conductor);
-		set('Paths', Paths);
-		set('ClientPrefs', ClientPrefs);
-		set('StringTools', StringTools);
-		set('ClientPrefs', ClientPrefs);
-		set('EngineData', EngineData);
-		set('CoolUtil', Utils);
-		set('Utils', Utils);
-		set('FlxMath', FlxMath);
-		set('Math', Math);
-		set('FlxSave', FlxSave);
-		set('FlxBasic', FlxBasic);
-		set('FlxObject', FlxObject);
-		set('FlxSound', FlxSound);
-		set('FlxText', FlxText);
-		set('FlxTypedGroup', FlxTypedGroup);
-		set("Std", Std);
-		set("Type", Type);
-		set("Reflect", Reflect);
-		set("FileSystem", FileSystem);
-		set("File", File);
-		set("Achievements", AchievementsGrfx);
-		set("CutsceneHandler", CutsceneHandler);
-
-		set('gradeAchievement', function(name:String)
-		{
-			AchievementsGrfx.setAchievement(name, true);
-			return true;
-		});
-
-		set('getAchievement', function(name:String)
-		{
-			return AchievementsGrfx.getAchievement(name);
-		});
-
-		set('setAchievement', function(name:String, ?value:Bool = true)
-		{
-			AchievementsGrfx.setAchievement(name, value);
-			return true;
-		});
-
-		scriptName = name;
-		
-		if (extraParams != null) {
-			for (i in extraParams.keys())
-				set(i, extraParams.get(i));
-		}
-		set('import', import_type);
-		interp.execute(contents);
-	}
-
-	public function executeFunc(eventName:String, args:Array<Dynamic>):Dynamic {
-		var smthVal:Dynamic = null;
-		if (this.exists(eventName))
-		    smthVal = Reflect.callMethod(interp.variables, this.get(eventName), args);
-		return smthVal;
-	} //callOnHscrip("onFunction", [arg1, arg2, arg3]);
-
-	public function get(field:String):Dynamic
-		return interp.variables.get(field);
-
-	public function set(field:String, value:Dynamic)
-		interp.variables.set(field, value);
-
-	public function exists(field:String):Bool
-		return interp.variables.exists(field);
-
-	public function import_type(path:String) {
-		var classPackage:Array<String> = path.split('.');
-		var name:String = classPackage[classPackage.length - 1];
-		set(name, Type.resolveClass(path));
-	} 
 }
 
 class GrfxHxScript extends GrfxModule
 {
-    var smthVal:Dynamic;
-    public function executeFunc(eventName:String, args:Array<Dynamic>):Dynamic {
-        smthVal = null;
-		if (this.exists(eventName) && !closed) smthVal = Reflect.callMethod(interp.variables, this.get(eventName), args);
+	public function executeFunc(eventName:String, args:Array<Dynamic>):Dynamic {
+		if (!exists(eventName) || closed) return null;
+
+		if(program == null) {
+			trace('{${scriptName}}: Null Script'); 
+			dispose();
+			return null;
+		}
+
+		var smthVal = null;
+		var funcToExec = null;
+
+		funcToExec = get(eventName);
+
+		try {
+			smthVal = Reflect.callMethod(null, funcToExec, args);
+		} catch(e) {
+			trace('{${scriptName}}: [Function Error](${eventName}): ${e}');
+		 	Lib.application.window.alert(e.message + "\n Function: " + eventName + "\n In script '" + scriptName + "'", "Function ('+eventName+') Executing Error!");
+			dispose();
+		}
+
 		return smthVal;
-    } //callOnHscrip("onFunction", [arg1, array-arg2, some-val-arg3]);
+	} //callOnHscrip("onFunction", [arg1, array-arg2, some-val-arg3]);
 }
 
 class GrfxModule
@@ -190,12 +123,24 @@ class GrfxModule
 	public var closed:Bool = false;
 	public var scriptName:String = '';
 
+	public var program = null;
+
 	public static var Function_Stop:Dynamic = 1;
 	public static var Function_Continue:Dynamic = 0;
 	public static var Function_StopScript:Dynamic = 2;
 
 	public function new(?contents:Expr, ?extraParams:StringMap<Dynamic>, ?name:String) {
 		interp = new Interp();
+
+		interp.allowStaticVariables = interp.allowPublicVariables = true;
+
+		try {
+		 	this.program = contents;
+		} catch(e) {
+		 	trace('[Script Error]: ${e.message}');
+		 	Lib.application.window.alert(e.message, "Script Error!");
+			return;
+		}
 
 		set('Function_StopScript', Function_StopScript);
 		set('Function_Stop', Function_Stop);
@@ -209,13 +154,16 @@ class GrfxModule
 		set('FlxTween', FlxTween);
 		set('FlxEase', FlxEase);
 		set('PlayState', PlayState);
+		set('GameOverSubstate', GameOverSubstate);
 		set('game', PlayState.instance);
 		set('this', PlayState.instance);
+		//interp.scriptObject = PlayState.instance;
+		setParent(PlayState.instance);
 		set('gameOver', GameOverSubstate.instance);
-		set('boyfriend', PlayState.instance.boyfriend);
-        	set('gf', PlayState.instance.gf);
-		set('dad', PlayState.instance.dad);
-		set('members', PlayState.instance.members);
+		//set('boyfriend', PlayState.instance.boyfriend);
+		//set('gf', PlayState.instance.gf);
+		//set('dad', PlayState.instance.dad);
+		//set('members', PlayState.instance.members);
 		set('SONG', PlayState.SONG);
 		set('Conductor', Conductor);
 		set('Paths', Paths);
@@ -233,7 +181,14 @@ class GrfxModule
 		set('FlxObject', FlxObject);
 		set('FlxSound', FlxSound);
 		set('FlxText', FlxText);
+		set("StringMap", haxe.ds.StringMap);
+		set("X", FlxAxes.X);
+		set("Y", FlxAxes.Y);
+		set("XY", FlxAxes.XY);
+
 		set('FlxColor', CustomFlxColor.instance);
+		set('BlendMode', CustomBlendMode);
+
 		set('FlxTypedGroup', FlxTypedGroup);
 		set("Std", Std);
 		set("Type", Type);
@@ -241,9 +196,10 @@ class GrfxModule
 		set("FileSystem", FileSystem);
 		set("File", File);
 
-		set('add', function(obj:FlxBasic) PlayState.instance.add(obj));
+		/*set('add', function(obj:FlxBasic) PlayState.instance.add(obj));
 		set('insert', function(pos:Int, obj:FlxBasic) PlayState.instance.insert(pos, obj));
-		set('remove', function(obj:FlxBasic, splice:Bool = false) PlayState.instance.remove(obj, splice));
+		set('remove', function(obj:FlxBasic, splice:Bool = false) PlayState.instance.remove(obj, splice));*/
+
 		set('addBehindGF', function(obj:FlxBasic) PlayState.instance.addBehindGF(obj));
 		set('addBehindDad', function(obj:FlxBasic) PlayState.instance.addBehindDad(obj));
 		set('addBehindBF', function(obj:FlxBasic) PlayState.instance.addBehindBF(obj));
@@ -251,31 +207,28 @@ class GrfxModule
 		set("Achievements", AchievementsGrfx);
 		set("CutsceneHandler", CutsceneHandler);
 
+		set('newFlxGroup', function()
+		{
+			return new FlxGroup();
+		});
+
+		set('newFlxSpriteGroup', function()
+		{
+			return new FlxSpriteGroup();
+		});
+
 		set('gameTrace', function(text:String, ?color:FlxColor = FlxColor.WHITE)
 		{
 			errorTrace(text, color);
 			return true;
 		});
 
-		set('gradeAchievement', function(name:String)
+		set('addText', function(text:String, ?color:FlxColor = FlxColor.WHITE)
 		{
-			AchievementsGrfx.setAchievement(name, true);
+			PlayState.instance.addTextToDebug(text, color);
 			return true;
 		});
-
-		set('getAchievement', function(name:String)
-		{
-			return AchievementsGrfx.getAchievement(name);
-		});
-
-		#if DEVS_BUILD
-		set('setAchievement', function(name:String, ?value:Bool = true)
-		{
-			AchievementsGrfx.setAchievement(name, value);
-			return true;
-		});
-		#end
-
+	
 		set('addHxScript', function(hxFile:String, ?ignoreAlreadyRunning:Bool = false)
 		{
 			var cervix = hxFile + ".hx";
@@ -303,6 +256,7 @@ class GrfxModule
 				doPush = true;
 			}
 			#end
+
 			if(doPush)
 			{
 				if(!ignoreAlreadyRunning)
@@ -316,7 +270,7 @@ class GrfxModule
 						}
 					}
 				}
-				//PlayState.instance.hscriptArray.push(GrfxScriptHandler.noPathModule(cervix));
+				PlayState.instance.hscriptArray.push(GrfxScriptHandler.noPathModule(cervix));
 				return;
 			}
 			errorTrace("addHxScript: Script doesn't exist!", FlxColor.RED);
@@ -368,6 +322,25 @@ class GrfxModule
 			errorTrace("removeHxScript: Script doesn't exist!", FlxColor.RED);
 		});
 
+		set('gradeAchievement', function(name:String)
+		{
+			AchievementsGrfx.setAchievement(name, true);
+			return true;
+		});
+
+		set('getAchievement', function(name:String)
+		{
+			return AchievementsGrfx.getAchievement(name);
+		});
+
+		#if DEVS_BUILD
+		set('setAchievement', function(name:String, ?value:Bool = true)
+		{
+			AchievementsGrfx.setAchievement(name, value);
+			return true;
+		});
+		#end
+
 		set('setVar', function(name:String, value:Dynamic)
 		{
 			PlayState.instance.variables.set(name, value);
@@ -388,11 +361,11 @@ class GrfxModule
 			return false;
 		});
 
-
 		scriptName = name;
 		set('scriptName', scriptName);
+
 		set("thisScript", this);
-		
+
 		if (extraParams != null) {
 			for (i in extraParams.keys())
 				set(i, extraParams.get(i));
@@ -400,7 +373,17 @@ class GrfxModule
 		set('close', closeShit);
 		set('dispose', dispose);
 		set('import', import_type);
-		interp.execute(contents);
+		execute();
+	}
+
+	public function execute():Void
+	{
+		if(program == null)
+		{
+			trace('Null Program'); 
+			return;
+		}
+		interp.execute(program);
 	}
 
 	function errorTrace(text:String, color:FlxColor = FlxColor.WHITE)
@@ -412,6 +395,13 @@ class GrfxModule
 		var status:Bool = PlayState.instance.closeScript(name);
 		(status) ? trace('hx script closed: $name') : trace('no hx script to close: $name');
 		return status;
+	}
+
+	public function setParent(parent:Dynamic) {
+		interp.scriptObject = parent;
+		set('add', function(obj:FlxBasic) parent.add(obj));
+		set('insert', function(pos:Int, obj:FlxBasic) parent.insert(pos, obj));
+		set('remove', function(obj:FlxBasic, splice:Bool = false) parent.remove(obj, splice));
 	}
 
 	public function dispose():Bool
@@ -429,12 +419,22 @@ class GrfxModule
 	public function exists(field:String):Bool
 		return interp.variables.exists(field);
 
-	public function import_type(path:String) {
+	public function import_type(path:String, ?customName:String = '') {
 		var classPackage:Array<String> = path.split('.');
+
 		var name:String = classPackage[classPackage.length - 1];
-		set(name, Type.resolveClass(path));
-	} 
+
+		trace(classPackage + "-" + name + "-" + customName);
+
+		if (customName != '') name = customName;
+
+		var c:Dynamic = Type.resolveClass(path);
+		if (c == null) c = Type.resolveEnum(path);
+
+		if (c != null) set(name, c);
+	}
 }
+
 
 @:publicFields
 class CustomFlxColor
@@ -586,4 +586,220 @@ typedef CustomTriadicHarmony = {
 	color1:Int,
 	color2:Int,
 	color3:Int
+}
+
+class CustomBlendMode
+{
+	public static var NORMAL = BlendMode.NORMAL;
+	public static var ADD = BlendMode.ADD;
+	public static var ALPHA = BlendMode.ALPHA;
+	public static var DARKEN = BlendMode.DARKEN;
+	public static var DIFFERENCE = BlendMode.DIFFERENCE;
+	public static var ERASE = BlendMode.ERASE;
+	public static var HARDLIGHT = BlendMode.HARDLIGHT;
+	public static var INVERT = BlendMode.INVERT;
+	public static var LAYER = BlendMode.LAYER;
+	public static var LIGHTEN = BlendMode.LIGHTEN;
+	public static var MULTIPLY = BlendMode.MULTIPLY;
+	public static var OVERLAY = BlendMode.OVERLAY;
+	public static var SCREEN = BlendMode.SCREEN;
+	public static var SHADER = BlendMode.SHADER;
+	public static var SUBTRACT = BlendMode.SUBTRACT;
+}
+
+
+
+
+class GrfxStateModule
+{
+	public var interp:Interp;
+	public var assetGroup:String;
+
+	public var closed:Bool = false;
+	public var scriptName:String = '';
+
+	public var program = null;
+
+	public static var Function_Stop:Dynamic = 1;
+	public static var Function_Continue:Dynamic = 0;
+	public static var Function_StopScript:Dynamic = 2;
+
+	public function new(?contents:Expr, ?extraParams:StringMap<Dynamic>, ?name:String) {
+		interp = new Interp();
+
+		interp.allowStaticVariables = interp.allowPublicVariables = true;
+
+		try {
+		 	this.program = contents;
+		} catch(e) {
+		 	trace('[Script Error]: ${e.message}');
+		 	Lib.application.window.alert(e.message, "Script Error!");
+			return;
+		}
+
+		set('Function_StopScript', Function_StopScript);
+		set('Function_Stop', Function_Stop);
+		set('Function_Continue', Function_Continue);
+
+		set('FlxG', FlxG);
+		set('FlxSprite', FlxSprite);
+		set('PlayState', PlayState);
+		set('FlxCamera', FlxCamera);
+		set('FlxTimer', FlxTimer);
+		set('FlxTween', FlxTween);
+		set('FlxEase', FlxEase);
+		set('PlayState', PlayState);
+		set('GameOverSubstate', GameOverSubstate);
+		//setParent(PlayState.instance);
+		set('gameOver', GameOverSubstate.instance);
+		set('SONG', PlayState.SONG);
+		set('Conductor', Conductor);
+		set('Paths', Paths);
+		set('ClientPrefs', ClientPrefs);
+		set('Character', Character);
+		set('StringTools', StringTools);
+		set('ClientPrefs', ClientPrefs);
+		set('EngineData', EngineData);
+		set('CoolUtil', Utils);
+		set('Utils', Utils);
+		set('FlxMath', FlxMath);
+		set('Math', Math);
+		set('FlxSave', FlxSave);
+		set('FlxBasic', FlxBasic);
+		set('FlxObject', FlxObject);
+		set('FlxSound', FlxSound);
+		set('FlxText', FlxText);
+		set("StringMap", haxe.ds.StringMap);
+		set("X", FlxAxes.X);
+		set("Y", FlxAxes.Y);
+		set("XY", FlxAxes.XY);
+
+		set('FlxColor', CustomFlxColor.instance);
+		set('BlendMode', CustomBlendMode);
+
+		set('FlxTypedGroup', FlxTypedGroup);
+		set("Std", Std);
+		set("Type", Type);
+		set("Reflect", Reflect);
+		set("FileSystem", FileSystem);
+		set("File", File);
+
+		set("Achievements", AchievementsGrfx);
+		set("CutsceneHandler", CutsceneHandler);
+
+		set('newFlxGroup', function()
+		{
+			return new FlxGroup();
+		});
+
+		set('newFlxSpriteGroup', function()
+		{
+			return new FlxSpriteGroup();
+		});
+
+		set('gradeAchievement', function(name:String)
+		{
+			AchievementsGrfx.setAchievement(name, true);
+			return true;
+		});
+
+		set('getAchievement', function(name:String)
+		{
+			return AchievementsGrfx.getAchievement(name);
+		});
+
+		#if DEVS_BUILD
+		set('setAchievement', function(name:String, ?value:Bool = true)
+		{
+			AchievementsGrfx.setAchievement(name, value);
+			return true;
+		});
+		#end
+
+		scriptName = name;
+		set('scriptName', scriptName);
+
+		set("thisScript", this);
+
+		if (extraParams != null) {
+			for (i in extraParams.keys())
+				set(i, extraParams.get(i));
+		}
+		set('dispose', dispose);
+		set('import', import_type);
+		execute();
+	}
+
+	public function execute():Void
+	{
+		if(program == null)
+		{
+			trace('Null Program'); 
+			return;
+		}
+		interp.execute(program);
+	}
+
+	public function setParent(parent:Dynamic) {
+		interp.scriptObject = parent;
+		set('add', function(obj:FlxBasic) parent.add(obj));
+		set('insert', function(pos:Int, obj:FlxBasic) parent.insert(pos, obj));
+		set('remove', function(obj:FlxBasic, splice:Bool = false) parent.remove(obj, splice));
+	}
+
+	public function executeFunc(eventName:String, args:Array<Dynamic>):Dynamic {
+		if (!exists(eventName) || closed) return null;
+
+		if(program == null) {
+			trace('{${scriptName}}: Null Script'); 
+			dispose();
+			return null;
+		}
+
+		var smthVal = null;
+		var funcToExec = null;
+
+		funcToExec = get(eventName);
+
+		try {
+			smthVal = Reflect.callMethod(null, funcToExec, args);
+		} catch(e) {
+			trace('{${scriptName}}: [Function Error](${eventName}): ${e}');
+		 	Lib.application.window.alert(e.message + "\n Function: " + eventName + "\n In script '" + scriptName + "'", "Function ('+eventName+') Executing Error!");
+			dispose();
+		}
+
+		return smthVal;
+	} //callOnHscrip("onFunction", [arg1, array-arg2, some-val-arg3]);
+
+
+	public function dispose():Bool
+		return this.closed = true;
+
+	public function activate():Bool
+		return this.closed = false;
+
+	public function get(field:String):Dynamic
+		return interp.variables.get(field);
+
+	public function set(field:String, value:Dynamic)
+		interp.variables.set(field, value);
+
+	public function exists(field:String):Bool
+		return interp.variables.exists(field);
+
+	public function import_type(path:String, ?customName:String = '') {
+		var classPackage:Array<String> = path.split('.');
+
+		var name:String = classPackage[classPackage.length - 1];
+
+		trace(classPackage + "-" + name + "-" + customName);
+
+		if (customName != '') name = customName;
+
+		var c:Dynamic = Type.resolveClass(path);
+		if (c == null) c = Type.resolveEnum(path);
+
+		if (c != null) set(name, c);
+	}
 }

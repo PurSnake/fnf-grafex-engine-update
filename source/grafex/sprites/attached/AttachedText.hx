@@ -10,8 +10,8 @@ class AttachedText extends Alphabet
 	public var sprTracker:FlxSprite;
 	public var copyVisible:Bool = true;
 	public var copyAlpha:Bool = false;
-	public function new(text:String = "", ?offsetX:Float = 0, ?offsetY:Float = 0, ?bold = false, ?scale:Float = 1) {
-		super(0, 0, text, bold, false, 0.05, scale);
+	public function new(text:String = "", ?offsetX:Float = 0, ?offsetY:Float = 0, ?bold = false, ?scale:Float = 1, ?white:Bool = false) {
+		super(0, 0, text, bold, false, 0.05, scale, white);
 		isMenuItem = false;
 		this.offsetX = offsetX;
 		this.offsetY = offsetY;

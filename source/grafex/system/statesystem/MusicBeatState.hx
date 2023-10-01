@@ -32,6 +32,9 @@ class MusicBeatState extends FlxUIState
 
 	public static var camBeat:FlxCamera;
 
+	public var stateScript:GrfxStateModule;
+	public static var instance:MusicBeatState;
+
 	inline function get_controls():Controls
 		return PlayerSettings.player1.controls;
 
@@ -40,15 +43,58 @@ class MusicBeatState extends FlxUIState
 		var skip:Bool = FlxTransitionableState.skipNextTransOut;
 		super.create();
 
-
 		if(!skip) openSubState(new CustomFadeTransition(0.6, true));
 		
 		FlxTransitionableState.skipNextTransOut = false;
+		loadStateScript();
 	}
+
+	function loadStateScript() {
+		var className = Type.getClassName(Type.getClass(this));
+		var scriptName = className.substr(className.lastIndexOf(".")+1);
+
+		trace(className + " // " + scriptName);
+		if (Paths.fileExists('states/${scriptName}.hx', TEXT)) {
+			stateScript = GrfxScriptHandler.loadStateModule('states/${scriptName}');
+
+			trace('states/${scriptName}.hx');
+			instance = this;
+
+			stateScript.set(scriptName, this);
+			stateScript.set('this', this);
+			stateScript.setParent(instance);
+			stateScript.activate();
+			call("onCreate", []);
+		}
+	}
+
+	public function call(name:String, ?args:Array<Dynamic>, ?defaultVal:Dynamic):Dynamic {
+		if (stateScript == null) return defaultVal;
+
+		return stateScript.executeFunc(name, args);
+	}
+
+	public override function onFocus() {
+		super.onFocus();
+		call("onFocus");
+	}
+
+	public override function onFocusLost() {
+		super.onFocusLost();
+		call("onFocusLost");
+	}
+
 
 	override function update(elapsed:Float)
 	{
 		super.update(elapsed);
+
+
+		if (FlxG.sound.music != null && !(this is PlayState))
+			Conductor.songPosition = FlxG.sound.music.time;
+
+
+		if(FlxG.keys.justPressed.F11) FlxG.fullscreen = !FlxG.fullscreen;
 
 		//everyStep();
 		var oldStep:Int = curStep;
@@ -62,6 +108,7 @@ class MusicBeatState extends FlxUIState
 	
 			if(PlayState.SONG != null) oldStep < curStep ? updateSection() : rollbackSection();
 		}
+		call("onUpdate", [elapsed]);
 	}
 
 	private function updateSection():Void
@@ -148,16 +195,19 @@ class MusicBeatState extends FlxUIState
 	{
 		if (curStep % 4 == 0)
 			beatHit();
+
+		call("onStepHit", [curStep]);
 	}
 
 	public function beatHit():Void
 	{
-		//do literally nothing dumbass
+		call("onBeatHit", [curBeat]);
 	}
 
 	public function sectionHit():Void
 	{
 		//GrfxLogger.debug('Section: ' + curSection + ', Beat: ' + curBeat + ', Step: ' + curStep);
+		call("onSectionHit", [curSection]);
 	}
 
 	function getBeatsOnSection()
@@ -165,5 +215,15 @@ class MusicBeatState extends FlxUIState
 		var val:Null<Float> = 4;
 		if(PlayState.SONG != null && PlayState.SONG.notes[curSection] != null) val = PlayState.SONG.notes[curSection].sectionBeats;
 		return val == null ? 4 : val;
+	}
+
+	public override function destroy() {
+		super.destroy();
+		call("onDestroy");
+
+		//if (stateScript != null) stateScript.dispose();
+
+		stateScript = null;
+		instance = null;
 	}
 }

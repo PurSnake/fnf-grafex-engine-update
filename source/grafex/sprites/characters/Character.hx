@@ -90,7 +90,7 @@ class Character extends FlxSprite
 	public var healthIcon:String = 'face';
 	public var healthIconType:String = 'duo';
 
-	public var healthIconTypes:Array<String> = ['solo', 'duo', 'trioWin', 'trioLose', 'quadro', 'custom'];
+	public static var healthIconTypes:Array<String> = ['solo', 'duo', 'trioWin', 'trioLose', 'quadro', 'classic-animated', 'modern-animated', 'custom'];
 
 	public var animationsArray:Array<AnimArray> = [];
 
@@ -122,10 +122,6 @@ class Character extends FlxSprite
 	{
 		super(x, y);
 
-		if (tempAnimState != null) {
-			tempAnimState.destroy();
-		}
-		tempAnimState = new FlxAnimationController(this);
 		curCharacter = character;
 		this.isPlayer = isPlayer;
 		antialiasing = ClientPrefs.globalAntialiasing;
@@ -171,39 +167,36 @@ class Character extends FlxSprite
 				#end
 					useAtlas = true;
 
+				var charFrames:FlxFramesCollection;
+
 				if (!useAtlas) {
-					frames = Paths.getAtlas(json.image);
-					curImage = json.image;
-					framesList.set(json.image, frames);
-					animStates.set(json.image, animation);
+					charFrames = Paths.getAtlas(json.image);
 					for (anim in json.animations) {
 						if (anim.image != null && anim.image.length > 0 && !framesList.exists(anim.image)) {
 							framesList.set(anim.image, Paths.getAtlas(anim.image));
-							animStates.set(anim.image, new FlxAnimationController(this));
 						}
-						else if (anim.image == null)
-							anim.image = '';
-						imageNames.set(anim.anim, anim.image);
 					}
 				}
 				else
 				{
-					frames = AtlasFrameMaker.construct(json.image);
-					curImage = json.image;
-					framesList.set(json.image, frames);
-					animStates.set(json.image, animation);
+					charFrames = AtlasFrameMaker.construct(json.image);
 					for (anim in json.animations) {
 						if (anim.image != null && anim.image.length > 0 && !framesList.exists(anim.image)) {
 							framesList.set(anim.image, AtlasFrameMaker.construct(anim.image));
-							animStates.set(anim.image, new FlxAnimationController(this));
 						}
-						else if (anim.image == null)
-							anim.image = '';
-						imageNames.set(anim.anim, anim.image);
 					}
 				}
-
 				imageFile = json.image;
+
+
+				var charFinalFrames = new FlxFramesCollection(null);
+				charFinalFrames.frames = charFrames.frames;
+				for (shittyFrameCollection in framesList) {
+ 					charFinalFrames.frames = charFinalFrames.frames.concat(shittyFrameCollection.frames);
+				}
+
+				frames = charFinalFrames;
+
 				if(json.scale != 1) {
 					jsonScale = json.scale;
 					setGraphicSize(Std.int(width * jsonScale));
@@ -264,13 +257,6 @@ class Character extends FlxSprite
 						if (animImage == null || animImage.length == 0) {
 							animImage = imageFile;
 						}
-						if (animImage != curImage) {
-							//trace(animImage + ', ' + curImage);
-							animation = tempAnimState;
-							frames = framesList.get(animImage);
-							animation = animStates.get(animImage);
-							curImage = animImage;
-						}
 
 						if (animIndices != null && animIndices.length > 0) {
 							animation.addByIndices(animAnim, animName, animIndices, "", animFps, animLoop);
@@ -285,10 +271,6 @@ class Character extends FlxSprite
 				} else {
 					quickAnimAdd('idle', 'BF idle dance');
 				}
-				animation = tempAnimState;
-				frames = framesList.get(json.image);
-				animation = animStates.get(json.image);
-				curImage = json.image;
 		}
 		originalFlipX = flipX;
 
@@ -312,11 +294,8 @@ class Character extends FlxSprite
 	{
 		if(!debugMode && animation.curAnim != null)
 		{
-			if (animation.curAnim.finished && imageNames.exists(animation.curAnim.name + '-loop')) {
-				var special = specialAnim;
+			if(animation.curAnim.finished && animation.getByName(animation.curAnim.name + '-loop') != null)
 				playAnim(animation.curAnim.name + '-loop');
-				specialAnim = special;
-			}
 
 			if(heyTimer > 0)
 			{
@@ -420,7 +399,7 @@ class Character extends FlxSprite
 	public function playAnim(AnimName:String, Force:Bool = false, Reversed:Bool = false, Frame:Int = 0):Void
 	{
 
-		var prevFrames = imageNames.get(AnimName);
+		/*var prevFrames = imageNames.get(AnimName);
 		if (prevFrames == null || prevFrames.length == 0) {
 			prevFrames = imageFile;
 		}
@@ -429,8 +408,7 @@ class Character extends FlxSprite
 			frames = framesList.get(prevFrames);
 			animation = animStates.get(prevFrames);
 			curImage = prevFrames;
-		}
-
+		}*/
 
 		specialAnim = false;
 		animation.play(AnimName, Force, Reversed, Frame);

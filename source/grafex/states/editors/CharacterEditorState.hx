@@ -8,6 +8,7 @@ import grafex.system.statesystem.MusicBeatState;
 import grafex.sprites.HealthIcon;
 import external.FlxUIDropDownMenuCustom;
 import external.animateatlas.AtlasFrameMaker;
+import flixel.graphics.frames.FlxFramesCollection;
 #if desktop
 import external.Discord.DiscordClient;
 #end
@@ -140,14 +141,12 @@ class CharacterEditorState extends MusicBeatState
 		add(healthBarBG2);
 		healthBarBG2.cameras = [camHUD];
  
-		leHealthIcon = new HealthIcon(char.healthIcon, false, 0, 0, 1, false);
-		leHealthIcon.gpuShit = false; // fix "Get Icon Color"
-		leHealthIcon = new HealthIcon(char.healthIcon, false, 0, 0, 1, false); //Bruh
+		//leHealthIcon = new HealthIcon(char.healthIcon, false, 0, 0, 1, false);
+		leHealthIcon = new HealthIcon(char.healthIcon, {type: char.healthIconType, offsets: char.iconOffsets, scale: char.iconScale}, false, false);
 		leHealthIcon.y = FlxG.height - 150;
 		add(leHealthIcon);
 		leHealthIcon.updateHitbox();
 		leHealthIcon.cameras = [camHUD];
-		leHealthIcon.changeOffsets(char.iconOffsets[0], char.iconOffsets[1]);
 
 		dumbTexts = new FlxTypedGroup<FlxText>();
 		add(dumbTexts);
@@ -666,14 +665,16 @@ class CharacterEditorState extends MusicBeatState
 
 	var iconScaleStepper:FlxUINumericStepper;
 
+	var iconTypeDropDown:FlxUIDropDownMenuCustom;
+
 	function addIconUI() {
 		var tab_group = new FlxUI(null, UI_box);
 		tab_group.name = "Icon";
 
         //TODO: make more smoother - PurSnake
-		healthIconInputText = new FlxUIInputText(15, 30, 75, leHealthIcon.getCharacter(), 8);
+		healthIconInputText = new FlxUIInputText(15, 30, 150, leHealthIcon.getCharacter(), 8);
 
-		var decideIconColor:FlxButton = new FlxButton(120, 30, "Get Icon Color", function()
+		var decideIconColor:FlxButton = new FlxButton(180, 27, "Get Icon Color", function()
 		{
 			var coolColor = FlxColor.fromInt(Utils.dominantColor(leHealthIcon));
 			healthColorStepperR.value = coolColor.red;
@@ -710,13 +711,25 @@ class CharacterEditorState extends MusicBeatState
 		healthColorStepper2G = new FlxUINumericStepper(80, personalY - 20, 20, char.healthColorArray2[1], 0, 255, 0);
 		healthColorStepper2B = new FlxUINumericStepper(145, personalY - 20, 20, char.healthColorArray2[2],0, 255, 0);
 
+		//charDropDown
+		iconTypeDropDown = new FlxUIDropDownMenuCustom(15, personalY + 30, FlxUIDropDownMenuCustom.makeStrIdLabelArray(Character.healthIconTypes, true), function(type:String)
+		{
+			var curType = Character.healthIconTypes[Std.parseInt(type)];
+			char.healthIconType = curType;
+			iconTypeDropDown.selectedLabel = curType;
+			leHealthIcon.changeIcon(healthIconInputText.text, {type: char.healthIconType, offsets: char.iconOffsets, scale: char.iconScale}, false, true);
+		});
+
+
 		tab_group.add(new FlxText(15, healthIconInputText.y - 18, 0, 'Health icon name:'));
+		tab_group.add(new FlxText(15, iconTypeDropDown.y - 14, 0, 'Health icon type:'));
 		tab_group.add(new FlxText(healthColorStepper2R.x, healthColorStepper2R.y - 18, 0, 'Health bar R/G/B:'));
 		tab_group.add(new FlxText(iconOffsetY.x, iconOffsetY.y + 18, 0, 'Icon offsets'));
 
 		tab_group.add(new FlxText(iconScaleStepper.x, iconScaleStepper.y + 18, 0, 'Icon scale'));
 
 		tab_group.add(healthIconInputText);
+		tab_group.add(iconTypeDropDown);
 		tab_group.add(decideIconColor);
 
 		tab_group.add(iconOffsetX);
@@ -823,17 +836,36 @@ class CharacterEditorState extends MusicBeatState
 					char.framesList.set(animImage, Paths.getAtlas(animImage));
 				else
 					char.framesList.set(animImage, AtlasFrameMaker.construct(animImage));
-				char.animStates.set(animImage, new flixel.animation.FlxAnimationController(char));
-				char.imageNames.set(newAnim.anim, newAnim.image); // animImage changes if it's blank, so we use newAnim.image
-
-				// Get it back out
-				char.animation = Character.tempAnimState;
-				char.frames = char.framesList.get(animImage);
-				char.animation = char.animStates.get(animImage);
-				char.curImage = animImage;
-				curAnim = char.animationsArray.indexOf(newAnim);
-				genBoyOffsets();
 			}
+
+			var anims:Array<AnimArray> = char.animationsArray.copy();
+			var charFrames;
+			if (char.useAtlas) {
+				charFrames = AtlasFrameMaker.construct(char.imageFile);
+				for (anim in anims) {
+					if (anim.image != null && anim.image.length > 0 && !char.framesList.exists(anim.image)) {
+						char.framesList.set(anim.image, AtlasFrameMaker.construct(anim.image));
+					}
+				}
+			}
+			else
+			{
+				charFrames = Paths.getAtlas(char.imageFile);
+				for (anim in anims) {
+					if (anim.image != null && anim.image.length > 0 && !char.framesList.exists(anim.image)) {
+						char.framesList.set(anim.image, Paths.getAtlas(anim.image));
+					}
+				}
+			}
+
+			var charFinalFrames = new FlxFramesCollection(null);
+			charFinalFrames.frames = charFrames.frames;
+			for (shittyFrameCollection in char.framesList) {
+ 				charFinalFrames.frames = charFinalFrames.frames.concat(shittyFrameCollection.frames);
+			}
+			char.setFrames(charFinalFrames, true);
+
+			genBoyOffsets();
 
 			if(indices != null && indices.length > 0) {
 				char.animation.addByIndices(newAnim.anim, newAnim.name, newAnim.indices, "", newAnim.fps, newAnim.loop);
@@ -918,9 +950,8 @@ class CharacterEditorState extends MusicBeatState
 	override function getEvent(id:String, sender:Dynamic, data:Dynamic, ?params:Array<Dynamic>) {
 		if(id == FlxUIInputText.CHANGE_EVENT && (sender is FlxUIInputText)) {
 			if(sender == healthIconInputText) {
-				leHealthIcon.changeIcon(healthIconInputText.text, char.iconOffsets[0], char.iconOffsets[1], char.iconScale, false);
+				leHealthIcon.changeIcon(healthIconInputText.text, {type: char.healthIconType, offsets: char.iconOffsets, scale: char.iconScale}, false);
 				leHealthIcon.updateHitbox();
-				leHealthIcon.changeOffsets(char.iconOffsets[0], char.iconOffsets[1]);
 				char.healthIcon = healthIconInputText.text;
 				updatePresence();
 			}
@@ -981,21 +1012,21 @@ class CharacterEditorState extends MusicBeatState
 			else if(sender == iconOffsetX)
 			{
 				char.iconOffsets[0] = sender.value;
-				leHealthIcon.changeOffsets(sender.value, char.iconOffsets[1]);
+				leHealthIcon.changeOffsets([sender.value, char.iconOffsets[1]]);
 				leHealthIcon.updateHitbox();
 			}
 
 			else if(sender == iconOffsetY)
 			{
 				char.iconOffsets[1] = sender.value;
-				leHealthIcon.changeOffsets(char.iconOffsets[0], sender.value);
+				leHealthIcon.changeOffsets([char.iconOffsets[0], sender.value]);
 				leHealthIcon.updateHitbox();
 			}
 
 			else if(sender == iconScaleStepper)
 			{
 				char.iconScale = sender.value;
-				leHealthIcon.changeScale(char.iconScale);
+				leHealthIcon.changeScale(char.iconScale, true);
 				leHealthIcon.updateHitbox();
 			}
 
@@ -1039,37 +1070,31 @@ class CharacterEditorState extends MusicBeatState
 		}
 
 		var anims:Array<AnimArray> = char.animationsArray.copy();
+		var charFrames;
 		if (char.useAtlas) {
-			char.frames = AtlasFrameMaker.construct(char.imageFile);
-			char.curImage = char.imageFile;
-			char.framesList.set(char.imageFile, char.frames);
-			char.animStates.set(char.imageFile, char.animation);
+			charFrames = AtlasFrameMaker.construct(char.imageFile);
 			for (anim in anims) {
 				if (anim.image != null && anim.image.length > 0 && !char.framesList.exists(anim.image)) {
 					char.framesList.set(anim.image, AtlasFrameMaker.construct(anim.image));
-					char.animStates.set(anim.image, new FlxAnimationController(char));
 				}
-				else if (anim.image == null)
-					anim.image = '';
-				char.imageNames.set(anim.anim, anim.image);
 			}
 		}
 		else
 		{
-			char.frames = Paths.getAtlas(char.imageFile);
-			char.curImage = char.imageFile;
-			char.framesList.set(char.imageFile, char.frames);
-			char.animStates.set(char.imageFile, char.animation);
+			charFrames = Paths.getAtlas(char.imageFile);
 			for (anim in anims) {
 				if (anim.image != null && anim.image.length > 0 && !char.framesList.exists(anim.image)) {
 					char.framesList.set(anim.image, Paths.getAtlas(anim.image));
-					char.animStates.set(anim.image, new FlxAnimationController(char));
 				}
-				else if (anim.image == null)
-					anim.image = '';
-				char.imageNames.set(anim.anim, anim.image);
 			}
 		}
+
+		var charFinalFrames = new FlxFramesCollection(null);
+		charFinalFrames.frames = charFrames.frames;
+		for (shittyFrameCollection in char.framesList) {
+ 			charFinalFrames.frames = charFinalFrames.frames.concat(shittyFrameCollection.frames);
+		}
+		char.frames = charFinalFrames;
 
 		if(char.animationsArray != null && char.animationsArray.length > 0) {
 			for (anim in char.animationsArray) {
@@ -1082,12 +1107,6 @@ class CharacterEditorState extends MusicBeatState
 
 				if (animImage == null || animImage.length == 0) {
 					animImage = char.imageFile;
-				}
-				if (animImage != char.curImage) {
-					char.animation = Character.tempAnimState;
-					char.frames = char.framesList.get(animImage);
-					char.animation = char.animStates.get(animImage);
-					char.curImage = animImage;
 				}
 				if (animIndices != null && animIndices.length > 0) {
 					char.animation.addByIndices(animAnim, animName, animIndices, "", animFps, animLoop);
@@ -1103,11 +1122,6 @@ class CharacterEditorState extends MusicBeatState
 			char.quickAnimAdd('idle', 'BF idle dance');
 		}
 		
-		char.animation = Character.tempAnimState;
-		char.frames = char.framesList.get(char.imageFile);
-		char.animation = char.animStates.get(char.imageFile);
-		char.curImage = char.imageFile;
-
 		if(lastAnim != '') {
 			char.playAnim(lastAnim, true);
 		} else {
@@ -1234,6 +1248,10 @@ class CharacterEditorState extends MusicBeatState
 		if(UI_characterbox != null) {
 			imageInputText.text = char.imageFile;
 			healthIconInputText.text = char.healthIcon;
+			// NEW SHIT
+			//"healthicon_type": char.healthIconType;
+			iconTypeDropDown.selectedLabel = char.healthIconType;
+
 			singDurationStepper.value = char.singDuration;
 			iconOffsetX.value = char.iconOffsets[0];
 			iconOffsetY.value = char.iconOffsets[1];
@@ -1242,8 +1260,7 @@ class CharacterEditorState extends MusicBeatState
 			flipXCheckBox.checked = char.originalFlipX;
 			noAntialiasingCheckBox.checked = char.noAntialiasing;
 			resetHealthBarColor();
-			leHealthIcon.changeIcon(healthIconInputText.text, iconOffsetX.value, iconOffsetY.value, iconScaleStepper.value, false);
-			leHealthIcon.changeOffsets(iconOffsetX.value, iconOffsetY.value);
+			leHealthIcon.changeIcon(healthIconInputText.text, {type: char.healthIconType, offsets: [iconOffsetX.value, iconOffsetY.value], scale: iconScaleStepper.value}, false);
 			positionXStepper.value = char.positionArray[0];
 			positionYStepper.value = char.positionArray[1];
 			positionCameraXStepper.value = char.cameraPosition[0];
@@ -1284,12 +1301,7 @@ class CharacterEditorState extends MusicBeatState
 				if (animImage == null || animImage.length == 0) {
 					animImage = char.imageFile;
 				}
-				if (animImage != char.curImage) {
-					char.animation = Character.tempAnimState;
-					char.frames = char.framesList.get(animImage);
-					char.animation = char.animStates.get(animImage);
-					char.curImage = animImage;
-				}
+	
 				if (animIndices != null && animIndices.length > 0) {
 					ghostChar.animation.addByIndices(animAnim, animName, animIndices, "", animFps, animLoop);
 				} else {
@@ -1308,7 +1320,7 @@ class CharacterEditorState extends MusicBeatState
 			char.alpha = 1;
 		}
 		ghostChar.color = 0xFF666688;
-        ghostChar.antialiasing = char.antialiasing;
+		ghostChar.antialiasing = char.antialiasing;
 	}
 
 	var charsLoaded:Map<String, String> = new Map();
@@ -1403,7 +1415,7 @@ class CharacterEditorState extends MusicBeatState
 		FlxG.sound.volumeDownKeys = PrelaunchingState.volumeDownKeys;
 		FlxG.sound.volumeUpKeys = PrelaunchingState.volumeUpKeys;
 
-		if(!charDropDown.dropPanel.visible) {
+		if(!charDropDown.dropPanel.visible && !iconTypeDropDown.dropPanel.visible) {
 			if (FlxG.keys.justPressed.ESCAPE) {
 				if(goToPlayState) {
 					MusicBeatState.switchState(new PlayState());
@@ -1616,6 +1628,7 @@ class CharacterEditorState extends MusicBeatState
 			"sing_duration": char.singDuration,
 			"sing_anims_prefix": char.singAnimsPrefix,
 			"healthicon": char.healthIcon,
+			"healthicon_type": char.healthIconType,
 			"healthicon_scale": char.iconScale,
 			"healthicon_offsets": char.iconOffsets,
 		

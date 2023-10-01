@@ -10,6 +10,7 @@ import grafex.system.song.Song;
 import grafex.system.Conductor;
 import grafex.system.Paths;
 import grafex.sprites.HealthIcon;
+import grafex.sprites.HealthIcon.IconProperties;
 import grafex.sprites.Alphabet;
 import grafex.system.statesystem.MusicBeatState;
 import grafex.util.ClientPrefs;
@@ -82,6 +83,8 @@ class FreeplayState extends MusicBeatState
 		
 		Paths.clearStoredMemory();
 		Application.current.window.title = Main.appTitle + ' - Freeplay Menu';
+
+		super.create();
 		
 		PlayState.isStoryMode = false;
 		WeekData.reloadWeekFiles(false);
@@ -126,7 +129,8 @@ class FreeplayState extends MusicBeatState
 				{
 					colors = [146, 113, 253];
 				}
-				addSong(song[0], i, song[1], FlxColor.fromRGB(colors[0], colors[1], colors[2]));
+				var props:IconProperties = song[3];
+				addSong(song[0], i, song[1], FlxColor.fromRGB(colors[0], colors[1], colors[2]), props);
 			}
 		}
 		WeekData.loadTheFirstEnabledMod();
@@ -160,7 +164,7 @@ class FreeplayState extends MusicBeatState
 			}
 
 			Paths.currentModDirectory = songs[i].folder;
-			var icon:HealthIcon = new HealthIcon(songs[i].songCharacter);
+			var icon:HealthIcon = new HealthIcon(songs[i].songCharacter, songs[i].iconProperties, false);
 			icon.sprTracker = songText;
 
 			iconArray.push(icon);
@@ -225,8 +229,6 @@ class FreeplayState extends MusicBeatState
         countText.cameras = [camINTERFACE];
 		textBG.cameras = [camINTERFACE];
 		text.cameras = [camINTERFACE];
-
-		super.create();
 	}
 
 	override function closeSubState() {
@@ -234,9 +236,9 @@ class FreeplayState extends MusicBeatState
 		super.closeSubState();
 	}
 
-	public function addSong(songName:String, weekNum:Int, songCharacter:String, color:Int)
+	public function addSong(songName:String, weekNum:Int, songCharacter:String, color:Int, props:IconProperties)
 	{
-		songs.push(new SongMetadata(songName, weekNum, songCharacter, color));
+		songs.push(new SongMetadata(songName, weekNum, songCharacter, color, props));
 	}
 
 	function weekIsLocked(name:String):Bool {
@@ -256,13 +258,11 @@ class FreeplayState extends MusicBeatState
 	override function update(elapsed:Float)
 	{
 		for (icon in iconArray)
-		    icon.doIconPosFreePlayBoyezz(elapsed);
+		    //icon.doIconPosFreePlayBoyezz(elapsed);
 
 		if (FlxG.sound.music != null)
 			Conductor.songPosition = FlxG.sound.music.time;
 
-		if(FlxG.keys.justPressed.F11)
-        	FlxG.fullscreen = !FlxG.fullscreen;
 
 		if (!acceptedSong){
             if (FlxG.sound.music.volume < 0.7)
@@ -540,14 +540,14 @@ class FreeplayState extends MusicBeatState
 			if (Math.abs(FlxG.sound.music.time - (Conductor.songPosition - Conductor.offset)) > 20 || (PlayState.SONG.needsVoices && Math.abs(vocals.time - (Conductor.songPosition - Conductor.offset)) > 20))
 				resyncVocals();
 
-			iconArray[freeplayinstPlaying].doIconSize();
-			iconArray[freeplayinstPlaying].doIconAnim(); //Reasons - PurSnake
+			//iconArray[freeplayinstPlaying].doIconSize();
+			//iconArray[freeplayinstPlaying].doIconAnim(); //Reasons - PurSnake
 		} : {
-			for (i in 0...iconArray.length)
+			/*for (i in 0...iconArray.length)
 			{
 				iconArray[i].doIconSize();
 				iconArray[i].doIconAnim(); //Reasons - PurSnake
-			}
+			}*/
 		}
 	}
 	
@@ -630,7 +630,7 @@ class FreeplayState extends MusicBeatState
 		    for (i in 0...iconArray.length)
 		    {
 		    	iconArray[i].alpha = 0.6;
-				iconArray[i].animation.curAnim.curFrame = 0;
+				//iconArray[i].animation.curAnim.curFrame = 0;
 		    }
     
 		    iconArray[curSelected].alpha = 1;
@@ -712,14 +712,20 @@ class SongMetadata
 	public var songName:String = "";
 	public var week:Int = 0;
 	public var songCharacter:String = "";
+	public var iconProperties:IconProperties = {
+		type: "duo",
+		offsets: [0, 0],
+		scale: 1
+	};
 	public var color:Int = -7179779;
 	public var folder:String = "";
 
-	public function new(song:String, week:Int, songCharacter:String, color:Int)
+	public function new(song:String, week:Int, songCharacter:String, color:Int, iconProperties:IconProperties)
 	{
 		this.songName = song;
 		this.week = week;
 		this.songCharacter = songCharacter;
+		this.iconProperties = iconProperties;
 		this.color = color;
 		this.folder = Paths.currentModDirectory;
 		if(this.folder == null) this.folder = '';

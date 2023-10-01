@@ -441,7 +441,8 @@ class Paths
 		}
 		#end
 
-		if(OpenFlAssets.exists(getPath(key, type, library, false))) {
+		//if(OpenFlAssets.exists(getPath(key, type, library, false))) {
+		if (FileSystem.exists(getPath(key, type, library, false))) {
 			return true;
 		}
 		return false;

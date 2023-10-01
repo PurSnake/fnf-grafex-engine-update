@@ -10,6 +10,7 @@ import flixel.tweens.FlxTween;
 import flixel.tweens.FlxEase;
 import flixel.math.FlxMath;
 import flixel.FlxG;
+import flixel.math.FlxPoint;
 
 #if MODS_ALLOWED
 import sys.io.File;
@@ -18,21 +19,52 @@ import sys.FileSystem;
 import openfl.utils.AssetType;
 import openfl.utils.Assets;
 
+import haxe.ds.Map;
+
 using StringTools;
 
+typedef IconProperties = {
+	var type:String;
+	var offsets:Array<Float>;
+	var scale:Float;
+}
 class HealthIcon extends FlxSprite
 {
+	public var animOffsets:Map<String, Array<Int>> = [];
+	public var isPlayer:Bool = false;
+	private var character:String = '';
+
 	public var sprTracker:FlxSprite;
 	public var sprTrackerOffsets:Array<Float> = [10, 15];
-	public var isPlayer:Bool = false;
-	private var char:String = '';
 
-	public function new(char:String = 'bf', isPlayer:Bool = false, ?xd:Float = 0, ?yd:Float = 0, ?cusScale:Float = 1, ?gpuShieet:Bool = true)
+	public var customOffsets:FlxPoint = FlxPoint.get(0, 0);
+	public var customScale:Float = 1;
+	public var scalePercent:Float = 1.2;
+
+	public var spriteType:String = 'duo';
+
+	public var alligment(default, set):String = 'right';
+
+	public var properties:Map<String, Dynamic> = new Map();
+
+	public function new(char:String = 'bf', props:IconProperties, isPlayer:Bool = false, ?gpuRender = true)
 	{
 		super();
+
+		if (props == null) {
+			props = {
+				type: "duo",
+				offsets: [0, 0],
+				scale: 1
+			}
+		}
 		this.isPlayer = isPlayer;
-		gpuShit = gpuShieet;
-		changeIcon(char, xd, yd, cusScale);
+
+		spriteType = props.type;
+		changeOffsets(props.offsets);
+		changeScale(props.scale);
+
+		changeIcon(char, gpuRender);
 		scrollFactor.set();
 	}
 
@@ -42,287 +74,219 @@ class HealthIcon extends FlxSprite
 
 		if (sprTracker != null)
 			setPosition(sprTracker.x + sprTracker.width + sprTrackerOffsets[0], sprTracker.y + sprTrackerOffsets[1]);
-
-		if(oldAlligment != alligment)
-			onChangeAlligment();
-
-		if(spriteType == "animated")
-		{
-			if(animation.curAnim.finished && animation.getByName(animation.curAnim.name + '-loop') != null)
-			{
-				animation.play(animation.curAnim.name + '-loop');
-			}
-		}
 	}
 
-	private var iconOffsets:Array<Float> = [0, 0];
-	public var customIconOffsets:Array<Float> = [0, 0];
-	public var customIconScale:Float = 1;
-	public var spriteType = "dual";
-	var animatedIconStage = "normal";
-	public var alligment:String = 'right';
-	var oldAlligment:String = 'right';
-
-	public var gpuShit:Bool = true; 
-
-	public function changeIcon(char:String, ?xd:Float = 0, ?yd:Float = 0, ?cusScale:Float = 1, ?gpuShieet:Bool = true)
+	public function changeIcon(char, ?props:IconProperties = null, ?gpuRender:Bool = true, ?forced:Bool = false) //char:String, ?xd:Float = 0, ?yd:Float = 0, ?cusScale:Float = 1, ?gpuShieet:Bool = true
 	{
-		gpuShit = gpuShieet;
-		customIconOffsets[0] = xd; // -
-		customIconOffsets[1] = yd; // +
-        customIconScale = cusScale;
+        if (character == char && !forced) return;
 
-        //this.scale.set(this.customIconScale, this.customIconScale);
-
-		if(this.char != char)
-		{
-        	switch(char) 
-			{     
-        		default:
-					var name:String = 'icons/' + char;
-					spriteType = "dual";
-					animatedIconStage = "normal";
-
-					#if MODS_ALLOWED
-					var modXmlToFind:String = Paths.modsXml(name);
-					var xmlToFind:String = Paths.getPath('images/' + name + '.xml', TEXT);
-					if (FileSystem.exists(modXmlToFind) || FileSystem.exists(xmlToFind) || Assets.exists(xmlToFind))
-					#else
-					if (Assets.exists(Paths.getPath('images/' + name + '.xml', TEXT)))
-					#end
-					{
-						spriteType = "animated";
-					}
-
-					if(spriteType != "animated")
-					{
-					    if(!Paths.fileExists('images/' + name + '.png', IMAGE)) name = 'icons/icon-' + char; //Older versions of psych engine's support
-					    if(!Paths.fileExists('images/' + name + '.png', IMAGE)) name = 'icons/icon-noone'; //Prevents crash from missing icon
-					}
-
-					var file:Dynamic = Paths.image(name, null, gpuShit);
-
-					if(spriteType != "animated")
-					{
-						loadGraphic(file); //Load stupidly first for getting the file size
-					    var widths = width;
-
-						switch(width)
-						{
-                            case 150:
-								loadGraphic(file, true, Math.floor(width), Math.floor(height));
-								iconOffsets[0] = (width - 150);
-
-								animation.add(char, [0], 0, false, isPlayer);
-					            animation.play(char);
-					            this.char = char;
-
-								spriteType = "single";
-
-							case 300:
-								loadGraphic(file, true, Math.floor(width / 2), Math.floor(height)); 
-					    	    iconOffsets[0] = (width - 150) / 2;
-					    	    iconOffsets[1] = (width - 150) / 2;
-
-								animation.add(char, [0, 1], 0, false, isPlayer);
-								animation.play(char);
-								this.char = char;
-
-								spriteType = "dual";
-                      
-							case 450:
-								loadGraphic(file, true, Math.floor(width / 3), Math.floor(height)); // 
-								iconOffsets[0] = (width - 150) / 3;
-								iconOffsets[1] = (width - 150) / 3;
-								iconOffsets[2] = (width - 150) / 3;
-
-								animation.add(char, [0, 1, 2], 0, false, isPlayer);
-								animation.play(char);
-								this.char = char;
-
-								spriteType = "trio";
-
-								if(char.endsWith('-win')) spriteType = "trioWIN";
-
-							case 600:
-								loadGraphic(file, true, Math.floor(width / 4), Math.floor(height)); // 
-								iconOffsets[0] = (width - 150) / 4;
-								iconOffsets[1] = (width - 150) / 4;
-								iconOffsets[2] = (width - 150) / 4;
-								iconOffsets[3] = (width - 150) / 4; //I still idk why im writing this shit here, so it doesnt change nothing - PurSnake
-
-
-								animation.add(char, [0, 1, 2, 3], 0, false, isPlayer);
-								animation.play(char);
-								this.char = char;
-
-								spriteType = "trioWIND";
-
-							default:
-								loadGraphic(file, true, Math.floor(width / 2), Math.floor(height)); 
-					    	    iconOffsets[0] = (width - 150) / 2;
-					    	    iconOffsets[1] = (width - 150) / 2;
-
-								animation.add(char, [0, 1], 0, false, isPlayer);
-								animation.play(char);
-								this.char = char;
-
-								spriteType = "dual";
-						}
-				
-			            updateHitbox();
-					    antialiasing = ClientPrefs.globalAntialiasing;
-					    if(char.endsWith('-pixel')) {
-					    	antialiasing = false;
-        	   	       }
-					}
-					
-					if(spriteType == "animated")
-					{
-						frames = Paths.getSparrowAtlas(name, null, gpuShit);
-						animation.addByPrefix('win', 'win', 24, false, isPlayer);
-						animation.addByPrefix('win-loop', 'win-loop', 24, true, isPlayer);
-						animation.addByPrefix('normal', 'normal', 24, false, isPlayer);
-						animation.addByPrefix('normal-loop', 'normal-loop', 24, true, isPlayer);
-						animation.addByPrefix('loose', 'loose', 24, false, isPlayer);
-						animation.addByPrefix('loose-loop', 'loose-loop', 24, true, isPlayer);
-
-						animation.addByPrefix('win-2', 'win-2', 24, false, isPlayer);
-						animation.addByPrefix('normal-2', 'normal-2', 24, false, isPlayer);
-						animation.addByPrefix('loose-2', 'loose-2', 24, false, isPlayer);
-
-						updateHitbox();
-
-						animation.play('normal', true);
-						this.char = char;
-
-						antialiasing = ClientPrefs.globalAntialiasing;
-						if(char.endsWith('-pixel')) {
-							antialiasing = false;
-						}
-					}
-			}
+		if (props != null) {
+			spriteType = props.type;
+			changeOffsets(props.offsets);
+			changeScale(props.scale);
 		}
+
+		switch (char) 
+		{  
+            default: 
+				switch(spriteType) {
+                    case 'solo' | 'duo' | 'trioWin' | 'trioLose' | 'quadro':
+
+						var name:String = 'icons/' + char;
+
+						if(!Paths.fileExists('images/' + name + '.png', IMAGE)) name = 'icons/icon-' + char; //Older versions of psych engine's support
+
+						if(!Paths.fileExists('images/' + name + '.png', IMAGE)) {
+							name = 'icons/icon-noone'; //Prevents crash from missing 
+							spriteType == 'solo';
+							changeOffsets([0, 0]);
+							changeScale(1);
+						}
+
+						var cutNum:Int = switch (spriteType) {
+							case 'solo': 1;
+							case 'duo': 2;
+							case 'trioWin' | 'trioLose': 3;
+							case 'quadro': 4;
+							default: 2;
+						}
+						var graphic = Paths.image(name, gpuRender); //For width and height - PurSnake
+
+						loadGraphic(graphic, true, Math.floor(graphic.width / cutNum), Math.floor(graphic.height));
+
+						switch(spriteType) {
+							case 'solo':
+								animation.add('default', [0], 0, false, isPlayer);
+
+							case 'duo': 
+								animation.add('default', [0], 0, false, isPlayer);
+								animation.add('losing', [1], 0, false, isPlayer);
+	
+							case 'trioWin':
+								animation.add('default', [0], 0, false, isPlayer);
+								animation.add('losing', [1], 0, false, isPlayer);
+								animation.add('winning', [2], 0, false, isPlayer);
+							case 'trioLose': 
+								animation.add('default', [0], 0, false, isPlayer);
+								animation.add('losing', [1], 0, false, isPlayer);
+								animation.add('lost', [2], 0, false, isPlayer);
+
+							case 'quadro': 4;
+							    animation.add('default', [0], 0, false, isPlayer);
+							    animation.add('losing', [1], 0, false, isPlayer);
+							    animation.add('winning', [2], 0, false, isPlayer);
+								animation.add('lost', [3], 0, false, isPlayer);
+						}
+						playAnim("default");
+
+					case 'classic-animated' | 'modern-animated':
+						var name:String = 'icons/' + char;
+						
+						if(!Paths.fileExists('images/' + name + '.png', IMAGE)) name = 'icons/icon-' + char; //Older versions of psych engine's support
+
+						if(Paths.getAtlas(name) == null) {
+							name = 'icons/icon-noone';
+							spriteType == 'solo';
+							changeOffsets([0, 0]);
+							changeScale(1);
+						}
+		
+						var file:Dynamic = Paths.getAtlas(name); //For width and height - PurSnake
+
+					case 'custom': loadGraphic(Paths.image('icons/icon-noone')); // For custom things
+				}
+				updateHitbox();
+				antialiasing = !char.endsWith('-pixel') ? ClientPrefs.globalAntialiasing : false;
+		} // Add new 'case', if you want to add HARDCODED character icon ;)
+
+		character = char;
+
+		//game.callOnHscript("onChangeIcon", [character, isPlayer, spriteType]);
 	}
 
-	public function changeOffsets(?xd:Float = 0, ?yd:Float = 0) {
-		customIconOffsets[0] = xd; // -
-		customIconOffsets[1] = yd; // +
+	public function playAnim(AnimName:String, Force:Bool = false, Reversed:Bool = false, Frame:Int = 0){
+		if(animation.getByName(AnimName) == null) return;
+
+		animation.play(AnimName, Force, Reversed, Frame);
 	}
 
-	public function changeScale(?val:Float = 1) {
-		customIconScale = val;
-		this.scale.set(this.customIconScale, this.customIconScale);
-	}
-
-	public dynamic function updateAnim(health:Float){ // Dynamic to prevent having like 20 if statements
-		    switch(spriteType)
-		    {
-				case 'trio':
-				    if (health < 10)
-						animation.curAnim.curFrame = 2;
-					else if (health < 30) 
-						animation.curAnim.curFrame = 1;
-					else 
-						animation.curAnim.curFrame = 0;
-
-		        case 'trioWIN':
-		    	    if (health < 20) 
-		    	    	animation.curAnim.curFrame = 1;
-		    	   else if (health > 80)
-		    	    	animation.curAnim.curFrame = 2;
-		    	    else
-		    	    	animation.curAnim.curFrame = 0;
-
-		        case 'trioWIND':
-				if (health < 10)
-				    animation.curAnim.curFrame = 3;
-				else if (health < 30) 
-					animation.curAnim.curFrame = 1;
-				else if (health > 80)
-		    	    	    animation.curAnim.curFrame = 2;
-				else
-				    animation.curAnim.curFrame = 0;
-                case 'dual':
-		        	if (health < 20)
-		        		animation.curAnim.curFrame = 1;
-		        	else
-		        		animation.curAnim.curFrame = 0;
-				case 'single': 
-					animation.curAnim.curFrame = 0; //for real
-
-				case 'animated':
-					if ((health < 20) && (animation.getByName("loose") != null)) {
-						animatedIconStage = "loose";
-					} else if ((health > 80) && (animation.getByName("win") != null)) {
-						animatedIconStage = "win";
-					} else if (animation.getByName("normal") != null) {
-						animatedIconStage = "normal";
-					}
-	        }
-	}
-
-	public function doIconSize() {
-		scale.set(this.customIconScale + 0.2, this.customIconScale + 0.2);
-		updateHitbox();
-	}
-
-	public function doIconAnim() {
-		if(spriteType == "animated")
-		    animation.play(animatedIconStage, true);
-	}
-
-	var iconOffset:Int = 26;
-	public function doIconPos(elapsed:Float) {
-	    var mult:Float = FlxMath.lerp(this.customIconScale, scale.x, Utils.boundTo(1 - (elapsed * 9 * PlayState.instance.playbackRate), 0, 1));
+	var game = PlayState.instance;
+	public function updateScale(elapsed:Float)
+	{
+		var mult:Float = FlxMath.lerp(customScale, scale.x, Utils.boundTo(1 - (elapsed * 9 * game.playbackRate), 0, 1));
 		scale.set(mult, mult);
 		updateHitbox();
+	}
 
+	public var iconOffset:Int = 26;
+	public function updatePosition(elapsed:Float)
+	{
+		var newX:Float = x;
 		switch(alligment) {
 			case 'right':
 				this.isPlayer ? {
-					x = PlayState.instance.healthBar.x + (PlayState.instance.healthBar.width * (FlxMath.remapToRange(PlayState.instance.healthBar.percent, 0, 100, 100, 0) * 0.01)) + (150 * scale.x - 150) / 2 - iconOffset;
+					newX = game.healthBar.x + (game.healthBar.width * (FlxMath.remapToRange(game.healthBar.percent, 0, 100, 100, 0) * 0.01)) + (150 * scale.x - 150) / 2 - iconOffset;
 				} : {
-					x = PlayState.instance.healthBar.x + (PlayState.instance.healthBar.width * (FlxMath.remapToRange(PlayState.instance.healthBar.percent, 0, 100, 100, 0) * 0.01)) - (150 * scale.x) / 2 - iconOffset * 2;
+					newX = game.healthBar.x + (game.healthBar.width * (FlxMath.remapToRange(game.healthBar.percent, 0, 100, 100, 0) * 0.01)) - (150 * scale.x) / 2 - iconOffset * 2;
 				}	
 			case 'left':
 				this.isPlayer ? {
-				        x = PlayState.instance.healthBar.x + (PlayState.instance.healthBar.width * (FlxMath.remapToRange(100 - PlayState.instance.healthBar.percent, 0, 100, 100, 0) * 0.01)) - (150 * scale.x) / 2 - iconOffset * 2;
+				        newX = game.healthBar.x + (game.healthBar.width * (FlxMath.remapToRange(100 - game.healthBar.percent, 0, 100, 100, 0) * 0.01)) - (150 * scale.x) / 2 - iconOffset * 2;
 				} : {
-					x = PlayState.instance.healthBar.x + (PlayState.instance.healthBar.width * (FlxMath.remapToRange(100 - PlayState.instance.healthBar.percent, 0, 100, 100, 0) * 0.01)) + (150 * scale.x - 150) / 2 - iconOffset;
+					newX = game.healthBar.x + (game.healthBar.width * (FlxMath.remapToRange(100 - game.healthBar.percent, 0, 100, 100, 0) * 0.01)) + (150 * scale.x - 150) / 2 - iconOffset;
 				}
 		}
 
+		game.smoothIcons ? x = FlxMath.bound(FlxMath.lerp(x, newX, FlxMath.bound(elapsed * 35 * game.playbackRate, 0, 1)), newX - 50, newX + 50) : x = newX;
 	}
 
-	public function doIconPosFreePlayBoyezz(elapsed:Float) {
-	
-		var mult:Float = FlxMath.lerp(1, scale.x, Utils.boundTo(1 - (elapsed * 9), 0, 1));
-		scale.set(mult, mult);
-   
-	}
-
-	public function onChangeAlligment()
+	public dynamic function updateAnim(health:Float) // Dynamic to prevent having like 20 if statements
 	{
-		switch(alligment) {
-			case 'right':
-				this.flipX = isPlayer;
+		switch (spriteType) {
+			case 'solo': 
+				playAnim("default");
 
-			case 'left':
-				this.flipX = !isPlayer;
+		    case 'duo': 
+				health < 20 ? playAnim("losing") : playAnim("default");
+
+			case 'trioWin': 
+				if (health < 20) 
+					playAnim("losing");
+			    else if (health > 80)
+					playAnim("winning");
+				else
+					playAnim("default");
+
+			case 'trioLose': 
+				if (health < 10)
+					playAnim("lost");
+				else if (health < 30) 
+					playAnim("losing");
+				else 
+					playAnim("default");
+
+			case 'quadro': 
+				if (health < 10)
+				    playAnim("lost")
+				else if (health < 30) 
+					playAnim("losing");
+				else if (health > 80)
+		    	    playAnim("winning");
+				else
+					playAnim("default");
 		}
 
-		oldAlligment = alligment;
+	}
+
+	public function doScale(percentage:Float = 1)
+	{
+		scale.set(customScale * scalePercent * percentage, customScale * scalePercent * percentage);
+		updateHitbox();
 	}
 
 	override function updateHitbox()
 	{
 		super.updateHitbox();
-		offset.x = iconOffsets[0] -	customIconOffsets[0];
-		offset.y = iconOffsets[1] +	customIconOffsets[1];
+		var offsetByAnim = [0, 0];
+		if (animOffsets.exists(animation.curAnim.name)) offsetByAnim = animOffsets.get(animation.curAnim.name);
+
+		offset.x = -customOffsets.x + offsetByAnim[0];
+		offset.y = customOffsets.y + offsetByAnim[1];
+	}
+	
+	// Setters functions
+
+	function set_alligment(Alligment:String):String
+	{
+		switch(Alligment) {
+			case 'left':
+				flipX = isPlayer;
+			case 'right':
+				flipX = !isPlayer;
+		}
+		alligment = Alligment;
+		return Alligment;
+	}
+
+	function get_alligment():String
+	{
+		return alligment;
+	}
+
+	public function changeOffsets(custom:Array<Float>)
+	{
+        customOffsets.set(custom[0], custom[1]);
+	}
+
+	public function changeScale(custom:Float = 1, ?set:Bool = false)
+	{
+		customScale = custom;
+		if (set) scale.set(custom, custom);
+
 	}
 
 	public function getCharacter():String {
-		return char;
+		return character;
 	}
+
 }
