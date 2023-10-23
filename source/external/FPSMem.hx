@@ -46,18 +46,16 @@ class FPSMem extends Sprite
 	public static var showMem:Bool=true; // TODO: Rename
 	public static var showFPS:Bool=true;
 
-	@:noCompletion private var cacheCount:Int;
-	@:noCompletion private var currentTime:Float;
-	@:noCompletion private var times:Array<Float>;
+	@:noCompletion private var fpsCount:Int = 0;
+	@:noCompletion private var currentTime:Float = 0;
+	@:noCompletion private var times:Array<Float> = [];
 
-	var fpsText:TextField;
-	var outlines:Array<TextField> = [];
+	@:noCompletion var fpsText:TextField;
+	@:noCompletion var outlines:Array<TextField> = [];
 
-	var lastUpdate:Float = 0;
 	public function new(x:Float = 10, y:Float = 10, color:Int = 0x000000)
 	{
 		super();
-
 		this.x = x;
 		this.y = y;
 
@@ -67,30 +65,30 @@ class FPSMem extends Sprite
 		fpsText.width = FlxG.width;
 		fpsText.selectable = fpsText.mouseEnabled = false;
 
-		for (i in 0...8) {
-			var otext:TextField = new TextField();
-			otext.x = Math.sin(i) * 2;
-			otext.y = Math.cos(i) * 2;
-
-			otext.defaultTextFormat = fpsText.defaultTextFormat;
-			otext.textColor = 0x000000;
-			otext.width = fpsText.width;
-			otext.selectable = otext.mouseEnabled = false;
+		if (!ClientPrefs.lowQuality){
+			var iterations = 10;
+			final deezNuts = (1/iterations)*Math.PI*2;
+			while (iterations > -1){
+				var otext:TextField = new TextField();
+				otext.x = Math.sin(deezNuts * iterations) * 2;
+				otext.y = Math.cos(deezNuts * iterations) * 2;
 	
-			outlines.push(otext);
-			addChild(otext);
+				otext.defaultTextFormat = fpsText.defaultTextFormat;
+				otext.textColor = 0x000000;
+				otext.width = fpsText.width;
+				otext.selectable = otext.mouseEnabled = false;
+		
+				outlines.push(otext);
+				addChild(otext);
+				iterations--;
+			}
 		}
 		addChild(fpsText);
-
-
-		cacheCount = 0;
-		currentTime = 0;
-		times = [];
 
 		#if flash
 		addEventListener(Event.ENTER_FRAME, function(e)
 		{
-			__enterFrame(Timer.stamp()-lastUpdate);
+			__enterFrame(Timer.stamp()-currentTime);
 		});
 		#end
 	}
@@ -100,17 +98,15 @@ class FPSMem extends Sprite
 	private #if !flash override #end function __enterFrame(d:Float):Void
 	{
 		currentTime = Timer.stamp();
-		lastUpdate = currentTime;
 		times.push(currentTime);
 		
 		while(times[0]<currentTime-1)
 			times.shift();
 
-		var currentCount = times.length;
-		currentFPS = currentCount;
+		currentFPS = times.length;
 		currentMem = System.totalMemory;
 
-		if (currentCount != cacheCount /*&& visible*/)
+		if (currentFPS != fpsCount /*&& visible*/)
 		{
 			fpsText.text = "";
 			if(showFPS) 
@@ -138,7 +134,7 @@ class FPSMem extends Sprite
 			for (outline in outlines)
 				outline.text = fpsText.text;
 		}
-		cacheCount = currentCount;
+		fpsCount = currentFPS;
 	}
 
 	function setText(text:String) {

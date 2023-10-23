@@ -3220,7 +3220,7 @@ class PlayState extends MusicBeatState
 	
 					if(cpuControlled && daNote.mustPress && !daNote.blockHit && daNote.canBeHit) {
 						if(daNote.isSustainNote) {
-							if(daNote.canBeHit) {
+							if(!daNote.wasGoodHit) {
 								goodNoteHit(daNote);
 							}
 						} else if(daNote.strumTime <= Conductor.songPosition) {
@@ -5157,7 +5157,7 @@ class PlayState extends MusicBeatState
 		splash.setupNoteSplash(x, y, data, skin, hue, sat, brt);
 		if (note != null) {
 			splash.scrollFactor.set(note.scrollFactor.x, note.scrollFactor.y);
-			splash.alpha *= note.alpha;			
+			splash.alpha *= note.alpha;
 		}
 		grpNoteSplashes.add(splash);
 	}
@@ -5775,8 +5775,7 @@ class PlayState extends MusicBeatState
 		    }
     }
 
-	function getCamOffsets() 
-    {
+	function getCamOffsets(){
         dadPos[0] = dad.getMidpoint().x + 150 + dad.cameraPosition[0] + opponentCameraOffset[0];
         dadPos[1] = dad.getMidpoint().y - 100 + dad.cameraPosition[1] + opponentCameraOffset[1];
 		camCharsPositions.set('dad', [dadPos[0], dadPos[1]]);
@@ -5796,9 +5795,8 @@ class PlayState extends MusicBeatState
         stageBuild.callFunction('onGetCamOffsets', []);
 		callOnHscript("onGetCamOffsets", []);
     }
-		
-	public function startVideo(name:String)
-	{
+	
+	public function startVideo(name:String){
 		#if VIDEOS_ALLOWED
 		inCutscene = true;
 
@@ -5816,8 +5814,7 @@ class PlayState extends MusicBeatState
 
 		var video:MP4Handler = new MP4Handler();
 		video.playVideo(filepath);
-		video.finishCallback = function()
-		{
+		video.finishCallback = function(){
 			startAndEnd();
 			return;
 		}
