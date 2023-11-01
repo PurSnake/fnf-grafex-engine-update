@@ -398,18 +398,6 @@ class Character extends FlxSprite
 
 	public function playAnim(AnimName:String, Force:Bool = false, Reversed:Bool = false, Frame:Int = 0):Void
 	{
-
-		/*var prevFrames = imageNames.get(AnimName);
-		if (prevFrames == null || prevFrames.length == 0) {
-			prevFrames = imageFile;
-		}
-		if (prevFrames != null && prevFrames != curImage) {
-			animation = tempAnimState;
-			frames = framesList.get(prevFrames);
-			animation = animStates.get(prevFrames);
-			curImage = prevFrames;
-		}*/
-
 		specialAnim = false;
 		animation.play(AnimName, Force, Reversed, Frame);
 

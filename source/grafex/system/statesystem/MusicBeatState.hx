@@ -18,6 +18,9 @@ import grafex.util.MemoryUtil;
 
 import grafex.system.script.GrfxScriptHandler;
 
+import grafex.system.statesystem.ScriptedState;
+import grafex.system.statesystem.ScriptedSubState;
+
 class MusicBeatState extends FlxUIState
 {
 	private var curSection:Int = 0;
@@ -179,6 +182,33 @@ class MusicBeatState extends FlxUIState
 		}
 		FlxTransitionableState.skipNextTransIn = false;
 		FlxG.switchState(nextState);
+	}
+
+
+	public static function switchScriptedState(?nextCustomState:String = 'CustomState') {
+		// Custom made Trans in
+		var nextState = new ScriptedState(nextCustomState);
+		var curState:Dynamic = FlxG.state;
+		var leState:ScriptedState = curState;
+		if(!FlxTransitionableState.skipNextTransIn) {
+			leState.openSubState(new CustomFadeTransition(0.4, false));
+			if(nextState == FlxG.state) {
+				CustomFadeTransition.finishCallback = function() {
+					FlxG.resetState();
+				};
+			} else {
+				CustomFadeTransition.finishCallback = function() {
+					FlxG.switchState(nextState);
+				};
+			}
+			return;
+		}
+		FlxTransitionableState.skipNextTransIn = false;
+		FlxG.switchState(nextState);
+	}
+
+	public static function openScriptedSubState(?CustomSubState:String = 'CustomSubState') {
+		FlxG.state.openSubState(new ScriptedSubState(CustomSubState));
 	}
 
 	public static function resetState() {

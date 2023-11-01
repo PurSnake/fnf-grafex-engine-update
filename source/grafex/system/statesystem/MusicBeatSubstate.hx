@@ -122,10 +122,13 @@ class MusicBeatSubstate extends FlxSubState
 	public override function close() {
 		super.close();
 		call("onClose");
+	}
 
-		//if (stateScript != null) stateScript.dispose();
-
+	override function destroy()
+	{
+		call("onDestroy");
 		subStateScript = null;
 		instance = null;
+		super.destroy();
 	}
 }

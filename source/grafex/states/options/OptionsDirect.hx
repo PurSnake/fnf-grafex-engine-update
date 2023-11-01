@@ -14,7 +14,6 @@ class OptionsDirect extends MusicBeatState
 {
 	override function create()
 	{
-		super.create();
 		transIn = FlxTransitionableState.defaultTransIn;
 		transOut = FlxTransitionableState.defaultTransOut;
 
@@ -27,6 +26,8 @@ class OptionsDirect extends MusicBeatState
 		menuBg.scrollFactor.set();
 		menuBg.scale.set(1, 1);
 		add(menuBg);
+
+		super.create();
 
 		openSubState(new OptionsMenu());
 	}

@@ -151,6 +151,38 @@ class WinAPI {
 		return 0;
 	}
 
+    #if windows
+    @:functionCode('
+        HWND window = GetActiveWindow();
+
+        // make window layered
+        alpha = SetWindowLong(window, GWL_EXSTYLE, GetWindowLong(window, GWL_EXSTYLE) ^ WS_EX_LAYERED);
+        SetLayeredWindowAttributes(window, RGB(red, green, blue), 0, LWA_COLORKEY);
+    ')
+    #end
+    public static function setTransColor(red:Int, green:Int, blue:Int, alpha:Int = 0) {
+        return alpha;
+    }
+
+    // kudos to bing chatgpt thing i hate C++
+    #if windows
+    @:functionCode('
+        HWND hwnd = GetActiveWindow();
+        HMENU hmenu = GetSystemMenu(hwnd, FALSE);
+        if (enable) {
+            EnableMenuItem(hmenu, SC_CLOSE, MF_BYCOMMAND | MF_ENABLED);
+        } else {
+            EnableMenuItem(hmenu, SC_CLOSE, MF_BYCOMMAND | MF_GRAYED);
+        }
+    ')
+    #end
+    public static function setCloseButtonEnabled(enable:Bool) {
+        return enable;
+    }
+
+
+
+
 
 }
 #end

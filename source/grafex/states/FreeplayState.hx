@@ -229,6 +229,9 @@ class FreeplayState extends MusicBeatState
         countText.cameras = [camINTERFACE];
 		textBG.cameras = [camINTERFACE];
 		text.cameras = [camINTERFACE];
+		
+		call('onCreatePost', []);
+
 	}
 
 	override function closeSubState() {
@@ -238,7 +241,9 @@ class FreeplayState extends MusicBeatState
 
 	public function addSong(songName:String, weekNum:Int, songCharacter:String, color:Int, props:IconProperties)
 	{
+		call('onAddSong', [songName, weekNum, songCharacter, color, props]);
 		songs.push(new SongMetadata(songName, weekNum, songCharacter, color, props));
+		call('onAddSongPost', [songName, weekNum, songCharacter, color, props]);
 	}
 
 	function weekIsLocked(name:String):Bool {
@@ -257,6 +262,9 @@ class FreeplayState extends MusicBeatState
 	private static var ChooseSound:FlxSound = null;
 	override function update(elapsed:Float)
 	{
+
+		super.update(elapsed);
+
 		for (icon in iconArray)
 		    //icon.doIconPosFreePlayBoyezz(elapsed);
 
@@ -341,6 +349,7 @@ class FreeplayState extends MusicBeatState
 		{
 			if (!acceptedSong)
 			{
+				call('onLeave', []);
 				acceptedSong = true;
 				FlxTween.tween(camINTERFACE, {alpha: 0}, 0.2, {ease: FlxEase.linear, startDelay: 0.1});
 				new FlxTimer().start(0.4, function(tmr:FlxTimer)
@@ -433,18 +442,19 @@ class FreeplayState extends MusicBeatState
 			openSubState(new ResetScoreSubState(songs[curSelected].songName, curDifficulty, songs[curSelected].songCharacter));
 			FlxG.sound.play(Paths.sound('scrollMenu'));
 		}
-		super.update(elapsed);
+		call('onUpdatePost', [elapsed]);
 	}
 
 	function acceptSong()
 	{
 		if (!acceptedSong)
 		{
-
 		    persistentUpdate = false;
 		    var songLowercase:String = Paths.formatToSongPath(songs[curSelected].songName);
 		    var songString:String = Highscore.formatSong(songLowercase, curDifficulty);
 	    
+		    call('onAcceptSong', [songLowercase, songString]);
+
 			if(sys.FileSystem.exists(Paths.modsJson(songLowercase + '/' + songString)) || sys.FileSystem.exists(Paths.json(songLowercase + '/' + songString))) 
 			{
 			        trace(songString);
@@ -512,7 +522,7 @@ class FreeplayState extends MusicBeatState
 					}
 				});
 			}
-
+		    call('onAcceptSongPost', [songLowercase, songString]);
 	    }
 	}
 
@@ -574,6 +584,7 @@ class FreeplayState extends MusicBeatState
 	{
 		if (!acceptedSong)
 		{
+		    call('onChangeDiff', [change]);
 		    curDifficulty = Math.round(Math.max(0, Math.min(curDifficulty + change, Utils.difficulties.length - 1)));
     
 		    lastDifficultyName = Utils.difficulties[curDifficulty];
@@ -591,6 +602,7 @@ class FreeplayState extends MusicBeatState
 			}
     
 		    positionHighscore();
+		    call('onChangeDiffPost', [change]);
 		}
 	}
 
@@ -598,6 +610,7 @@ class FreeplayState extends MusicBeatState
 	{
 		if (!acceptedSong)
 		{
+		    call('onChangeSelection', [change, playSound]);
 		    if(playSound) FlxG.sound.play(Paths.sound('scrollMenu'), 0.4);
     
 		    curSelected += change;
@@ -675,6 +688,8 @@ class FreeplayState extends MusicBeatState
 			var newPos:Int = Utils.difficulties.indexOf(lastDifficultyName);
 			//trace('Pos of ' + lastDifficultyName + ' is ' + newPos);
 			if(newPos > -1) curDifficulty = newPos;
+
+		    call('onChangeSelectionPost', [change, playSound]);
 		}
 	}
 
@@ -704,6 +719,8 @@ class FreeplayState extends MusicBeatState
 
 		vocals2.time = Conductor.songPosition;
 		vocals2.play();
+
+		call('onResyncVocals', []);
 	}
 }
 

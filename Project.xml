@@ -133,7 +133,8 @@
 	<haxedef name="hscriptPos" />
 	<haxedef name="openflPos" />
 
-	<haxelib name="flixel-screenshot-plugin" />
+	<!--haxelib name="flixel-screenshot-plugin" /-->
+	<haxelib name="flixel-shadertoy-shader-lr" />
 
 	<!--In case you want to use the ui package-->
 	<haxelib name="flixel-ui" />

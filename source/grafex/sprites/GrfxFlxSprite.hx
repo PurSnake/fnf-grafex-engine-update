@@ -3,13 +3,12 @@ package grafex.sprites;
 import openfl.geom.Matrix;
 import flixel.FlxCamera;
 import flixel.FlxG;
-import flixel.FlxSprite;
 import flixel.graphics.frames.FlxFrame.FlxFrameAngle;
 import flixel.math.FlxAngle;
 import flixel.math.FlxPoint;
 import flixel.util.FlxDestroyUtil;
 
-class GrfxFlxSprite extends FlxSprite
+class GrfxSkewedFlxSprite extends flixel.FlxSprite
 {
 	public var skew(default, null):FlxPoint = FlxPoint.get();
 

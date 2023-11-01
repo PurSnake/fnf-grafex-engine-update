@@ -44,6 +44,9 @@ import flixel.util.FlxAxes;
 
 import grafex.cutscenes.CutsceneHandler;
 
+import grafex.system.statesystem.ScriptedState;
+import grafex.system.statesystem.ScriptedSubState;
+
 using StringTools;
 
 class GrfxScriptHandler {
@@ -106,8 +109,8 @@ class GrfxHxScript extends GrfxModule
 		try {
 			smthVal = Reflect.callMethod(null, funcToExec, args);
 		} catch(e) {
-			trace('{${scriptName}}: [Function Error](${eventName}): ${e}');
-		 	Lib.application.window.alert(e.message + "\n Function: " + eventName + "\n In script '" + scriptName + "'", "Function ('+eventName+') Executing Error!");
+			trace(scriptName + ': [Function Error] (' +eventName + '): ' + e);
+		 	Lib.application.window.alert(e.message + "\n Function: " + eventName + "\n In script '" + scriptName + "'", "Function (' + eventName + ') Executing Error!");
 			dispose();
 		}
 
@@ -145,6 +148,15 @@ class GrfxModule
 		set('Function_StopScript', Function_StopScript);
 		set('Function_Stop', Function_Stop);
 		set('Function_Continue', Function_Continue);
+
+		set("async", (f:Void->Void) -> {
+			#if sys
+			sys.thread.Thread.create(f);
+			#else
+			FlxG.log.warn("Non-sys platform detected, function will run on main thread.");
+			f();
+			#end
+		});
 
 		set('FlxG', FlxG);
 		set('FlxSprite', FlxSprite);
@@ -185,6 +197,10 @@ class GrfxModule
 		set("X", FlxAxes.X);
 		set("Y", FlxAxes.Y);
 		set("XY", FlxAxes.XY);
+		set("Json", tjson.TJSON);
+
+		set("ScriptedState", ScriptedState);
+		set("ScriptedSubState", ScriptedSubState);
 
 		set('FlxColor', CustomFlxColor.instance);
 		set('BlendMode', CustomBlendMode);
@@ -195,6 +211,12 @@ class GrfxModule
 		set("Reflect", Reflect);
 		set("FileSystem", FileSystem);
 		set("File", File);
+
+		#if !flash
+		set('FlxRuntimeShader', flixel.addons.display.FlxRuntimeShader);
+		set('FlxShaderToyRuntimeShader', shadertoy.FlxShaderToyRuntimeShader);
+		set('ShaderFilter', openfl.filters.ShaderFilter);
+		#end
 
 		/*set('add', function(obj:FlxBasic) PlayState.instance.add(obj));
 		set('insert', function(pos:Int, obj:FlxBasic) PlayState.instance.insert(pos, obj));
@@ -364,7 +386,7 @@ class GrfxModule
 		scriptName = name;
 		set('scriptName', scriptName);
 
-		set("thisScript", this);
+		set("__script__", this);
 
 		if (extraParams != null) {
 			for (i in extraParams.keys())
@@ -418,6 +440,16 @@ class GrfxModule
 
 	public function exists(field:String):Bool
 		return interp.variables.exists(field);
+
+	public static function inlineCast<T>(v:Dynamic, t:Class<T>) {
+		var c:T = cast v;
+		return c;
+	}
+	private static function _dynamicify(obj:Map<String, Dynamic>):Dynamic {
+		var nd:Dynamic = {};
+		for (k => v in obj) Reflect.setField(nd, k, v);
+		return nd;
+	}
 
 	public function import_type(path:String, ?customName:String = '') {
 		var classPackage:Array<String> = path.split('.');
@@ -641,6 +673,15 @@ class GrfxStateModule
 		set('Function_Stop', Function_Stop);
 		set('Function_Continue', Function_Continue);
 
+		set("async", (f:Void->Void) -> {
+			#if sys
+			sys.thread.Thread.create(f);
+			#else
+			FlxG.log.warn("Non-sys platform detected, function will run on main thread.");
+			f();
+			#end
+		});
+
 		set('FlxG', FlxG);
 		set('FlxSprite', FlxSprite);
 		set('PlayState', PlayState);
@@ -673,6 +714,10 @@ class GrfxStateModule
 		set("X", FlxAxes.X);
 		set("Y", FlxAxes.Y);
 		set("XY", FlxAxes.XY);
+		set("Json", tjson.TJSON);
+
+		set("ScriptedState", ScriptedState);
+		set("ScriptedSubState", ScriptedSubState);
 
 		set('FlxColor', CustomFlxColor.instance);
 		set('BlendMode', CustomBlendMode);
@@ -683,6 +728,12 @@ class GrfxStateModule
 		set("Reflect", Reflect);
 		set("FileSystem", FileSystem);
 		set("File", File);
+
+		#if !flash
+		set('FlxRuntimeShader', flixel.addons.display.FlxRuntimeShader);
+		set('FlxShaderToyRuntimeShader', shadertoy.FlxShaderToyRuntimeShader);
+		set('ShaderFilter', openfl.filters.ShaderFilter);
+		#end
 
 		set("Achievements", AchievementsGrfx);
 		set("CutsceneHandler", CutsceneHandler);
@@ -719,7 +770,7 @@ class GrfxStateModule
 		scriptName = name;
 		set('scriptName', scriptName);
 
-		set("thisScript", this);
+		set("__script__", this);
 
 		if (extraParams != null) {
 			for (i in extraParams.keys())
@@ -787,6 +838,16 @@ class GrfxStateModule
 
 	public function exists(field:String):Bool
 		return interp.variables.exists(field);
+
+	public static function inlineCast<T>(v:Dynamic, t:Class<T>) {
+		var c:T = cast v;
+		return c;
+	}
+	private static function _dynamicify(obj:Map<String, Dynamic>):Dynamic {
+		var nd:Dynamic = {};
+		for (k => v in obj) Reflect.setField(nd, k, v);
+		return nd;
+	}
 
 	public function import_type(path:String, ?customName:String = '') {
 		var classPackage:Array<String> = path.split('.');

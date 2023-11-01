@@ -171,9 +171,9 @@ class HealthIcon extends FlxSprite
 	}
 
 	var game = PlayState.instance;
-	public function updateScale(elapsed:Float)
+	public function updateScale(?elapsed:Float = 0, ?playbackRate:Float = 0)
 	{
-		var mult:Float = FlxMath.lerp(customScale, scale.x, Utils.boundTo(1 - (elapsed * 9 * game.playbackRate), 0, 1));
+		var mult:Float = FlxMath.lerp(customScale, scale.x, Utils.boundTo(1 - ((elapsed != 0 ? elapsed : FlxG.elapsed) * 9 * (playbackRate != 0 ? playbackRate : game.playbackRate)), 0, 1));
 		scale.set(mult, mult);
 		updateHitbox();
 	}
@@ -181,19 +181,20 @@ class HealthIcon extends FlxSprite
 	public var iconOffset:Int = 26;
 	public function updatePosition(elapsed:Float)
 	{
+
 		var newX:Float = x;
 		switch(alligment) {
 			case 'right':
 				this.isPlayer ? {
-					newX = game.healthBar.x + (game.healthBar.width * (FlxMath.remapToRange(game.healthBar.percent, 0, 100, 100, 0) * 0.01)) + (150 * scale.x - 150) / 2 - iconOffset;
+					newX = game.healthBar.x + (game.healthBar.width * (FlxMath.remapToRange(game.displayedHealth, 0, 100, 100, 0) * 0.01)) + (150 * scale.x - 150) / 2 - iconOffset;
 				} : {
-					newX = game.healthBar.x + (game.healthBar.width * (FlxMath.remapToRange(game.healthBar.percent, 0, 100, 100, 0) * 0.01)) - (150 * scale.x) / 2 - iconOffset * 2;
+					newX = game.healthBar.x + (game.healthBar.width * (FlxMath.remapToRange(game.displayedHealth, 0, 100, 100, 0) * 0.01)) - (150 * scale.x) / 2 - iconOffset * 2;
 				}	
 			case 'left':
 				this.isPlayer ? {
-				        newX = game.healthBar.x + (game.healthBar.width * (FlxMath.remapToRange(100 - game.healthBar.percent, 0, 100, 100, 0) * 0.01)) - (150 * scale.x) / 2 - iconOffset * 2;
+				        newX = game.healthBar.x + (game.healthBar.width * (FlxMath.remapToRange(100 - game.displayedHealth, 0, 100, 100, 0) * 0.01)) - (150 * scale.x) / 2 - iconOffset * 2;
 				} : {
-					newX = game.healthBar.x + (game.healthBar.width * (FlxMath.remapToRange(100 - game.healthBar.percent, 0, 100, 100, 0) * 0.01)) + (150 * scale.x - 150) / 2 - iconOffset;
+					newX = game.healthBar.x + (game.healthBar.width * (FlxMath.remapToRange(100 - game.displayedHealth, 0, 100, 100, 0) * 0.01)) + (150 * scale.x - 150) / 2 - iconOffset;
 				}
 		}
 
@@ -264,8 +265,7 @@ class HealthIcon extends FlxSprite
 			case 'right':
 				flipX = !isPlayer;
 		}
-		alligment = Alligment;
-		return Alligment;
+		return alligment = Alligment;
 	}
 
 	function get_alligment():String

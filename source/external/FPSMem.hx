@@ -72,12 +72,10 @@ class FPSMem extends Sprite
 				var otext:TextField = new TextField();
 				otext.x = Math.sin(deezNuts * iterations) * 2;
 				otext.y = Math.cos(deezNuts * iterations) * 2;
-	
 				otext.defaultTextFormat = fpsText.defaultTextFormat;
 				otext.textColor = 0x000000;
 				otext.width = fpsText.width;
 				otext.selectable = otext.mouseEnabled = false;
-		
 				outlines.push(otext);
 				addChild(otext);
 				iterations--;
@@ -109,12 +107,11 @@ class FPSMem extends Sprite
 		if (currentFPS != fpsCount /*&& visible*/)
 		{
 			fpsText.text = "";
-			if(showFPS) 
-				fpsText.text += "FPS: " + currentFPS + "\n"; 
-			if(showMem) 
-				currentMem < 0 ? fpsText.text += "Memory: Leaking " + formatBytes(currentMem): fpsText.text += "Memory: " + formatBytes(currentMem);
+			if(showFPS) fpsText.text += "FPS: " + currentFPS + "\n"; 
+
+			if(showMem) currentMem < 0 ? fpsText.text += "Memory: Leaking " + formatBytes(currentMem): fpsText.text += "Memory: " + formatBytes(currentMem);
 	
-				//currentMem < 0 ? fpsText.text += "Memory: Leaking " + Math.abs(currentMem) + " MB\n" : fpsText.text += "Memory: " + currentMem + " MB\n";
+			//currentMem < 0 ? fpsText.text += "Memory: Leaking " + Math.abs(currentMem) + " MB\n" : fpsText.text += "Memory: " + currentMem + " MB\n";
 
 			#if DEVS_BUILD
 

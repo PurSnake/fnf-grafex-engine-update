@@ -1,5 +1,9 @@
 import grafex.states.FreeplayState;
 
+
+import lime.app.Application;
+
+
 function onCreate() {
     if(FlxG.sound.music != null)
 	    if (!FlxG.sound.music.playing)
@@ -17,6 +21,9 @@ function onCreate() {
 	'donate',
         'options'
     ];
+
+	//Application.createWindow({x: 15, y: 15});
+	//Application.current.window.minimized = true;
 }
 
 function screenFunnyBop()

@@ -7,8 +7,9 @@ function newPost() {
   FlxTween.tween(membe, {
 	xAdd: 0,
 	alpha: 1
-  }, .75, {ease: FlxEase.smoothStepOut});
+  }, .15, {ease: FlxEase.smoothStepOut});
  }
+ pausebg.visible = false;
 }
 
 function onChangeSelectionPost(change) {
