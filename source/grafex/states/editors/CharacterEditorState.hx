@@ -46,7 +46,7 @@ import flixel.math.FlxPoint;
 import grafex.util.ClientPrefs;
 import grafex.util.Utils;
 
-
+import flixel.input.mouse.FlxMouseEventManager;
 import sys.FileSystem;
 
 
@@ -85,6 +85,7 @@ class CharacterEditorState extends MusicBeatState
 
 	var changeBGbutton:FlxButton;
 	var leHealthIcon:HealthIcon;
+	public var mouseEvents:FlxMouseEventManager;
 	var characterList:Array<String> = [];
 
 	var cameraFollowPointer:FlxSprite;
@@ -115,6 +116,8 @@ class CharacterEditorState extends MusicBeatState
 		charLayer = new FlxTypedGroup<Character>();
 		add(charLayer);
 
+		mouseEvents = new FlxMouseEventManager();
+
 		var pointer:FlxGraphic = FlxGraphic.fromClass(GraphicCursorCross);
 		cameraFollowPointer = new FlxSprite().loadGraphic(pointer);
 		cameraFollowPointer.setGraphicSize(40, 40);
@@ -136,17 +139,19 @@ class CharacterEditorState extends MusicBeatState
 		add(healthBarBG);
 		healthBarBG.cameras = [camHUD];
 
-        healthBarBG2 = new FlxSprite(30, FlxG.height - 95).loadGraphic(Paths.image('old/healthBar'));
+		healthBarBG2 = new FlxSprite(30, FlxG.height - 95).loadGraphic(Paths.image('old/healthBar'));
 		healthBarBG2.scrollFactor.set();
 		add(healthBarBG2);
 		healthBarBG2.cameras = [camHUD];
- 
+
 		//leHealthIcon = new HealthIcon(char.healthIcon, false, 0, 0, 1, false);
 		leHealthIcon = new HealthIcon(char.healthIcon, {type: char.healthIconType, offsets: char.iconOffsets, scale: char.iconScale}, false, false);
 		leHealthIcon.y = FlxG.height - 150;
 		add(leHealthIcon);
 		leHealthIcon.updateHitbox();
 		leHealthIcon.cameras = [camHUD];
+
+		add(mouseEvents);
 
 		dumbTexts = new FlxTypedGroup<FlxText>();
 		add(dumbTexts);
@@ -203,7 +208,7 @@ class CharacterEditorState extends MusicBeatState
 
 		var tabs = [
 			{name: 'Character', label: 'Character'},
-			{name: 'Properties', label: 'Properties'},  // by BeastlyGhost - PurSnake
+			{name: 'Properties', label: 'Properties'},
 			{name: 'Animations', label: 'Animations'},
 			{name: 'Icon', label: 'Icon'},
 		];
@@ -228,6 +233,28 @@ class CharacterEditorState extends MusicBeatState
 		loadChar(!char.isPlayer);
 		reloadCharacterDropDown();
 		super.create();
+		trace('sex1');
+		mouseEvents.removeAll();
+		mouseEvents.add(leHealthIcon, function(icon:HealthIcon) {
+			var iconAnimList = icon.animation != null ? icon.animation.getNameList() : ['default'];
+			iconAnimList.reverse();
+			var curIconAnim = icon.animation.curAnim.name;
+			var newAnim = iconAnimList.indexOf(curIconAnim)+1;
+			if (newAnim >= iconAnimList.length) newAnim = 0;
+
+			icon.playAnim(iconAnimList[newAnim]);
+			leHealthIcon.doScale(1.025);
+		}, function(icon:HealthIcon) {
+			trace('mouseUp');
+			//icon.playAnim('default', true);
+		}, function(icon:HealthIcon) {
+			trace('mouseOver');
+			leHealthIcon.customScale *= 1.05;
+		}, function(icon:HealthIcon) {
+			trace('mouseOut');
+			leHealthIcon.customScale /= 1.05;
+		});
+		trace('sex2');
 	}
 
 	var onPixelBG:Bool = false;
@@ -1380,7 +1407,6 @@ class CharacterEditorState extends MusicBeatState
 	override function update(elapsed:Float)
 	{
 		MusicBeatState.camBeat = FlxG.camera;
-		if(FlxG.keys.justPressed.F11) FlxG.fullscreen = !FlxG.fullscreen;
 
         if(char.animationsArray[curAnim] != null) {
 			textAnim.text = char.animationsArray[curAnim].anim;
@@ -1493,7 +1519,7 @@ class CharacterEditorState extends MusicBeatState
 				// Refer to 1210
 				try
 				{
-					if(!FlxG.mouse.overlaps(UI_box) && !FlxG.mouse.overlaps(UI_characterbox))
+					if(!FlxG.mouse.overlaps(UI_box) && !FlxG.mouse.overlaps(UI_characterbox) && !FlxG.mouse.overlaps(leHealthIcon) && !FlxG.mouse.overlaps(healthBarBG) && !FlxG.mouse.overlaps(healthBarBG2))
 					{
 						if(FlxG.mouse.justPressed)
 						{
@@ -1566,7 +1592,10 @@ class CharacterEditorState extends MusicBeatState
 		}
 		//camMenu.zoom = FlxG.camera.zoom;
                 //camHUD.zoom = FlxG.camera.zoom;
+		if (ghostChar.scale.x != char.scale.x) ghostChar.scale.set(char.scale.x, char.scale.y);
+
 		ghostChar.setPosition(char.x, char.y);
+		leHealthIcon.updateScale(elapsed, 1);
 		super.update(elapsed);
 	}
 

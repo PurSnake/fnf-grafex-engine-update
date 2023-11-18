@@ -202,6 +202,8 @@ class GrfxModule
 		set("ScriptedState", ScriptedState);
 		set("ScriptedSubState", ScriptedSubState);
 
+		set("ParallaxSprite", ParallaxSprite);
+
 		set('FlxColor', CustomFlxColor.instance);
 		set('BlendMode', CustomBlendMode);
 
@@ -718,6 +720,8 @@ class GrfxStateModule
 
 		set("ScriptedState", ScriptedState);
 		set("ScriptedSubState", ScriptedSubState);
+
+		set("ParallaxSprite", ParallaxSprite);
 
 		set('FlxColor', CustomFlxColor.instance);
 		set('BlendMode', CustomBlendMode);

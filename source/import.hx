@@ -12,6 +12,7 @@ import flixel.system.FlxSound;
 #end
 import flixel.FlxG;
 import flixel.FlxSprite;
+import grafex.sprites.ParallaxSprite;
 //import flixel.addons.effects.FlxSkewedSprite as FlxSprite;
 import flixel.FlxCamera;
 import flixel.math.FlxMath;

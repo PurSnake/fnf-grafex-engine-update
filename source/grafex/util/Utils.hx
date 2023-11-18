@@ -59,6 +59,9 @@ class Utils
 		return Math.max(min, Math.min(max, value));
 	}
 
+	inline public static function capitalize(text:String)
+		return text.charAt(0).toUpperCase() + text.substr(1).toLowerCase();
+
 	inline public static function coolTextFile(path:String):Array<String>
 	{
 		var daList:String = null;
@@ -80,6 +83,25 @@ class Utils
 			daList[i] = daList[i].trim();
 
 		return daList;
+	}
+
+	inline public static function openFolder(folder:String, absolute:Bool = false) {
+		#if sys
+			if(!absolute) folder =  Sys.getCwd() + '$folder';
+
+			folder = folder.replace('/', '\\');
+			if(folder.endsWith('/')) folder.substr(0, folder.length - 1);
+
+			#if linux
+			var command:String = 'explorer.exe';
+			#else
+			var command:String = '/usr/bin/xdg-open';
+			#end
+			Sys.command(command, [folder]);
+			trace('$command $folder');
+		#else
+			FlxG.error("Platform is not supported for CoolUtil.openFolder");
+		#end
 	}
 
 	public static function dominantColor(sprite:flixel.FlxSprite):Int

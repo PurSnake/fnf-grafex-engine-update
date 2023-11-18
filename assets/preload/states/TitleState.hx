@@ -20,6 +20,8 @@ var logoTween:FlxTween;
 function onCreate() {
 	swagShader = new ColorSwap(); // idk
         switchTime = 1;
+
+        FlxG.worldBounds.set(-500, -500, FlxG.width + 500, FlxG.height + 500);
 }
 
 function onIntroStart() {

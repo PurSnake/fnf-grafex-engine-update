@@ -1,8 +1,5 @@
 import grafex.states.FreeplayState;
-
-
 import lime.app.Application;
-
 
 function onCreate() {
     if(FlxG.sound.music != null)
@@ -12,18 +9,20 @@ function onCreate() {
 		    FlxG.sound.music.time = 9400;
 		    updateGameBpm();
 	    }
-    optionShit = [
+	optionShit = [
 	'story_mode',
 	'freeplay',
 	'mods',
 	//'awards',
 	'credits',
 	'donate',
-        'options'
-    ];
+		'options'
+	];
 
 	//Application.createWindow({x: 15, y: 15});
 	//Application.current.window.minimized = true;
+
+	//Application.current.window.resizable = false;
 }
 
 function screenFunnyBop()

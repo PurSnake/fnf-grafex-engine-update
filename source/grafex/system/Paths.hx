@@ -394,10 +394,10 @@ class Paths
 		if (!ignoreMods && FileSystem.exists(modFolders(key)))
 			return File.getContent(modFolders(key));
 		#end
-	
+
 		if (FileSystem.exists(getPreloadPath(key)))
 			return File.getContent(getPreloadPath(key));
-	
+
 		if (currentLevel != null)
 		{
 			var levelPath:String = '';
@@ -412,7 +412,9 @@ class Paths
 				return File.getContent(levelPath);
 		}
 		#end
-		return Assets.getText(getPath(key, TEXT));
+		var path:String = getPath(key, TEXT);
+		if(FileSystem.exists(path)) return File.getContent(path);
+		return null;
 	}
 		
 	inline static public function font(key:String)
