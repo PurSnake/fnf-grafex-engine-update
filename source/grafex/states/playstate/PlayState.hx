@@ -123,8 +123,6 @@ import sys.io.File;
 import external.Discord.DiscordClient;
 #end
 
-import flixel.animation.FlxAnimationController;
-
 using StringTools;
 
 class PlayState extends MusicBeatState
@@ -1474,7 +1472,7 @@ class PlayState extends MusicBeatState
         }
 
         var arr:Array<String> = runtimeShaders.get(name);
-        return new FlxRuntimeShader(arr[0], arr[1], glslVersion);
+        return new FlxRuntimeShader(arr[0], arr[1]/*, glslVersion*/);
         #else
         FlxG.log.warn("Platform unsupported for Runtime Shaders!");
         return null;
@@ -1562,8 +1560,8 @@ class PlayState extends MusicBeatState
 		}
 
         playbackRate = value;
-        FlxAnimationController.globalSpeed = value;
-        trace('Anim speed: ' + FlxAnimationController.globalSpeed);
+        FlxG.animationTimeScale = value;
+        trace('Anim speed: ' + FlxG.animationTimeScale);
         Conductor.safeZoneOffset = (ClientPrefs.safeFrames / 60) * 1000 * value;
         setOnLuas('playbackRate', playbackRate);
         return value;
@@ -2351,14 +2349,14 @@ class PlayState extends MusicBeatState
         if (Conductor.songPosition <= vocals.length)
         {
             vocals.time = time;
-            vocals.pitch = playbackRate;
+           // vocals.pitch = playbackRate;
         }
         vocals.play();
 
         if (Conductor.songPosition <= vocals2.length)
         {
                 vocals2.time = time;
-                vocals2.pitch = playbackRate;
+                //vocals2.pitch = playbackRate;
         }
         vocals2.play();
 
@@ -2811,24 +2809,24 @@ class PlayState extends MusicBeatState
 	{
 		if(finishTimer != null) return;
 
-		vocals.pause();
-		vocals2.pause();
+		//vocals.pause();
+		//vocals2.pause();
 
-		FlxG.sound.music.play();
-		FlxG.sound.music.pitch = playbackRate;
+		//FlxG.sound.music.play();
+		//FlxG.sound.music.pitch = playbackRate;
 		Conductor.songPosition = FlxG.sound.music.time;
 		if (Conductor.songPosition <= vocals.length)
 		{
 			vocals.time = Conductor.songPosition;
-			vocals.pitch = playbackRate;
-			vocals.play();
+			//vocals.pitch = playbackRate;
+			//vocals.play();
 		}
 
 		if (Conductor.songPosition <= vocals2.length)
 		{
 			vocals2.time = Conductor.songPosition;
-			vocals2.pitch = playbackRate;
-			vocals2.play();
+			//vocals2.pitch = playbackRate;
+			//vocals2.play();
 		}
 	}
 
@@ -2845,9 +2843,9 @@ class PlayState extends MusicBeatState
 		if (SONG.needsVoices && updateTime && vocals.volume < 1) vocals.volume += 0.4 *elapsed;
 
 		if(smoothCamera)
-			FlxG.camera.followLerp = FlxMath.bound(elapsed * 7.5 * cameraSpeed * playbackRate / (FlxG.updateFramerate / 60), 0, 1);
+			FlxG.camera.followLerp = elapsed * 7.5 * cameraSpeed * playbackRate * (FlxG.updateFramerate / 60);
 		else
-			FlxG.camera.followLerp = 60 / FlxG.updateFramerate;
+			FlxG.camera.followLerp = FlxG.updateFramerate / 60;
 
 		callOnLuas('onUpdate', [elapsed]);
 		stageBuild.callFunction('onUpdate', [elapsed]);
@@ -5309,7 +5307,7 @@ class PlayState extends MusicBeatState
 			FlxG.stage.removeEventListener(KeyboardEvent.KEY_DOWN, onKeyPress);
 			FlxG.stage.removeEventListener(KeyboardEvent.KEY_UP, onKeyRelease);
 		}
-		FlxAnimationController.globalSpeed = 1;
+		FlxG.animationTimeScale = 1;
 		FlxG.sound.music.pitch = 1;
 		FlxG.mouse.visible = true;
         FlxG.mouse.load(Paths.image("cursor").bitmap, 1, 0, 0);

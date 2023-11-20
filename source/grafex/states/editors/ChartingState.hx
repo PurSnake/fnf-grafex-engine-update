@@ -13,7 +13,8 @@ import grafex.system.statesystem.MusicBeatState;
 import grafex.sprites.attached.AttachedSprite;
 import grafex.system.notes.*;
 import grafex.sprites.HealthIcon;
-import external.FlxUIDropDownMenuCustom;
+import grafex.system.ui.DropDownAdvanced as FlxUIDropDownMenuCustom;
+import flixel.addons.ui.FlxUIDropDownMenu;
 import grafex.system.Paths;
 #if desktop
 import external.Discord.DiscordClient;
@@ -32,6 +33,7 @@ import flixel.addons.ui.FlxInputText;
 import flixel.addons.ui.FlxUI9SliceSprite;
 import flixel.addons.ui.FlxUI;
 import flixel.addons.ui.FlxUICheckBox;
+import grafex.system.ui.UIInputTextAdvanced;
 import flixel.addons.ui.FlxUIInputText;
 import flixel.addons.ui.FlxUINumericStepper;
 import flixel.addons.ui.FlxUISlider;
@@ -190,9 +192,9 @@ class ChartingState extends MusicBeatState
 	var leftIcon:HealthIcon;
 	var rightIcon:HealthIcon;
 
-	var value1InputText:FlxUIInputText;
-	var value2InputText:FlxUIInputText;
-	var value3InputText:FlxUIInputText;
+	var value1InputText:UIInputTextAdvanced;
+	var value2InputText:UIInputTextAdvanced;
+	var value3InputText:UIInputTextAdvanced;
 	var currentSongName:String;
 
 	public var colorSwap:ColorSwap = null;
@@ -215,7 +217,7 @@ class ChartingState extends MusicBeatState
 
 	var curZoom:Int = 2;
 
-	private var blockPressWhileTypingOn:Array<FlxUIInputText> = [];
+	private var blockPressWhileTypingOn:Array<UIInputTextAdvanced> = [];
 	private var blockPressWhileTypingOnStepper:Array<FlxUINumericStepper> = [];
 	private var blockPressWhileScrolling:Array<FlxUIDropDownMenuCustom> = [];
 
@@ -452,19 +454,19 @@ class ChartingState extends MusicBeatState
 	var check_vortex:FlxUICheckBox = null;
 	var playSoundBf:FlxUICheckBox = null;
 	var playSoundDad:FlxUICheckBox = null;
-	var UI_songTitle:FlxUIInputText;
-	var UI_songTitlePostfix:FlxUIInputText;
-	var noteSkinInputText:FlxUIInputText;
-	var noteSplashesInputText:FlxUIInputText;
-	var noteExtraInputText:FlxUIInputText;
-	var composersInputText:FlxUIInputText;
+	var UI_songTitle:UIInputTextAdvanced;
+	var UI_songTitlePostfix:UIInputTextAdvanced;
+	var noteSkinInputText:UIInputTextAdvanced;
+	var noteSplashesInputText:UIInputTextAdvanced;
+	var noteExtraInputText:UIInputTextAdvanced;
+	var composersInputText:UIInputTextAdvanced;
 	var stageDropDown:FlxUIDropDownMenuCustom;
 	function addSongUI():Void
 	{
-		UI_songTitle = new FlxUIInputText(10, 10, 70, _song.song, 8);
+		UI_songTitle = new UIInputTextAdvanced(10, 10, 70, _song.song, 8);
 		blockPressWhileTypingOn.push(UI_songTitle);
 
-		UI_songTitlePostfix = new FlxUIInputText(110, 70, 80, _song.postfix, 10);
+		UI_songTitlePostfix = new UIInputTextAdvanced(110, 70, 80, _song.postfix, 10);
 		blockPressWhileTypingOn.push(UI_songTitlePostfix);
 		
 		var check_voices = new FlxUICheckBox(10, 25, null, null, "Has voice track", 100);
@@ -582,7 +584,7 @@ class ChartingState extends MusicBeatState
 		}
 		#end
 
-		var player1DropDown = new FlxUIDropDownMenuCustom(10, stepperSpeed.y + 45, FlxUIDropDownMenuCustom.makeStrIdLabelArray(characters, true), function(character:String)
+		var player1DropDown = new FlxUIDropDownMenuCustom(10, stepperSpeed.y + 45, FlxUIDropDownMenu.makeStrIdLabelArray(characters, true), function(character:String)
 		{
 			_song.player1 = characters[Std.parseInt(character)];
 			updateChars();
@@ -591,7 +593,7 @@ class ChartingState extends MusicBeatState
 		player1DropDown.selectedLabel = _song.player1;
 		blockPressWhileScrolling.push(player1DropDown);
 
-		var gfVersionDropDown = new FlxUIDropDownMenuCustom(player1DropDown.x, player1DropDown.y + 40, FlxUIDropDownMenuCustom.makeStrIdLabelArray(characters, true), function(character:String)
+		var gfVersionDropDown = new FlxUIDropDownMenuCustom(player1DropDown.x, player1DropDown.y + 40, FlxUIDropDownMenu.makeStrIdLabelArray(characters, true), function(character:String)
 		{
 			_song.gfVersion = characters[Std.parseInt(character)];
 			updateChars();
@@ -600,7 +602,7 @@ class ChartingState extends MusicBeatState
 		gfVersionDropDown.selectedLabel = _song.gfVersion;
 		blockPressWhileScrolling.push(gfVersionDropDown);
 
-		var player2DropDown = new FlxUIDropDownMenuCustom(player1DropDown.x, gfVersionDropDown.y + 40, FlxUIDropDownMenuCustom.makeStrIdLabelArray(characters, true), function(character:String)
+		var player2DropDown = new FlxUIDropDownMenuCustom(player1DropDown.x, gfVersionDropDown.y + 40, FlxUIDropDownMenu.makeStrIdLabelArray(characters, true), function(character:String)
 		{
 			_song.player2 = characters[Std.parseInt(character)];
 			updateChars();
@@ -648,7 +650,7 @@ var directories:Array<String> = [Paths.mods('stages/'), Paths.mods(Paths.current
 
 		if(stages.length < 1) stages.push('stage');
 
-		stageDropDown = new FlxUIDropDownMenuCustom(player1DropDown.x + 140, player1DropDown.y, FlxUIDropDownMenuCustom.makeStrIdLabelArray(stages, true), function(character:String)
+		stageDropDown = new FlxUIDropDownMenuCustom(player1DropDown.x + 140, player1DropDown.y, FlxUIDropDownMenu.makeStrIdLabelArray(stages, true), function(character:String)
 		{
 			_song.stage = stages[Std.parseInt(character)];
 		});
@@ -657,7 +659,7 @@ var directories:Array<String> = [Paths.mods('stages/'), Paths.mods(Paths.current
 
 	        // Utils.difficulties = Utils.defaultDifficulties.copy(); //
 
-		var difficultyDropDown = new FlxUIDropDownMenuCustom(stageDropDown.x, gfVersionDropDown.y, FlxUIDropDownMenuCustom.makeStrIdLabelArray(Utils.difficulties, true), function(difficulty:String)
+		var difficultyDropDown = new FlxUIDropDownMenuCustom(stageDropDown.x, gfVersionDropDown.y, FlxUIDropDownMenu.makeStrIdLabelArray(Utils.difficulties, true), function(difficulty:String)
 		{
 			if (PlayState.storyDifficulty != Std.parseInt(difficulty)) {
 				PlayState.storyDifficulty = Std.parseInt(difficulty);
@@ -673,20 +675,20 @@ var directories:Array<String> = [Paths.mods('stages/'), Paths.mods(Paths.current
 
 		var skin = PlayState.SONG.arrowSkin;
 		if(skin == null) skin = '';
-		noteSkinInputText = new FlxUIInputText(player2DropDown.x, player2DropDown.y + 50, 180, skin, 8);
+		noteSkinInputText = new UIInputTextAdvanced(player2DropDown.x, player2DropDown.y + 50, 180, skin, 8);
 		blockPressWhileTypingOn.push(noteSkinInputText);
 	
-		noteSplashesInputText = new FlxUIInputText(noteSkinInputText.x, noteSkinInputText.y + 35, 180, _song.splashSkin, 8);
+		noteSplashesInputText = new UIInputTextAdvanced(noteSkinInputText.x, noteSkinInputText.y + 35, 180, _song.splashSkin, 8);
 		blockPressWhileTypingOn.push(noteSplashesInputText);
 
 		var extra = PlayState.SONG.extrasSkin;
 		if(extra == null) extra = '';
-		noteExtraInputText = new FlxUIInputText(player2DropDown.x, noteSplashesInputText.y + 35, 180, extra, 8);
+		noteExtraInputText = new UIInputTextAdvanced(player2DropDown.x, noteSplashesInputText.y + 35, 180, extra, 8);
 		blockPressWhileTypingOn.push(noteExtraInputText);
 
 		var composers = PlayState.SONG.composedBy;
 		if(composers == null) composers = '';
-		composersInputText = new FlxUIInputText(difficultyDropDown.x, player2DropDown.y, 350, composers, 10);
+		composersInputText = new UIInputTextAdvanced(difficultyDropDown.x, player2DropDown.y, 350, composers, 10);
 		blockPressWhileTypingOn.push(composersInputText);
 
 		var reloadNotesButton:FlxButton = new FlxButton(noteExtraInputText.x + 5, noteExtraInputText.y + 20, 'Change Notes', function() {
@@ -1019,7 +1021,7 @@ var directories:Array<String> = [Paths.mods('stages/'), Paths.mods(Paths.current
 	}
 
 	var stepperSusLength:FlxUINumericStepper;
-	var strumTimeInputText:FlxUIInputText; //I wanted to use a stepper but we can't scale these as far as i know :(
+	var strumTimeInputText:UIInputTextAdvanced; //I wanted to use a stepper but we can't scale these as far as i know :(
 	var noteTypeDropDown:FlxUIDropDownMenuCustom;
 	var currentType:Int = 0;
 
@@ -1033,7 +1035,7 @@ var directories:Array<String> = [Paths.mods('stages/'), Paths.mods(Paths.current
 		stepperSusLength.name = 'note_susLength';
 		blockPressWhileTypingOnStepper.push(stepperSusLength);
 
-		strumTimeInputText = new FlxUIInputText(10, 65, 180, "0");
+		strumTimeInputText = new UIInputTextAdvanced(10, 65, 180, "0");
 		tab_group_note.add(strumTimeInputText);
 		blockPressWhileTypingOn.push(strumTimeInputText);
 
@@ -1088,7 +1090,7 @@ var directories:Array<String> = [Paths.mods('stages/'), Paths.mods(Paths.current
 			displayNameList[i] = i + '. ' + displayNameList[i];
 		}
 
-		noteTypeDropDown = new FlxUIDropDownMenuCustom(10, 105, FlxUIDropDownMenuCustom.makeStrIdLabelArray(displayNameList, true), function(character:String)
+		noteTypeDropDown = new FlxUIDropDownMenuCustom(10, 105, FlxUIDropDownMenu.makeStrIdLabelArray(displayNameList, true), function(character:String)
 		{
 			currentType = Std.parseInt(character);
 			if(curSelectedNote != null && curSelectedNote[1] > -1) {
@@ -1154,7 +1156,7 @@ var directories:Array<String> = [Paths.mods('stages/'), Paths.mods(Paths.current
 
 		var text:FlxText = new FlxText(20, 30, 0, "Event:");
 		tab_group_event.add(text);
-		eventDropDown = new FlxUIDropDownMenuCustom(20, 50, FlxUIDropDownMenuCustom.makeStrIdLabelArray(leEvents, true), function(pressed:String) {
+		eventDropDown = new FlxUIDropDownMenuCustom(20, 50, FlxUIDropDownMenu.makeStrIdLabelArray(leEvents, true), function(pressed:String) {
 			var selectedEvent:Int = Std.parseInt(pressed);
 			descText.text = eventStuff[selectedEvent][1];
 				if (curSelectedNote != null &&  eventStuff != null) {
@@ -1169,17 +1171,17 @@ var directories:Array<String> = [Paths.mods('stages/'), Paths.mods(Paths.current
 
 		var text:FlxText = new FlxText(20, 90, 0, "Value 1:");
 		tab_group_event.add(text);
-		value1InputText = new FlxUIInputText(20, 110, 250, "");
+		value1InputText = new UIInputTextAdvanced(20, 110, 250, "");
 		blockPressWhileTypingOn.push(value1InputText);
 
 		var text:FlxText = new FlxText(20, 130, 0, "Value 2:");
 		tab_group_event.add(text);
-		value2InputText = new FlxUIInputText(20, 150, 250, "");
+		value2InputText = new UIInputTextAdvanced(20, 150, 250, "");
 		blockPressWhileTypingOn.push(value2InputText);
 
 		var text:FlxText = new FlxText(20, 170, 0, "Value 3:");
 		tab_group_event.add(text);
-		value3InputText = new FlxUIInputText(20, 190, 250, "");
+		value3InputText = new UIInputTextAdvanced(20, 190, 250, "");
 		blockPressWhileTypingOn.push(value3InputText);
 
 		// New event buttons
@@ -1692,7 +1694,7 @@ var directories:Array<String> = [Paths.mods('stages/'), Paths.mods(Paths.current
 				vocals2.volume = nums.value;
 			}
 		}
-		else if(id == FlxUIInputText.CHANGE_EVENT && (sender is FlxUIInputText)) {
+		else if(id == UIInputTextAdvanced.CHANGE_EVENT && (sender is UIInputTextAdvanced)) {
 			if(sender == noteSplashesInputText) {
 				_song.splashSkin = noteSplashesInputText.text;
 			}
@@ -1855,8 +1857,7 @@ var directories:Array<String> = [Paths.mods('stages/'), Paths.mods(Paths.current
 		if(!blockInput) {
 			for (stepper in blockPressWhileTypingOnStepper) {
 				@:privateAccess
-				var leText:Dynamic = stepper.text_field;
-				var leText:FlxUIInputText = leText;
+				var leText:FlxUIInputText = cast (stepper.text_field, FlxUIInputText);
 				if(leText.hasFocus) {
 					FlxG.sound.muteKeys = [];
 					FlxG.sound.volumeDownKeys = [];
@@ -2528,6 +2529,7 @@ var directories:Array<String> = [Paths.mods('stages/'), Paths.mods(Paths.current
 					sound = FlxG.sound.music;
 			}
 
+			@:privateAccess
 			if (sound._sound != null && sound._sound.__buffer != null){
 				var bytes:Bytes = sound._sound.__buffer.data.toBytes();
 

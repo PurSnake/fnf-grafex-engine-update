@@ -212,8 +212,8 @@ class Main extends Sprite
 		FlxG.signals.gameResized.add(function (w, h) {
 		     if (FlxG.cameras != null) {
 			   for (cam in FlxG.cameras.list) {
-				@:privateAccess
-				if (cam != null && cam._filters != null)
+				//@:privateAccess
+				if (cam != null && cam.filters != null)
 					resetSpriteCache(cam.flashSprite);
 			   }
 		     }
@@ -225,14 +225,14 @@ class Main extends Sprite
 	}
 
 	public static function clearCache() {
-		@:privateAccess {
+		/*@:privateAccess {
 			// clear uint8 pools
 			for(length=>pool in openfl.display3D.utils.UInt8Buff._pools) {
 				for(b in pool.clear())
 					b.destroy();
 			}
 			openfl.display3D.utils.UInt8Buff._pools.clear();
-		}
+		}*/
 
 		FlxG.bitmap.dumpCache();
 

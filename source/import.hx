@@ -1,4 +1,4 @@
-#if (!macro)
+#if !macro
 
 
 #if desktop
@@ -35,6 +35,5 @@ import grafex.system.achievements.AchievementsToast.AchievementsToastManager;
 import grafex.system.achievements.AchievementsToast.AchievementsToast;
 import grafex.system.Conductor;
 
-#end
-
 using StringTools;
+#end
