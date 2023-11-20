@@ -82,7 +82,7 @@ class Main extends Sprite
 		appTitle = appConfig.appName;
 	}
 
-	public static var achievementToatManager:AchievementsToastManager; 
+	public static var achievementToatManager:grafex.system.achievements.AchievementsToast.AchievementsToastManager; 
         
 	// You can pretty much ignore everything from here on - your code should go in your states.
 
@@ -155,7 +155,7 @@ class Main extends Sprite
 		Lib.current.stage.scaleMode = StageScaleMode.NO_SCALE;
 		#end
 
-		achievementToatManager = new AchievementsToastManager();
+		achievementToatManager = new grafex.system.achievements.AchievementsToast.AchievementsToastManager();
 		addChild(achievementToatManager);
 
 		//flixel.FlxG.plugins.add(new flixel.addons.plugin.ScreenShotPlugin());
@@ -180,6 +180,9 @@ class Main extends Sprite
 	public static var audioDisconnected:Bool = false;
 
 	public static function initBaseGameSettings() {
+
+		FlxG.fixedTimestep = false;
+
 		WindowsAPI.setDarkMode(true);
 		ClientPrefs.loadDefaultKeys();
 		AudioSwitchFix.init();
