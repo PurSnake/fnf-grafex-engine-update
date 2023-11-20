@@ -6,7 +6,8 @@ import grafex.sprites.background.BGSprite;
 import grafex.system.Paths;
 import grafex.system.statesystem.MusicBeatState;
 import grafex.sprites.HealthIcon;
-import external.FlxUIDropDownMenuCustom;
+import grafex.system.ui.DropDownAdvanced as FlxUIDropDownMenuCustom;
+import flixel.addons.ui.FlxUIDropDownMenu;
 import external.animateatlas.AtlasFrameMaker;
 import flixel.graphics.frames.FlxFramesCollection;
 #if desktop
@@ -23,11 +24,10 @@ import flixel.group.FlxGroup.FlxTypedGroup;
 import flixel.graphics.FlxGraphic;
 import flixel.text.FlxText;
 import flixel.util.FlxColor;
-import flixel.addons.ui.FlxInputText;
 import flixel.addons.ui.FlxUI9SliceSprite;
 import flixel.addons.ui.FlxUI;
 import flixel.addons.ui.FlxUICheckBox;
-import flixel.addons.ui.FlxUIInputText;
+import grafex.system.ui.UIInputTextAdvanced as FlxUIInputText;
 import flixel.addons.ui.FlxUINumericStepper;
 import flixel.addons.ui.FlxUITabMenu;
 import flixel.addons.ui.FlxUITooltip.FlxUITooltipStyle;
@@ -143,6 +143,8 @@ class CharacterEditorState extends MusicBeatState
 		healthBarBG2.scrollFactor.set();
 		add(healthBarBG2);
 		healthBarBG2.cameras = [camHUD];
+
+		/*if(ClientPrefs.data.cacheOnGPU)*/ Paths.clearUnusedMemory();
 
 		//leHealthIcon = new HealthIcon(char.healthIcon, false, 0, 0, 1, false);
 		leHealthIcon = new HealthIcon(char.healthIcon, {type: char.healthIconType, offsets: char.iconOffsets, scale: char.iconScale}, false, false);
@@ -498,7 +500,7 @@ class CharacterEditorState extends MusicBeatState
 			ghostChar.flipX = char.flipX;
 		};
 
-		charDropDown = new FlxUIDropDownMenuCustom(10, 30, FlxUIDropDownMenuCustom.makeStrIdLabelArray([''], true), function(character:String)
+		charDropDown = new FlxUIDropDownMenuCustom(10, 30, FlxUIDropDownMenu.makeStrIdLabelArray([''], true), function(character:String)
 		{
 			daAnim = characterList[Std.parseInt(character)];
 			check_player.checked = daAnim.startsWith('bf');
@@ -739,7 +741,7 @@ class CharacterEditorState extends MusicBeatState
 		healthColorStepper2B = new FlxUINumericStepper(145, personalY - 20, 20, char.healthColorArray2[2],0, 255, 0);
 
 		//charDropDown
-		iconTypeDropDown = new FlxUIDropDownMenuCustom(15, personalY + 30, FlxUIDropDownMenuCustom.makeStrIdLabelArray(Character.healthIconTypes, true), function(type:String)
+		iconTypeDropDown = new FlxUIDropDownMenuCustom(15, personalY + 30, FlxUIDropDownMenu.makeStrIdLabelArray(Character.healthIconTypes, true), function(type:String)
 		{
 			var curType = Character.healthIconTypes[Std.parseInt(type)];
 			char.healthIconType = curType;
@@ -791,7 +793,7 @@ class CharacterEditorState extends MusicBeatState
 		animationNameFramerate = new FlxUINumericStepper(animationInputText.x + 170, animationInputText.y, 1, 24, 0, 240, 0);
 		animationLoopCheckBox = new FlxUICheckBox(animationNameInputText.x + 170, animationNameInputText.y - 1, null, null, "Should it Loop?", 100);
 
-		animationDropDown = new FlxUIDropDownMenuCustom(15, animationInputText.y - 55, FlxUIDropDownMenuCustom.makeStrIdLabelArray([''], true), function(pressed:String) {
+		animationDropDown = new FlxUIDropDownMenuCustom(15, animationInputText.y - 55, FlxUIDropDownMenu.makeStrIdLabelArray([''], true), function(pressed:String) {
 			var selectedAnimation:Int = Std.parseInt(pressed);
 			var anim:AnimArray = char.animationsArray[selectedAnimation];
 			animationInputText.text = anim.anim;
@@ -804,7 +806,7 @@ class CharacterEditorState extends MusicBeatState
 			animationIndicesInputText.text = indicesStr.substr(1, indicesStr.length - 2);
 		});
 
-		ghostDropDown = new FlxUIDropDownMenuCustom(animationDropDown.x + 150, animationDropDown.y, FlxUIDropDownMenuCustom.makeStrIdLabelArray([''], true), function(pressed:String) {
+		ghostDropDown = new FlxUIDropDownMenuCustom(animationDropDown.x + 150, animationDropDown.y, FlxUIDropDownMenu.makeStrIdLabelArray([''], true), function(pressed:String) {
 			var selectedAnimation:Int = Std.parseInt(pressed);
 			ghostChar.visible = false;
 			char.alpha = 1;
@@ -1310,8 +1312,8 @@ class CharacterEditorState extends MusicBeatState
 		}
 		if(anims.length < 1) anims.push('NO ANIMATIONS'); //Prevents crash
 
-		animationDropDown.setData(FlxUIDropDownMenuCustom.makeStrIdLabelArray(anims, true));
-		ghostDropDown.setData(FlxUIDropDownMenuCustom.makeStrIdLabelArray(ghostAnims, true));
+		animationDropDown.setData(FlxUIDropDownMenu.makeStrIdLabelArray(anims, true));
+		ghostDropDown.setData(FlxUIDropDownMenu.makeStrIdLabelArray(ghostAnims, true));
 		reloadGhost();
 	}
 
@@ -1383,7 +1385,7 @@ class CharacterEditorState extends MusicBeatState
 		characterList = Utils.coolTextFile(Paths.txt('characterList'));
 		#end
 
-		charDropDown.setData(FlxUIDropDownMenuCustom.makeStrIdLabelArray(characterList, true));
+		charDropDown.setData(FlxUIDropDownMenu.makeStrIdLabelArray(characterList, true));
 		charDropDown.selectedLabel = daAnim;
 	}
 	function resetHealthBarColor() {
