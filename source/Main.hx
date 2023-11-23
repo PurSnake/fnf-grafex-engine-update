@@ -180,12 +180,11 @@ class Main extends Sprite
 	public static var audioDisconnected:Bool = false;
 
 	public static function initBaseGameSettings() {
-
-		FlxG.fixedTimestep = false;
-
 		WindowsAPI.setDarkMode(true);
 		ClientPrefs.loadDefaultKeys();
 		AudioSwitchFix.init();
+
+		FlxG.fixedTimestep = false;
 
 		grafex.system.statesystem.ScriptedState.init();
 		grafex.system.statesystem.ScriptedSubState.init();

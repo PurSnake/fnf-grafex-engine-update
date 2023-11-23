@@ -235,8 +235,7 @@ class CharacterEditorState extends MusicBeatState
 		loadChar(!char.isPlayer);
 		reloadCharacterDropDown();
 		super.create();
-		trace('sex1');
-		mouseEvents.removeAll();
+		FlxG.mouse.visible = true;
 		mouseEvents.add(leHealthIcon, function(icon:HealthIcon) {
 			var iconAnimList = icon.animation != null ? icon.animation.getNameList() : ['default'];
 			iconAnimList.reverse();
@@ -245,18 +244,16 @@ class CharacterEditorState extends MusicBeatState
 			if (newAnim >= iconAnimList.length) newAnim = 0;
 
 			icon.playAnim(iconAnimList[newAnim]);
-			leHealthIcon.doScale(1.025);
+			leHealthIcon.doScale(1.01);
 		}, function(icon:HealthIcon) {
-			trace('mouseUp');
-			//icon.playAnim('default', true);
+
 		}, function(icon:HealthIcon) {
-			trace('mouseOver');
 			leHealthIcon.customScale *= 1.05;
 		}, function(icon:HealthIcon) {
-			trace('mouseOut');
 			leHealthIcon.customScale /= 1.05;
 		});
-		trace('sex2');
+		FlxG.mouse.visible = true;
+		FlxG.mouse.load(Paths.image("cursor").bitmap, 1, 0, 0);
 	}
 
 	var onPixelBG:Bool = false;

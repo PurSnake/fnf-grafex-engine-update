@@ -60,7 +60,7 @@ class Utils
 	}
 
 	inline public static function capitalize(text:String)
-		return text.charAt(0).toUpperCase() + text.substr(1).toLowerCase();
+		return text.charAt(0).toUpperCase() + text.substr(1);
 
 	inline public static function coolTextFile(path:String):Array<String>
 	{
@@ -74,6 +74,18 @@ class Utils
 		#end
 		return daList != null ? listFromString(daList) : [];
 	}
+
+	inline public static function colorFromString(color:String):FlxColor
+	{
+		var hideChars = ~/[\t\n\r]/;
+		var color:String = hideChars.split(color).join('').trim();
+		if(color.startsWith('0x')) color = color.substring(color.length - 6);
+
+		var colorNum:Null<FlxColor> = FlxColor.fromString(color);
+		if(colorNum == null) colorNum = FlxColor.fromString('#$color');
+		return colorNum != null ? colorNum : FlxColor.WHITE;
+	}
+
 	inline public static function listFromString(string:String):Array<String>
 	{
 		var daList:Array<String> = [];
@@ -150,24 +162,24 @@ class Utils
 	}
 
 	public static function formatString(string:String):String
+	{
+		var split:Array<String> = string.split('-');
+		var formattedString:String = '';
+		for (i in 0...split.length)
 		{
-			var split:Array<String> = string.split('-');
-			var formattedString:String = '';
-			for (i in 0...split.length)
+			var piece:String = split[i];
+			var allSplit = piece.split('');
+			var firstLetterUpperCased = allSplit[0].toUpperCase();
+			var substring = piece.substr(1, piece.length - 1);
+			var newPiece = firstLetterUpperCased + substring;
+			if (i != split.length - 1)
 			{
-				var piece:String = split[i];
-				var allSplit = piece.split('');
-				var firstLetterUpperCased = allSplit[0].toUpperCase();
-				var substring = piece.substr(1, piece.length - 1);
-				var newPiece = firstLetterUpperCased + substring;
-				if (i != split.length - 1)
-				{
-					newPiece += " ";
-				}
-				formattedString += newPiece;
+				newPiece += " ";
 			}
-			return formattedString;
+			formattedString += newPiece;
 		}
+		return formattedString;
+	}
 
 	//uhhhh does this even work at all? i'm starting to doubt
 	public static function precacheSound(sound:String, ?library:String = null):Void {

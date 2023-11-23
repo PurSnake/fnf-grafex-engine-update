@@ -83,8 +83,6 @@ class FreeplayState extends MusicBeatState
 		
 		Paths.clearStoredMemory();
 		Application.current.window.title = Main.appTitle + ' - Freeplay Menu';
-
-		super.create();
 		
 		PlayState.isStoryMode = false;
 		WeekData.reloadWeekFiles(false);
@@ -100,13 +98,12 @@ class FreeplayState extends MusicBeatState
 		// FlxCamera.defaultCameras = [camBackground];
 		FlxG.cameras.setDefaultDrawTarget(camBackground, true);
 
-        camINTERFACE.alpha = 0;
-		FlxTween.tween(camINTERFACE, {alpha: 1}, 0.3, {ease: FlxEase.linear, startDelay: 0.8});
-
 		#if desktop
 		// Updating Discord Rich Presence
 		DiscordClient.changePresence("In the Menu", null);
 		#end
+
+		super.create();
 
 		for (i in 0...WeekData.weeksList.length) {
 			if(weekIsLocked(WeekData.weeksList[i])) continue;
@@ -137,7 +134,7 @@ class FreeplayState extends MusicBeatState
 
 		bg = new FlxSprite().loadGraphic(Paths.image('menuDesat'));
 		bg.antialiasing = ClientPrefs.globalAntialiasing;
-        bg.setGraphicSize(Std.int(bg.width * 1.1));
+		bg.setGraphicSize(Std.int(bg.width * 1.1));
 		bg.updateHitbox();
 		bg.screenCenter();
 		add(bg);
@@ -147,7 +144,7 @@ class FreeplayState extends MusicBeatState
 
 		for (i in 0...songs.length)
 		{
-			var songText:Alphabet = new Alphabet(0, (70 * i) + 30, songs[i].songName, false, false, 0.05, 1, true);
+			var songText:Alphabet = new Alphabet(0, (70 * i) + 30, Utils.capitalize(songs[i].songName), false, false, 0.05, 1, true);
 			songText.isMenuItem = true;
 			songText.targetY = i;
 			grpSongs.add(songText);
@@ -223,10 +220,10 @@ class FreeplayState extends MusicBeatState
 		text.scrollFactor.set();
 		add(text);
 
-        scoreText.cameras = [camINTERFACE];
+		scoreText.cameras = [camINTERFACE];
 		scoreBG.cameras = [camINTERFACE];
 		diffText.cameras = [camINTERFACE];
-        countText.cameras = [camINTERFACE];
+		countText.cameras = [camINTERFACE];
 		textBG.cameras = [camINTERFACE];
 		text.cameras = [camINTERFACE];
 		
@@ -351,10 +348,9 @@ class FreeplayState extends MusicBeatState
 			{
 				call('onLeave', []);
 				acceptedSong = true;
-				FlxTween.tween(camINTERFACE, {alpha: 0}, 0.2, {ease: FlxEase.linear, startDelay: 0.1});
 				new FlxTimer().start(0.4, function(tmr:FlxTimer)
 				{		
-			        if(colorTween != null) colorTween.cancel();
+					if(colorTween != null) colorTween.cancel();
 
 			        FlxG.sound.play(Paths.sound('cancelMenu'));
 			        MusicBeatState.switchState(new MainMenuState());
@@ -491,8 +487,6 @@ class FreeplayState extends MusicBeatState
 			        	if (i != curSelected)
 			        		FlxTween.tween(iconArray[i], {alpha: 0}, 0.42, {ease: FlxEase.linear});
             
-		            FlxTween.tween(camINTERFACE, {alpha: 0}, 0.3, {ease: FlxEase.linear, startDelay: 0.4});
-        
 		            LoadingState.amTake = false;
 		            new FlxTimer().start(1.1, function(tmr:FlxTimer)
 		            {	

@@ -1410,10 +1410,10 @@ class FunkinLua {
 			return PlayState.instance.health;
 		});
 
-		Lua_helper.add_callback(lua, "getColorFromHex", function(color:String) {
-			if(!color.startsWith('0x')) color = '0xff' + color;
-			return Std.parseInt(color);
-		});
+		Lua_helper.add_callback(lua, "FlxColor", function(color:String) return FlxColor.fromString(color));
+		Lua_helper.add_callback(lua, "getColorFromName", function(color:String) return FlxColor.fromString(color));
+		Lua_helper.add_callback(lua, "getColorFromString", function(color:String) return FlxColor.fromString(color));
+		Lua_helper.add_callback(lua, "getColorFromHex", function(color:String) return FlxColor.fromString('#$color'));
 
 		Lua_helper.add_callback(lua, "keyboardJustPressed", function(name:String)
 		{
@@ -1640,14 +1640,10 @@ class FunkinLua {
 		});
 
 		Lua_helper.add_callback(lua, "cameraFlash", function(camera:String, color:String, duration:Float,forced:Bool) {
-			var colorNum:Int = Std.parseInt(color);
-			if(!color.startsWith('0x')) colorNum = Std.parseInt('0xff' + color);
-			cameraFromString(camera).flash(colorNum, duration,null,forced);
+			cameraFromString(camera).flash(Utils.colorFromString(color), duration, null,forced);
 		});
 		Lua_helper.add_callback(lua, "cameraFade", function(camera:String, color:String, duration:Float,forced:Bool) {
-			var colorNum:Int = Std.parseInt(color);
-			if(!color.startsWith('0x')) colorNum = Std.parseInt('0xff' + color);
-			cameraFromString(camera).fade(colorNum, duration,false,null,forced);
+			cameraFromString(camera).fade(Utils.colorFromString(color), duration, false,null,forced);
 		});
 		Lua_helper.add_callback(lua, "setRatingPercent", function(value:Float) {
 			PlayState.instance.ratingPercent = value;
@@ -1758,19 +1754,11 @@ class FunkinLua {
 		});
 
 		Lua_helper.add_callback(lua, "makeGraphic", function(obj:String, width:Int, height:Int, color:String) {
-			var colorNum:Int = Std.parseInt(color);
-			if(!color.startsWith('0x')) colorNum = Std.parseInt('0xff' + color);
 
-			var spr:FlxSprite = PlayState.instance.getLuaObject(obj,false);
-			if(spr!=null) {
-				PlayState.instance.getLuaObject(obj,false).makeGraphic(width, height, colorNum);
-				return;
-			}
+			var spr:Dynamic = PlayState.instance.getLuaObject(obj, false);
+			if(spr == null) spr = getVarInArray(getInstance(), obj, false);
 
-			var object:FlxSprite = Reflect.getProperty(getInstance(), obj);
-			if(object != null) {
-				object.makeGraphic(width, height, colorNum);
-			}
+			if(spr != null) spr.makeGraphic(width, height, Utils.colorFromString(color));
 		});
 		Lua_helper.add_callback(lua, "addAnimationByPrefix", function(obj:String, name:String, prefix:String, framerate:Int = 24, loop:Bool = true) {
 			if(PlayState.instance.getLuaObject(obj,false)!=null) {
@@ -2841,27 +2829,34 @@ class FunkinLua {
 		Reflect.setProperty(instance, variable, value);
 		return true;
 	}
-	public static function getVarInArray(instance:Dynamic, variable:String):Any
+
+	public static function getVarInArray(instance:Dynamic, variable:String, ?allowMaps:Bool = false):Any
 	{
-		var shit:Array<String> = variable.split('[');
-		if(shit.length > 1)
+		var splitProps:Array<String> = variable.split('[');
+		if(splitProps.length > 1)
 		{
-			var blah:Dynamic = null;
-			if(PlayState.instance.variables.exists(shit[0]))
+			var target:Dynamic = null;
+			if(PlayState.instance.variables.exists(splitProps[0]))
 			{
-				var retVal:Dynamic = PlayState.instance.variables.get(shit[0]);
+				var retVal:Dynamic = PlayState.instance.variables.get(splitProps[0]);
 				if(retVal != null)
-					blah = retVal;
+					target = retVal;
 			}
 			else
-				blah = Reflect.getProperty(instance, shit[0]);
+				target = Reflect.getProperty(instance, splitProps[0]);
 
-			for (i in 1...shit.length)
+			for (i in 1...splitProps.length)
 			{
-				var leNum:Dynamic = shit[i].substr(0, shit[i].length - 1);
-				blah = blah[leNum];
+				var j:Dynamic = splitProps[i].substr(0, splitProps[i].length - 1);
+				target = target[j];
 			}
-			return blah;
+			return target;
+		}
+		
+		if(allowMaps && isMap(instance))
+		{
+			//trace(instance);
+			return instance.get(variable);
 		}
 
 		if(PlayState.instance.variables.exists(variable))
@@ -2870,8 +2865,13 @@ class FunkinLua {
 			if(retVal != null)
 				return retVal;
 		}
-
 		return Reflect.getProperty(instance, variable);
+	}
+
+	public static function isMap(variable:Dynamic)
+	{
+		if(variable.exists != null && variable.keyValueIterator != null) return true;
+		return false;
 	}
 
 	inline static function getTextObject(name:String):FlxText

@@ -43,6 +43,7 @@ class MenuCharacterEditorState extends MusicBeatState
 	var defaultCharacters:Array<String> = ['dad', 'bf', 'gf'];
 
 	override function create() {
+		FlxG.mouse.visible = true;
 		characterFile = {
 			image: 'Menu_Dad',
 			scale: 1,

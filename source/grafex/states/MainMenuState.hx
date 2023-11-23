@@ -35,8 +35,6 @@ import openfl.display.Sprite;
 
 import flixel.util.FlxSave;
 
-import grafex.system.CustomFadeTransition;
-
 import grafex.system.script.GrfxScriptHandler;
 
 import flixel.input.mouse.FlxMouseEventManager;
@@ -68,7 +66,6 @@ class MainMenuState extends MusicBeatState
 
 	override function create()
 	{
-		super.create();
 		#if MODS_ALLOWED
 		Paths.pushGlobalMods();
 		#end
@@ -88,6 +85,8 @@ class MainMenuState extends MusicBeatState
 
 		FlxG.cameras.reset(camGame);
 		FlxG.cameras.setDefaultDrawTarget(camGame, true);
+
+		super.create();
 
 		transIn = FlxTransitionableState.defaultTransIn;
 		transOut = FlxTransitionableState.defaultTransOut;

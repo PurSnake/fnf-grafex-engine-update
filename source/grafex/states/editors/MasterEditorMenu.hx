@@ -59,6 +59,8 @@ class MasterEditorMenu extends MusicBeatState
 		grpTexts = new FlxTypedGroup<Alphabet>();
 		add(grpTexts);
 
+		FlxG.mouse.visible = true;
+
 		for (i in 0...options.length)
 		{
 			var leText:Alphabet = new Alphabet(0, (70 * i) + 30, options[i], true, false);
