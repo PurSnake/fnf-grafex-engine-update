@@ -596,11 +596,11 @@ class PlayState extends MusicBeatState
 		dadGroup = new FlxSpriteGroup(DAD_X, DAD_Y);
 		gfGroup = new FlxSpriteGroup(GF_X, GF_Y);
 
-		CustomFadeTransition.nextCamera = camOther;
+		//CustomFadeTransition.nextCamera = camOther;
 
 		super.create();
 
-		CustomFadeTransition.nextCamera = camOther;
+		//CustomFadeTransition.nextCamera = camOther;
 
 		stageBuild = new GrfxStage(curStage);
 
@@ -1507,7 +1507,7 @@ class PlayState extends MusicBeatState
 
 		Paths.clearUnusedMemory();
 		FlxG.mouse.visible = false;
-		CustomFadeTransition.nextCamera = camOther;
+		//CustomFadeTransition.nextCamera = camOther;
 
 		if (eventNotes.length < 1)
 			checkEventNote();
@@ -4535,11 +4535,11 @@ class PlayState extends MusicBeatState
 					Conductor.changeBPM(TitleState.titleJSON.bpm);
 
 					cancelMusicFadeTween();
-					CustomFadeTransition.nextCamera = camOther;
+					/*CustomFadeTransition.nextCamera = camOther;
 					if (FlxTransitionableState.skipNextTransIn)
 					{
 						CustomFadeTransition.nextCamera = null;
-					}
+					}*/
 					MusicBeatState.switchState(new StoryMenuState());
 
 					if (!ClientPrefs.getGameplaySetting('practice', false) && !ClientPrefs.getGameplaySetting('botplay', false))
@@ -4580,11 +4580,11 @@ class PlayState extends MusicBeatState
 			{
 				trace('Switching back to FreeplayState');
 				cancelMusicFadeTween();
-				CustomFadeTransition.nextCamera = camOther;
+				/*CustomFadeTransition.nextCamera = camOther;
 				if (FlxTransitionableState.skipNextTransIn)
 				{
 					CustomFadeTransition.nextCamera = null;
-				}
+				}*/
 				MusicBeatState.switchState(new FreeplayState());
 				FlxG.sound.playMusic(Paths.music('freakyMenu'));
 				TitleState.titleJSON = TitleState.getTitleData();

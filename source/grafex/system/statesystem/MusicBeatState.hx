@@ -39,7 +39,12 @@ class MusicBeatState extends FlxUIState
 	inline function get_controls():Controls
 		return PlayerSettings.player1.controls;
 
-	public static final substatesToTrans:Array<Class<flixel.FlxSubState>> = [grafex.states.substates.PauseSubState, grafex.system.script.FunkinLua.CustomSubstate, ScriptedSubState, grafex.states.substates.GameOverSubstate];
+	public static final substatesToTrans:Array<Class<flixel.FlxSubState>> = [
+		grafex.states.substates.PauseSubState,
+		grafex.system.script.FunkinLua.CustomSubstate,
+		ScriptedSubState,
+		grafex.states.substates.GameOverSubstate
+	];
 
 	override function create()
 	{
@@ -214,13 +219,13 @@ class MusicBeatState extends FlxUIState
 		CustomFadeTransition.finishCallback = function() nextState == FlxG.state ? FlxG.resetState() : FlxG.switchState(nextState);
 	}
 
-	public static function getState():MusicBeatState
-		return cast(FlxG.state, MusicBeatState);
+	public static function getState():FlxState
+		return cast FlxG.state;
 
-	public static function getSubState():MusicBeatSubstate
-		return cast(FlxG.state.subState, MusicBeatSubstate);
+	public static function getSubState():FlxState
+		return cast FlxG.state.subState;
 
-	public static function getStateWithSubState()
+	public static function getStateWithSubState():FlxState
 		return (FlxG.state.subState != null && substatesToTrans.contains(Type.getClass(FlxG.state.subState))) 
 		? getSubState() : getState();
 
