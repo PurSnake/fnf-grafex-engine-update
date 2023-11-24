@@ -1614,15 +1614,15 @@ class PlayState extends MusicBeatState
 			if (vocals2 != null)
 				vocals2.pitch = value;
 			FlxG.sound.music.pitch = value;
-		}
 
-		var ratio:Float = playbackRate / value; // funny word huh
-		if (ratio != 1)
-		{
-			for (note in notes.members)
-				note.resizeByRatio(ratio);
-			for (note in unspawnNotes)
-				note.resizeByRatio(ratio);
+			var ratio:Float = playbackRate / value; // funny word huh
+			if (ratio != 1)
+			{
+				for (note in notes.members)
+					note.resizeByRatio(ratio);
+				for (note in unspawnNotes)
+					note.resizeByRatio(ratio);
+			}
 		}
 
 		playbackRate = value;
