@@ -1721,11 +1721,11 @@ class FunkinLua {
 
 			return 0;
 		});
-		Lua_helper.add_callback(lua, "characterDance", function(character:String) {
+		Lua_helper.add_callback(lua, "characterDance", function(character:String, force:Bool = false) {
 			switch(character.toLowerCase()) {
-				case 'dad': PlayState.instance.dad.dance();
-				case 'gf' | 'girlfriend': if(PlayState.instance.gf != null) PlayState.instance.gf.dance();
-				default: PlayState.instance.boyfriend.dance();
+				case 'dad': PlayState.instance.dad.dance(force);
+				case 'gf' | 'girlfriend': if(PlayState.instance.gf != null) PlayState.instance.gf.dance(force);
+				default: PlayState.instance.boyfriend.dance(force);
 			}
 		});
 

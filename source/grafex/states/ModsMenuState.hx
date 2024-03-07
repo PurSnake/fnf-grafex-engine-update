@@ -84,7 +84,7 @@ class ModsMenuState extends MusicBeatState
 		DiscordClient.changePresence("In the Menus", null);
 		#end
 
-		bg = new FlxSprite().loadGraphic(Paths.image('menuDesat'));
+		bg = new FlxSprite(Paths.image('menuDesat'));
 		bg.antialiasing = ClientPrefs.globalAntialiasing;
 		add(bg);
 
@@ -92,7 +92,6 @@ class ModsMenuState extends MusicBeatState
 			if (!FlxG.sound.music.playing)
 			{	
 				FlxG.sound.playMusic(Paths.music('freakyMenu'), 0.7);
-        		FlxG.sound.music.time = 9400;
 				TitleState.titleJSON = TitleState.getTitleData();
 				Conductor.changeBPM(TitleState.titleJSON.bpm);
 			}
@@ -492,7 +491,7 @@ class ModsMenuState extends MusicBeatState
 
 		var path:String = 'modsList.txt';
 		File.saveContent(path, fileStr);
-        Paths.pushGlobalMods();
+        	Paths.pushGlobalMods();
 	}
 
 	var noModsSine:Float = 0;

@@ -439,12 +439,8 @@ class OptionsMenu extends MusicBeatSubstate
 				{
 					FlxG.sound.play(Paths.sound('scrollMenu'), 0.6);
 					selectedCat.optionObjects.members[selectedOptionIndex].text = selectedOption.getValue();
-					selectedCatIndex++;
 
-					if (selectedCatIndex > options.length - 3)
-						selectedCatIndex = 0;
-					if (selectedCatIndex < 0)
-						selectedCatIndex = options.length - 3;
+					selectedCatIndex = FlxMath.wrap(selectedCatIndex + 1, 0, options.length - 3);
 
 					switchCat(options[selectedCatIndex]);
 				}
@@ -452,12 +448,8 @@ class OptionsMenu extends MusicBeatSubstate
 				{
 					FlxG.sound.play(Paths.sound('scrollMenu'), 0.6);
 					selectedCat.optionObjects.members[selectedOptionIndex].text = selectedOption.getValue();
-					selectedCatIndex--;
 
-					if (selectedCatIndex > options.length - 3)
-						selectedCatIndex = 0;
-					if (selectedCatIndex < 0)
-						selectedCatIndex = options.length - 3;
+					selectedCatIndex = FlxMath.wrap(selectedCatIndex - 1, 0, options.length - 3);
 
 					switchCat(options[selectedCatIndex]);
 				}

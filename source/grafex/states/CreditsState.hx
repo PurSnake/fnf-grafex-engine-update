@@ -55,7 +55,7 @@ class CreditsState extends MusicBeatState
 		#end
 
 		persistentUpdate = true;
-		bg = new FlxSprite().loadGraphic(Paths.image('menuDesat'));
+		bg = new FlxSprite(Paths.image('menuDesat'));
 		add(bg);
 		bg.screenCenter();
 
@@ -143,7 +143,7 @@ class CreditsState extends MusicBeatState
 			}
 		}
 		descBox = new AttachedSprite();
-		descBox.makeGraphic(1, 1, FlxColor.BLACK);
+		descBox.makeGraphic(1, 1, 0x99000000);
 		descBox.xAdd = -10;
 		descBox.yAdd = -10;
 		descBox.alphaMult = 0.6;
@@ -272,12 +272,7 @@ class CreditsState extends MusicBeatState
 			item.targetY = bullShit - curSelected;
 			bullShit++;
 
-			if(!unselectableCheck(bullShit-1)) {
-				item.alpha = 0.6;
-				if (item.targetY == 0) {
-					item.alpha = 1;
-				}
-			}
+			if(!unselectableCheck(bullShit-1)) item.alpha = (item.targetY == 0 ? 1 : 0.6);
 		}
 
 		descText.text = creditsStuff[curSelected].description;

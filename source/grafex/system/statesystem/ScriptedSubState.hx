@@ -15,34 +15,21 @@ import grafex.system.statesystem.MusicBeatSubstate;
 
 class ScriptedSubState extends MusicBeatSubstate
 {
-	public static var subStateName:String = 'CustomSubState'; 
+	private static var subStateName:String = 'CustomSubState'; 
 	public static var instance:ScriptedSubState;
 
-	public static var _staticVariables:Map<String, Dynamic> = new Map();
+	public static var _staticVariables:Map<String, Any> = new Map();
 
-	public static function init() {
-		_staticVariables.set("ao", "ao");
-		_staticVariables.remove("ao");
-	}
-	
-	public static function setStatic(name:String, variable:Dynamic, ?force:Bool = false):Void {
+	public static function setStatic(name:String, variable:Any, ?force:Bool = false):Void {
 		return 	_staticVariables.set((!force ? subStateName + "-" : "") + name, variable);
 	}
 
-	public static function getStatic(name:String, ?defaultVar:Dynamic, ?force:Bool = false):Dynamic {
+	public static function getStatic(name:String, ?defaultVar:Any, ?force:Bool = false):Any {
 		(_staticVariables.exists((!force ? subStateName + "-" : "") + name) && _staticVariables.get((!force ? subStateName + "-" : "") + name) != null) ? {
 			return _staticVariables.get((!force ? subStateName + "-" : "") + name);
 		} : {
 			return defaultVar;
 		}
-	}
-
-	public function setStaticVar(name:String, variable:Dynamic, ?force:Bool = false):Void {
-		return 	setStatic(name, variable, force);
-	}
-
-	public function getStaticVar(name:String, ?defaultVar:Dynamic, ?force:Bool = false):Dynamic {
-		return 	getStatic(name, defaultVar, force);
 	}
 
 	public function new(?name:String = 'CustomSubState')
@@ -54,17 +41,18 @@ class ScriptedSubState extends MusicBeatSubstate
 	}
 
 	override function loadSubStateScript() {
-		trace(subStateName);
 		if (Paths.fileExists('states/sub/${subStateName}.hx', TEXT)) {
-			subStateScript = GrfxScriptHandler.loadStateModule('states/sub/${subStateName}');
-
+			final extraParams = [
+				subStateName => subStateName,
+				'subStateName' => subStateName
+			];
+			subStateScript = GrfxScriptHandler.loadStateModule('states/sub/${subStateName}', extraParams);
 			trace('states/sub/${subStateName}.hx');
 			instance = this;
-
-			subStateScript.set('CustomSubState', this);
 			subStateScript.set('this', this);
-			subStateScript.set('subStateName', subStateName);			
-
+			subStateScript.set('customSubState', this);
+			subStateScript.set('setStaticVar', setStatic);
+			subStateScript.set('getStaticVar', getStatic);
 			subStateScript.setParent(instance);
 			subStateScript.activate();
 			call("new", []);

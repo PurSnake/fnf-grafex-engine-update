@@ -43,7 +43,7 @@ class HealthIcon extends FlxSprite
 
 	public var spriteType:String = 'duo';
 
-	public var alligment(default, set):String = 'right';
+	public var aligment(default, set):String = 'right';
 
 	public var properties:Map<String, Dynamic> = new Map();
 
@@ -78,7 +78,7 @@ class HealthIcon extends FlxSprite
 
 	public function changeIcon(char, ?props:IconProperties = null, ?gpuRender:Bool = true, ?forced:Bool = false) //char:String, ?xd:Float = 0, ?yd:Float = 0, ?cusScale:Float = 1, ?gpuShieet:Bool = true
 	{
-        if (character == char && !forced) return;
+		if (character == char && !forced) return;
 
 		if (props != null) {
 			spriteType = props.type;
@@ -88,9 +88,9 @@ class HealthIcon extends FlxSprite
 
 		switch (char) 
 		{  
-            default: 
+			default: 
 				switch(spriteType) {
-                    case 'solo' | 'duo' | 'trioWin' | 'trioLose' | 'quadro':
+					case 'solo' | 'duo' | 'trioWin' | 'trioLose' | 'quadro':
 
 						var name:String = 'icons/' + char;
 
@@ -126,15 +126,16 @@ class HealthIcon extends FlxSprite
 								animation.add('default', [0], 0, false, isPlayer);
 								animation.add('losing', [1], 0, false, isPlayer);
 								animation.add('winning', [2], 0, false, isPlayer);
+
 							case 'trioLose': 
 								animation.add('default', [0], 0, false, isPlayer);
 								animation.add('losing', [1], 0, false, isPlayer);
 								animation.add('lost', [2], 0, false, isPlayer);
 
-							case 'quadro': 4;
-							    animation.add('default', [0], 0, false, isPlayer);
-							    animation.add('losing', [1], 0, false, isPlayer);
-							    animation.add('winning', [2], 0, false, isPlayer);
+							case 'quadro':
+								animation.add('default', [0], 0, false, isPlayer);
+								animation.add('losing', [1], 0, false, isPlayer);
+								animation.add('winning', [2], 0, false, isPlayer);
 								animation.add('lost', [3], 0, false, isPlayer);
 						}
 						playAnim("default");
@@ -165,36 +166,38 @@ class HealthIcon extends FlxSprite
 	}
 
 	public function playAnim(AnimName:String, Force:Bool = false, Reversed:Bool = false, Frame:Int = 0){
-		if(animation.getByName(AnimName) == null) return;
+		if(animation == null || animation.getByName(AnimName) == null) return;
 
 		animation.play(AnimName, Force, Reversed, Frame);
+		final offsetByAnim = animOffsets.exists(AnimName) ? animOffsets.get(AnimName) : [0, 0];
+		offset.x = -customOffsets.x + offsetByAnim[0];
+		offset.y = customOffsets.y + offsetByAnim[1];
 	}
 
 	var game = PlayState.instance;
-	public function updateScale(?elapsed:Float = 0, ?playbackRate:Float = 0)
+	public dynamic function updateScale(?elapsed:Float = null, ?playbackRate:Float = null)
 	{
-		var mult:Float = FlxMath.lerp(customScale, scale.x, Utils.boundTo(1 - ((elapsed != 0 ? elapsed : FlxG.elapsed) * 9 * (playbackRate != 0 ? playbackRate : game.playbackRate)), 0, 1));
+		var mult:Float = FlxMath.lerp(customScale, scale.x, Utils.boundTo(1 - ((elapsed ?? FlxG.elapsed) * 9 * (playbackRate ?? game.playbackRate)), 0, 1));
 		scale.set(mult, mult);
 		updateHitbox();
 	}
 
 	public var iconOffset:Int = 26;
-	public function updatePosition(elapsed:Float)
+	public dynamic function updatePosition(elapsed:Float)
 	{
-
 		var newX:Float = x;
-		switch(alligment) {
+		switch(aligment) {
 			case 'right':
 				this.isPlayer ? {
-					newX = game.healthBar.x + (game.healthBar.width * (FlxMath.remapToRange(game.displayedHealth, 0, 100, 100, 0) * 0.01)) + (150 * scale.x - 150) / 2 - iconOffset;
+					newX = game.healthBar.x + (game.healthBar.width * (FlxMath.remapToRange(game.displayedHealth * 2 / game.maxHealth, 0, 100, 100, 0) * 0.01)) + (150 * scale.x - 150) / 2 - iconOffset;
 				} : {
-					newX = game.healthBar.x + (game.healthBar.width * (FlxMath.remapToRange(game.displayedHealth, 0, 100, 100, 0) * 0.01)) - (150 * scale.x) / 2 - iconOffset * 2;
+					newX = game.healthBar.x + (game.healthBar.width * (FlxMath.remapToRange(game.displayedHealth * 2 / game.maxHealth, 0, 100, 100, 0) * 0.01)) - (150 * scale.x) / 2 - iconOffset * 2;
 				}	
 			case 'left':
 				this.isPlayer ? {
-				        newX = game.healthBar.x + (game.healthBar.width * (FlxMath.remapToRange(100 - game.displayedHealth, 0, 100, 100, 0) * 0.01)) - (150 * scale.x) / 2 - iconOffset * 2;
+				        newX = game.healthBar.x + (game.healthBar.width * (FlxMath.remapToRange(100 - game.displayedHealth * 2 / game.maxHealth, 0, 100, 100, 0) * 0.01)) - (150 * scale.x) / 2 - iconOffset * 2;
 				} : {
-					newX = game.healthBar.x + (game.healthBar.width * (FlxMath.remapToRange(100 - game.displayedHealth, 0, 100, 100, 0) * 0.01)) + (150 * scale.x - 150) / 2 - iconOffset;
+					newX = game.healthBar.x + (game.healthBar.width * (FlxMath.remapToRange(100 - game.displayedHealth * 2 / game.maxHealth, 0, 100, 100, 0) * 0.01)) + (150 * scale.x - 150) / 2 - iconOffset;
 				}
 		}
 
@@ -206,8 +209,7 @@ class HealthIcon extends FlxSprite
 		switch (spriteType) {
 			case 'solo': 
 				playAnim("default");
-
-		    case 'duo': 
+			case 'duo': 
 				health < 20 ? playAnim("losing") : playAnim("default");
 
 			case 'trioWin': 
@@ -232,14 +234,14 @@ class HealthIcon extends FlxSprite
 				else if (health < 30) 
 					playAnim("losing");
 				else if (health > 80)
-		    	    playAnim("winning");
+					playAnim("winning");
 				else
 					playAnim("default");
 		}
 
 	}
 
-	public function doScale(percentage:Float = 1)
+	public dynamic function doScale(percentage:Float = 1)
 	{
 		scale.set(customScale * scalePercent * percentage, customScale * scalePercent * percentage);
 		updateHitbox();
@@ -248,34 +250,27 @@ class HealthIcon extends FlxSprite
 	override function updateHitbox()
 	{
 		super.updateHitbox();
-		var offsetByAnim = [0, 0];
-		if (animOffsets.exists(animation.curAnim.name)) offsetByAnim = animOffsets.get(animation.curAnim.name);
-
+		final offsetByAnim = (animation != null && animOffsets.exists(animation.curAnim.name)) ? animOffsets.get(animation.curAnim.name) : [0, 0];
 		offset.x = -customOffsets.x + offsetByAnim[0];
 		offset.y = customOffsets.y + offsetByAnim[1];
 	}
 	
 	// Setters functions
 
-	function set_alligment(Alligment:String):String
+	function set_aligment(alligment:String):String
 	{
-		switch(Alligment) {
-			case 'left':
-				flipX = isPlayer;
-			case 'right':
-				flipX = !isPlayer;
-		}
-		return alligment = Alligment;
+		flipX = alligment == 'left';
+		return aligment = alligment;
 	}
 
-	function get_alligment():String
+	function get_aligment():String
 	{
-		return alligment;
+		return aligment;
 	}
 
 	public function changeOffsets(custom:Array<Float>)
 	{
-        customOffsets.set(custom[0], custom[1]);
+		customOffsets.set(custom[0], custom[1]);
 	}
 
 	public function changeScale(custom:Float = 1, ?set:Bool = false)

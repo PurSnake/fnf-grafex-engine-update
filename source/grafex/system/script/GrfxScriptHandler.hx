@@ -25,7 +25,7 @@ import sys.FileSystem;
 import sys.io.File;
 import grafex.system.Conductor;
 import grafex.util.ClientPrefs;
-
+import openfl.utils.AssetType;
 import flixel.math.FlxMath;
 import flixel.util.FlxSave;
 import grafex.data.EngineData;
@@ -47,38 +47,41 @@ import grafex.cutscenes.CutsceneHandler;
 import grafex.system.statesystem.ScriptedState;
 import grafex.system.statesystem.ScriptedSubState;
 
+import grafex.sprites.GrfxShader;
+
 using StringTools;
 
 class GrfxScriptHandler {
 
 	public static var scriptExts:Array<String> = ['hx', 'hxs', 'hscript', 'hxc'];
 
+	public static var staticVariables:Map<String, Dynamic> = [];
+	public static var publicVariables:Map<String, Dynamic> = [];
+
 	public static function loadStateModule(path:String, ?extraParams:StringMap<Dynamic>) {
 
-		var code = getParsedCode(Paths.hxModule(path));
+		final code = getParsedCode(Paths.hxModule(path));
 		return new GrfxStateModule(code, extraParams);
 	}
 
 	public static function loadModule(path:String, ?extraParams:StringMap<Dynamic>) {
 
-		var code = getParsedCode(Paths.hxModule(path));
+		final code = getParsedCode(Paths.hxModule(path));
 		return new GrfxModule(code, extraParams);
 	}
 	
 	public static function noPathModule(path:String, ?extraParams:StringMap<Dynamic>) {
-        var code = getParsedCode(path);
+		final code = getParsedCode(path);
 		return new GrfxHxScript(code, extraParams, path);
 	}
 
 	private static function getParsedCode(path:String) {
 		trace('Loading haxe file: $path'); 
 
-		var rawFileData = File.getContent(path);
+		final rawFileData = File.getContent(path);
 
-		var parser:Parser = new Parser();
-		parser.allowJSON = true;
-		parser.allowTypes = true;
-		parser.allowMetadata = true;
+		final parser:Parser = new Parser();
+		parser.allowJSON = parser.allowTypes = parser.allowMetadata = true;
 		var codeToExecute = null;
 		try {
 			codeToExecute = parser.parseString(rawFileData);
@@ -92,8 +95,8 @@ class GrfxScriptHandler {
 
 class GrfxHxScript extends GrfxModule
 {
-	public function executeFunc(eventName:String, args:Array<Dynamic>):Dynamic {
-		if (!exists(eventName) || closed) return null;
+	public function executeFunc(funcName:String, parameters:Array<Dynamic>):Dynamic {
+		/*if (!exists(eventName) || closed) return null;
 
 		if(program == null) {
 			trace('{${scriptName}}: Null Script'); 
@@ -109,12 +112,24 @@ class GrfxHxScript extends GrfxModule
 		try {
 			smthVal = Reflect.callMethod(null, funcToExec, args);
 		} catch(e) {
-			trace(scriptName + ': [Function Error] (' +eventName + '): ' + e);
-		 	Lib.application.window.alert(e.message + "\n Function: " + eventName + "\n In script '" + scriptName + "'", "Function (' + eventName + ') Executing Error!");
+			trace('{${scriptName}}: [Function Error](${eventName}): ${e}');
+		 	Lib.application.window.alert(e.message + "\n Function: " + eventName + "\n In script '" + scriptName + "'", "Function ('+eventName+') Executing Error!");
 			dispose();
 		}
 
-		return smthVal;
+		return smthVal;*/
+
+
+
+		if (interp == null) return null;
+		if (!exists(funcName) || closed) return null;
+
+		var func = get(funcName);
+		if (func != null && Reflect.isFunction(func))
+			return Reflect.callMethod(null, func, parameters);
+
+		return null;
+
 	} //callOnHscrip("onFunction", [arg1, array-arg2, some-val-arg3]);
 }
 
@@ -135,6 +150,9 @@ class GrfxModule
 	public function new(?contents:Expr, ?extraParams:StringMap<Dynamic>, ?name:String) {
 		interp = new Interp();
 
+		interp.importFailedCallback = importFailedCallback;
+		interp.staticVariables = GrfxScriptHandler.staticVariables;
+		interp.publicVariables = GrfxScriptHandler.publicVariables;
 		interp.allowStaticVariables = interp.allowPublicVariables = true;
 
 		try {
@@ -218,6 +236,7 @@ class GrfxModule
 		set('FlxRuntimeShader', flixel.addons.display.FlxRuntimeShader);
 		set('FlxShaderToyRuntimeShader', shadertoy.FlxShaderToyRuntimeShader);
 		set('ShaderFilter', openfl.filters.ShaderFilter);
+		set('GrfxShader', GrfxShader);
 		#end
 
 		/*set('add', function(obj:FlxBasic) PlayState.instance.add(obj));
@@ -408,6 +427,31 @@ class GrfxModule
 			return;
 		}
 		interp.execute(program);
+	}
+
+	private function importFailedCallback(cl:Array<String>):Bool {
+		final assetPath = Paths.getPath('source/${cl.join("/")}.hx', TEXT, null, true);
+		var code = File.getContent(assetPath);
+		trace(code);
+		trace(cl.join("/") + ".hx");
+		var parser:Parser = new Parser();
+		parser.allowJSON = parser.allowTypes = parser.allowMetadata = true;
+
+		var expr:Expr = null;
+		try {
+			if (code != null && code.trim() != "")
+				expr = parser.parseString(code, cl.join("/") + ".hx");
+		} catch(e:Error) {
+			trace(e);
+		} catch(e) {
+			trace(e.toString());
+		}
+		if (expr != null) {
+			@:privateAccess
+			interp.exprReturn(expr);
+			return true;
+		}
+		return true;
 	}
 
 	function errorTrace(text:String, color:FlxColor = FlxColor.WHITE)
@@ -661,6 +705,9 @@ class GrfxStateModule
 	public function new(?contents:Expr, ?extraParams:StringMap<Dynamic>, ?name:String) {
 		interp = new Interp();
 
+		interp.importFailedCallback = importFailedCallback;
+		interp.staticVariables = GrfxScriptHandler.staticVariables;
+		interp.publicVariables = GrfxScriptHandler.publicVariables;
 		interp.allowStaticVariables = interp.allowPublicVariables = true;
 
 		try {
@@ -737,6 +784,7 @@ class GrfxStateModule
 		set('FlxRuntimeShader', flixel.addons.display.FlxRuntimeShader);
 		set('FlxShaderToyRuntimeShader', shadertoy.FlxShaderToyRuntimeShader);
 		set('ShaderFilter', openfl.filters.ShaderFilter);
+		set('GrfxShader', GrfxShader);
 		#end
 
 		set("Achievements", AchievementsGrfx);
@@ -795,6 +843,31 @@ class GrfxStateModule
 		interp.execute(program);
 	}
 
+	private function importFailedCallback(cl:Array<String>):Bool {
+		final assetPath = Paths.getPath('source/${cl.join("/")}.hx', TEXT, null, true);
+		var code = File.getContent(assetPath);
+		trace(code);
+		trace(cl.join("/") + ".hx");
+		var parser:Parser = new Parser();
+		parser.allowJSON = parser.allowTypes = parser.allowMetadata = true;
+
+		var expr:Expr = null;
+		try {
+			if (code != null && code.trim() != "")
+				expr = parser.parseString(code, cl.join("/") + ".hx");
+		} catch(e:Error) {
+			trace(e);
+		} catch(e) {
+			trace(e.toString());
+		}
+		if (expr != null) {
+			@:privateAccess
+			interp.exprReturn(expr);
+			return true;
+		}
+		return true;
+	}
+
 	public function setParent(parent:Dynamic) {
 		interp.scriptObject = parent;
 		set('add', function(obj:FlxBasic) parent.add(obj));
@@ -802,8 +875,8 @@ class GrfxStateModule
 		set('remove', function(obj:FlxBasic, splice:Bool = false) parent.remove(obj, splice));
 	}
 
-	public function executeFunc(eventName:String, args:Array<Dynamic>):Dynamic {
-		if (!exists(eventName) || closed) return null;
+	public function executeFunc(funcName:String, parameters:Array<Dynamic>):Dynamic {
+		/*if (!exists(eventName) || closed) return null;
 
 		if(program == null) {
 			trace('{${scriptName}}: Null Script'); 
@@ -824,7 +897,19 @@ class GrfxStateModule
 			dispose();
 		}
 
-		return smthVal;
+		return smthVal;*/
+
+
+
+		if (interp == null) return null;
+		if (!exists(funcName) || closed) return null;
+
+		var func = get(funcName);
+		if (func != null && Reflect.isFunction(func))
+			return Reflect.callMethod(null, func, parameters);
+
+		return null;
+
 	} //callOnHscrip("onFunction", [arg1, array-arg2, some-val-arg3]);
 
 

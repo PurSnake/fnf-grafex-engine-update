@@ -12,36 +12,34 @@ import grafex.util.ClientPrefs;
 class MenuItem extends FlxSprite
 {
 	public var targetY:Float = 0;
-	public var flashingInt:Int = 0;
 
 	public function new(x:Float, y:Float, weekName:String = '')
 	{
-		super(x, y);
-		loadGraphic(Paths.image('storymenu/' + weekName));
+		super(x, y, Paths.image('storymenu/$weekName'));
 		//trace('Test added: ' + WeekData.getWeekNumber(weekNum) + ' (' + weekNum + ')');
 		antialiasing = ClientPrefs.globalAntialiasing;
 	}
 
-	private var isFlashing:Bool = false;
+	public var isFlashing(default, set):Bool = false;
+	final flashColor:Int = 0xFF33ffff;
+	final flashFrame:Int = 6;
+	var flashElapsed:Float = 0.0;
 
-	public function startFlashing():Void
+	inline function set_isFlashing(flashing:Bool):Bool
 	{
-		isFlashing = true;
+		flashElapsed = 0.0;
+		color = (flashing ? flashColor : FlxColor.WHITE);
+		return isFlashing = flashing;
 	}
-
-	var fakeFramerate:Int = Math.round((1 / FlxG.elapsed) / 10);
-
 	override function update(elapsed:Float)
 	{
 		super.update(elapsed);
-		y = FlxMath.lerp(y, (targetY * 120) + 480, Utils.boundTo(elapsed * 10.2, 0, 1));
+		y = FlxMath.lerp(y, (targetY * 120) + 480, Math.max(elapsed * 10.2, 0));
 
 		if (isFlashing)
-			flashingInt += 1;
-
-		if (flashingInt % fakeFramerate >= Math.floor(fakeFramerate / 2))
-			color = 0xFF33ffff;
-		else
-			color = FlxColor.WHITE;
+		{
+			flashElapsed += elapsed;
+			color = (flashElapsed * FlxG.updateFramerate) % flashFrame > flashFrame * 0.5 ? FlxColor.WHITE : flashColor;
+		}
 	}
 }

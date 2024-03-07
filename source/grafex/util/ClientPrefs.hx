@@ -15,28 +15,28 @@ class ClientPrefs {
 	public static var noteSplashesAlpha:Float = 0.6;
 	public static var lightCpuStrums:Bool = true;
 	public static var classicScoreTxt:Bool = true;
-    public static var playMissSounds:Bool = true;
-	public static var countDownPause:Bool = true;
-    public static var hitSound:Bool = false;
-    public static var shouldCameraMove:Bool = true;
-    public static var hsvol:Float = 0;
-    public static var instantRespawn:Bool = false;
-    public static var autoPause:Bool = false;
+	public static var playMissSounds:Bool = true;
+	public static var countDownPause:Bool = false;
+	public static var hitSound:Bool = false;
+	public static var shouldCameraMove:Bool = true;
+	public static var hsvol:Float = 0;
+	public static var instantRespawn:Bool = false;
+	public static var autoPause:Bool = false;
 	public static var visibleHealthbar:Bool = true;
 	public static var ColorBlindType:String = 'None';
 	public static var ColorBlindTypeNum:Int = 0;
 	public static var hideOpponenStrums:Bool = false;
 	public static var chartAutoSaveInterval:Int = 5;
 	public static var chartAutoSave:Bool = true;
-    public static var downScroll:Bool = false;
+	public static var downScroll:Bool = false;
 	public static var middleScroll:Bool = false;
-	public static var showFPS:Bool = true;
-    public static var showMEM:Bool = true;
+	public static var showFPS:Bool = false;
+	public static var showMEM:Bool = false;
 	public static var flashing:Bool = true;
 	public static var globalAntialiasing:Bool = true;
 	public static var noteSplashes:Bool = true;
 	public static var noteSusSplashes:Bool = true;
-	public static var noteSusSplashesAlpha:Float = 0.8;
+	public static var noteSusSplashesAlpha:Float = 0.6;
 	public static var lowQuality:Bool = false;
 	public static var shaders:Bool = true;
 	public static var framerate:Int = 120;
@@ -51,7 +51,7 @@ class ClientPrefs {
 	public static var scoreZoom:Bool = true;
 	public static var noReset:Bool = false;
 	public static var controllerMode:Bool = false;
-	public static var comboStacking = false;
+	public static var comboStacking = true;
 	public static var gameplaySettings:Map<String, Dynamic> = [
 		'scrollspeed' => 1.0,
 		'scrolltype' => 'multiplicative', 
@@ -78,7 +78,7 @@ class ClientPrefs {
 		'note_left'		=> [A, LEFT],
 		'note_down'		=> [S, DOWN],
 		'note_up'		=> [W, UP],
-		'note_right'	=> [D, RIGHT],
+		'note_right'		=> [D, RIGHT],
 		
 		'ui_left'		=> [A, LEFT],
 		'ui_down'		=> [S, DOWN],
@@ -90,9 +90,9 @@ class ClientPrefs {
 		'pause'			=> [ENTER, ESCAPE],
 		'reset'			=> [R, NONE],
 		
-		'volume_mute'	=> [ZERO, NONE],
+		'volume_mute'		=> [ZERO, NONE],
 		'volume_up'		=> [NUMPADPLUS, PLUS],
-		'volume_down'	=> [NUMPADMINUS, MINUS],
+		'volume_down'		=> [NUMPADMINUS, MINUS],
 		
 		'debug_1'		=> [SEVEN, NONE],
 		'debug_2'		=> [EIGHT, NONE]
@@ -108,7 +108,6 @@ class ClientPrefs {
 
 	public static function loadDefaultKeys() {
 		defaultKeys = keyBinds.copy();
-		//trace(defaultKeys);
 	}
 
 	public static function saveSettings() {
@@ -119,21 +118,21 @@ class ClientPrefs {
 		FlxG.save.data.achievements = achievements;
 		FlxG.save.data.hellAssTips = hellAssTips;
 		FlxG.save.data.lightCpuStrums = lightCpuStrums;
-        FlxG.save.data.autoPause = autoPause;
+		FlxG.save.data.autoPause = autoPause;
 		FlxG.save.data.visibleHealthbar = visibleHealthbar;
-        FlxG.save.data.instantRespawn = instantRespawn;
-        FlxG.save.data.playMissSounds = playMissSounds;
-        FlxG.save.data.hitSound = hitSound;
-        FlxG.save.data.shouldCameraMove = shouldCameraMove;
+		FlxG.save.data.instantRespawn = instantRespawn;
+		FlxG.save.data.playMissSounds = playMissSounds;
+		FlxG.save.data.hitSound = hitSound;
+		FlxG.save.data.shouldCameraMove = shouldCameraMove;
 		FlxG.save.data.chartAutoSaveInterval = chartAutoSaveInterval;
 		FlxG.save.data.chartAutoSave = chartAutoSave;
-        FlxG.save.data.downScroll = downScroll;
-        FlxG.save.data.classicScoreTxt = classicScoreTxt;
-    	FlxG.save.data.shaders = shaders;
+		FlxG.save.data.downScroll = downScroll;
+		FlxG.save.data.classicScoreTxt = classicScoreTxt;
+		FlxG.save.data.shaders = shaders;
 		FlxG.save.data.middleScroll = middleScroll;
 		FlxG.save.data.countDownPause = countDownPause;
 		FlxG.save.data.showFPS = showFPS;
-        FlxG.save.data.showMEM = showMEM;
+		FlxG.save.data.showMEM = showMEM;
 		FlxG.save.data.flashing = flashing;
 		FlxG.save.data.globalAntialiasing = globalAntialiasing;
 		FlxG.save.data.noteSplashes = noteSplashes;
@@ -152,7 +151,7 @@ class ClientPrefs {
 		FlxG.save.data.scoreZoom = scoreZoom;
 		FlxG.save.data.noReset = noReset;
 		FlxG.save.data.hideOpponenStrums = hideOpponenStrums;
-        FlxG.save.data.hsvol = hsvol;
+		FlxG.save.data.hsvol = hsvol;
 		FlxG.save.data.comboOffset = comboOffset;
 		FlxG.save.data.ratingOffset = ratingOffset;
 		FlxG.save.data.sickWindow = sickWindow;
@@ -174,40 +173,36 @@ class ClientPrefs {
 	public static function loadPrefs() {
 		if(FlxG.save.data.enableTimeBar != null) enableTimeBar = FlxG.save.data.enableTimeBar;
 		if(FlxG.save.data.noteSusSplashesAlpha != null) noteSusSplashesAlpha = FlxG.save.data.noteSusSplashesAlpha;
-
 		if(FlxG.save.data.noteSplashesAlpha != null) noteSplashesAlpha = FlxG.save.data.noteSplashesAlpha;
 		if(FlxG.save.data.noteSplashesScale != null) noteSplashesScale = FlxG.save.data.noteSplashesScale;
-
 		if(FlxG.save.data.sustainNotesClipRect != null) sustainNotesClipRect = FlxG.save.data.sustainNotesClipRect;
-
 		if(FlxG.save.data.achievements != null) achievements = FlxG.save.data.achievements;
 		if(FlxG.save.data.hellAssTips != null) hellAssTips = FlxG.save.data.hellAssTips;
-
 		if(FlxG.save.data.lightCpuStrums != null) lightCpuStrums = FlxG.save.data.lightCpuStrums;
+		if(FlxG.save.data.classicScoreTxt != null) classicScoreTxt = FlxG.save.data.classicScoreTxt;
+		if(FlxG.save.data.comboStacking != null) comboStacking = FlxG.save.data.comboStacking;
+		if(FlxG.save.data.ColorBlindType != null) ColorBlindType = FlxG.save.data.ColorBlindType;
+		if(FlxG.save.data.ColorBlindTypeNum != null) ColorBlindTypeNum = FlxG.save.data.ColorBlindTypeNum;
+		if(FlxG.save.data.hideOpponenStrums != null) hideOpponenStrums = FlxG.save.data.hideOpponenStrums;
+		if(FlxG.save.data.chartAutoSaveInterval != null) chartAutoSaveInterval = FlxG.save.data.chartAutoSaveInterval;
+		if(FlxG.save.data.chartAutoSave != null) chartAutoSave = FlxG.save.data.chartAutoSave;
+		if(FlxG.save.data.countDownPause != null) countDownPause = FlxG.save.data.countDownPause;
+		if(FlxG.save.data.visibleHealthbar != null) visibleHealthbar = FlxG.save.data.visibleHealthbar;
+		if(FlxG.save.data.shouldCameraMove != null) shouldCameraMove = FlxG.save.data.shouldCameraMove;
 
-		FlxG.save.data.classicScoreTxt != null ? classicScoreTxt = FlxG.save.data.classicScoreTxt : classicScoreTxt = true;
-		FlxG.save.data.comboStacking != null ? comboStacking = FlxG.save.data.comboStacking : comboStacking = true;
-		FlxG.save.data.ColorBlindType != null ? ColorBlindType = FlxG.save.data.ColorBlindType : ColorBlindType = 'None';
-		FlxG.save.data.ColorBlindTypeNum != null ? ColorBlindTypeNum = FlxG.save.data.ColorBlindTypeNum : ColorBlindTypeNum = 0;
-		FlxG.save.data.hideOpponenStrums != null ? hideOpponenStrums = FlxG.save.data.hideOpponenStrums : hideOpponenStrums = false;
-		FlxG.save.data.chartAutoSaveInterval != null ? chartAutoSaveInterval = FlxG.save.data.chartAutoSaveInterval : chartAutoSaveInterval = 5;
-		FlxG.save.data.chartAutoSave != null ? chartAutoSave = FlxG.save.data.chartAutoSave : chartAutoSave = true;
-		FlxG.save.data.countDownPause != null ? countDownPause = FlxG.save.data.countDownPause : countDownPause = true;
-		FlxG.save.data.visibleHealthbar != null ? visibleHealthbar = FlxG.save.data.visibleHealthbar : visibleHealthbar = true;
-		FlxG.save.data.shouldCameraMove != null ? shouldCameraMove = FlxG.save.data.shouldCameraMove : shouldCameraMove = true;
 		FlxG.save.data.autoPause != null ? {
-			autoPause = FlxG.save.data.autoPause;
-			FlxG.autoPause = autoPause;
+			FlxG.autoPause = autoPause = FlxG.save.data.autoPause;
 		} : {
-			autoPause = false;
-			FlxG.autoPause = autoPause;
+			FlxG.autoPause = autoPause = false;
 		};
-		FlxG.save.data.hitSound != null ? hitSound = FlxG.save.data.hitSound : hitSound = false;
-		FlxG.save.data.playMissSounds != null ? playMissSounds = FlxG.save.data.playMissSounds : playMissSounds = true;
-		FlxG.save.data.hitSound != null ? hitSound = FlxG.save.data.hitSound : hitSound = false;
-		FlxG.save.data.instantRespawn != null ? instantRespawn = FlxG.save.data.instantRespawn : instantRespawn = false;
-		FlxG.save.data.downScroll != null ? downScroll = FlxG.save.data.downScroll : downScroll = false;
-		FlxG.save.data.middleScroll != null ? middleScroll = FlxG.save.data.middleScroll : middleScroll = false;
+
+		if(FlxG.save.data.hitSound != null) hitSound = FlxG.save.data.hitSound;
+		if(FlxG.save.data.playMissSounds != null) playMissSounds = FlxG.save.data.playMissSounds;
+		if(FlxG.save.data.hitSound != null) hitSound = FlxG.save.data.hitSound;
+		if(FlxG.save.data.instantRespawn != null) instantRespawn = FlxG.save.data.instantRespawn;
+		if(FlxG.save.data.downScroll != null) downScroll = FlxG.save.data.downScroll;
+		if(FlxG.save.data.middleScroll != null) middleScroll = FlxG.save.data.middleScroll;
+
 		FlxG.save.data.showFPS != null ? {
 			showFPS = FlxG.save.data.showFPS; 
 			FPSMem.showFPS = showFPS;
@@ -216,15 +211,17 @@ class ClientPrefs {
 			showMEM = FlxG.save.data.showMEM; 
 			FPSMem.showMem = showMEM;
 		} : showMEM = false;
-		FlxG.save.data.flashing != null ? flashing = FlxG.save.data.flashing : flashing = true;
-		FlxG.save.data.noteSplashes != null ? noteSplashes = FlxG.save.data.noteSplashes : noteSplashes = true;
-		FlxG.save.data.noteSusSplashes != null ? noteSusSplashes = FlxG.save.data.noteSusSplashes : noteSusSplashes = true;
-		FlxG.save.data.lowQuality != null ? lowQuality = FlxG.save.data.lowQuality : lowQuality = false;
-		FlxG.save.data.shaders != null ? shaders = FlxG.save.data.shaders : shaders = true;
-		FlxG.save.data.camZooms != null ? camZooms = FlxG.save.data.camZooms : camZooms = true;
-		FlxG.save.data.hideHud != null ? hideHud = FlxG.save.data.hideHud : hideHud = false;
-		FlxG.save.data.noteOffset != null ? noteOffset = FlxG.save.data.noteOffset : noteOffset = 0;
-		FlxG.save.data.arrowHSV != null ? arrowHSV = FlxG.save.data.arrowHSV : arrowHSV = [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]];
+
+		if(FlxG.save.data.flashing != null) flashing = FlxG.save.data.flashing;
+		if(FlxG.save.data.noteSplashes != null) noteSplashes = FlxG.save.data.noteSplashes;
+		if(FlxG.save.data.noteSusSplashes != null) noteSusSplashes = FlxG.save.data.noteSusSplashes;
+		if(FlxG.save.data.lowQuality != null) lowQuality = FlxG.save.data.lowQuality;
+		if(FlxG.save.data.shaders != null) shaders = FlxG.save.data.shaders;
+		if(FlxG.save.data.camZooms != null) camZooms = FlxG.save.data.camZooms;
+		if(FlxG.save.data.hideHud != null) hideHud = FlxG.save.data.hideHud;
+		if(FlxG.save.data.noteOffset != null) noteOffset = FlxG.save.data.noteOffset;
+		if(FlxG.save.data.arrowHSV != null) arrowHSV = FlxG.save.data.arrowHSV;
+
 		FlxG.save.data.imagesPersist != null ? {
 			imagesPersist = FlxG.save.data.imagesPersist; 
 			FlxGraphic.defaultPersist = ClientPrefs.imagesPersist;
@@ -232,48 +229,39 @@ class ClientPrefs {
 			imagesPersist = false; 
 			FlxGraphic.defaultPersist = ClientPrefs.imagesPersist;
 		};
-		FlxG.save.data.ghostTapping != null ? ghostTapping = FlxG.save.data.ghostTapping : ghostTapping = false;
-		FlxG.save.data.scoreZoom != null ? scoreZoom = FlxG.save.data.scoreZoom : scoreZoom = true;
-		FlxG.save.data.noReset != null ? noReset = FlxG.save.data.noReset : noReset = false;
-		FlxG.save.data.hsvol != null ? hsvol = FlxG.save.data.hsvol : hsvol = 0;
-		FlxG.save.data.comboOffset != null ? comboOffset = FlxG.save.data.comboOffset : comboOffset = [0, 0, 0, 0];
-		FlxG.save.data.ratingOffset != null ? ratingOffset = FlxG.save.data.ratingOffset : ratingOffset = 0;
-		FlxG.save.data.sickWindow != null ? sickWindow = FlxG.save.data.sickWindow : sickWindow = 45;
-		FlxG.save.data.goodWindow != null ? goodWindow = FlxG.save.data.goodWindow : goodWindow = 90;
-		FlxG.save.data.badWindow != null ? badWindow = FlxG.save.data.badWindow : badWindow = 135;
-		FlxG.save.data.safeFrames != null ? safeFrames = FlxG.save.data.safeFrames : safeFrames = 10;
-		FlxG.save.data.controllerMode != null ? controllerMode = FlxG.save.data.controllerMode : controllerMode = false;
-		FlxG.save.data.volume != null ? FlxG.sound.volume = FlxG.save.data.volume : FlxG.sound.volume = 1;
-		FlxG.save.data.mute != null ? FlxG.sound.muted = FlxG.save.data.mute : FlxG.sound.muted = false;
+
+		if(FlxG.save.data.ghostTapping != null) ghostTapping = FlxG.save.data.ghostTapping;
+		if(FlxG.save.data.scoreZoom != null) scoreZoom = FlxG.save.data.scoreZoom;
+		if(FlxG.save.data.noReset != null) noReset = FlxG.save.data.noReset;
+		if(FlxG.save.data.hsvol != null) hsvol = FlxG.save.data.hsvol;
+		if(FlxG.save.data.comboOffset != null) comboOffset = FlxG.save.data.comboOffset;
+		if(FlxG.save.data.ratingOffset != null) ratingOffset = FlxG.save.data.ratingOffset;
+		if(FlxG.save.data.sickWindow != null) sickWindow = FlxG.save.data.sickWindow;
+		if(FlxG.save.data.goodWindow != null) goodWindow = FlxG.save.data.goodWindow;
+		if(FlxG.save.data.badWindow != null) badWindow = FlxG.save.data.badWindow;
+		if(FlxG.save.data.safeFrames != null) safeFrames = FlxG.save.data.safeFrames;
+		if(FlxG.save.data.controllerMode != null) controllerMode = FlxG.save.data.controllerMode;
+		if(FlxG.save.data.volume != null) FlxG.sound.volume = FlxG.save.data.volume;
+		if(FlxG.save.data.mute != null) FlxG.sound.muted = FlxG.save.data.mute;
 		if(FlxG.save.data.framerate != null) {
 			framerate = FlxG.save.data.framerate;
-			if(framerate > FlxG.drawFramerate) {
-				FlxG.updateFramerate = framerate;
-				FlxG.drawFramerate = framerate;
-			} else {
-				FlxG.drawFramerate = framerate;
-				FlxG.updateFramerate = framerate;
-			}
+			FlxG.drawFramerate = framerate;
+			FlxG.updateFramerate = framerate;
 		}
 
 		if(FlxG.save.data.gameplaySettings != null)
+		{
+			var savedMap:Map<String, Dynamic> = FlxG.save.data.gameplaySettings;
+			for (name => value in savedMap)
 			{
-				var savedMap:Map<String, Dynamic> = FlxG.save.data.gameplaySettings;
-				for (name => value in savedMap)
-				{
-					gameplaySettings.set(name, value);
-				}
+				gameplaySettings.set(name, value);
 			}
+		}
 
 		if(FlxG.save.data.framerate == null) {
 			framerate = 120;
-			if(framerate > FlxG.drawFramerate) {
-				FlxG.updateFramerate = framerate;
-				FlxG.drawFramerate = framerate;
-			} else {
-				FlxG.drawFramerate = framerate;
-				FlxG.updateFramerate = framerate;
-			}
+			FlxG.drawFramerate = framerate;
+			FlxG.updateFramerate = framerate;
 		}
 
 		var save:FlxSave = new FlxSave();

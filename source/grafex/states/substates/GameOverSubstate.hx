@@ -28,10 +28,9 @@ using StringTools;
 class GameOverSubstate extends MusicBeatSubstate
 {
 	public var boyfriend:Character;
-	var camFollow:FlxPoint;
-	var camFollowPos:FlxObject;
+	var camFollow:FlxObject;
 	var updateCamera:Bool = false;
-    var playingDeathSound:Bool = false;
+	var playingDeathSound:Bool = false;
 	var ableToCamBeat:Bool = false;
 
 	public var coolBg:FlxSprite;
@@ -69,7 +68,7 @@ class GameOverSubstate extends MusicBeatSubstate
 		beatAnimShit = 1;
 	}
 
-public function checkDeathLines():Bool {
+	public function checkDeathLines():Bool {
 		return deathLines.length > 0;
 	}
 
@@ -107,20 +106,19 @@ public function checkDeathLines():Bool {
 		super.create();
 	}
 
-	public function new(x:Float, y:Float)
+	public function new(x:Float, y:Float, camX:Float, camY:Float)
 	{
-		trace('Opened substate: ' + Type.getClassName(Type.getClass(this)));
-		
 		super();
 
 		PlayState.instance.setOnLuas('inGameOver', true);
-
 		PlayState.instance.callOnLuas('onGameOverCreate', []);
 		PlayState.instance.callOnHscript('onGameOverCreate', []);
 
-		coolBg = new FlxSprite(-(FlxG.width/2), -(FlxG.height/2)).makeGraphic(Std.int(FlxG.width * 2), Std.int(FlxG.height * 2), coolBgColor);
-		add(coolBg);
+		coolBg = new FlxSprite().makeGraphic(1, 1, coolBgColor);
+		coolBg.scale.set(FlxG.width * 2.5, FlxG.height * 2.5);
 		coolBg.scrollFactor.set();
+		coolBg.screenCenter();
+		add(coolBg);
 
 		Conductor.songPosition = 0;
 
@@ -131,8 +129,6 @@ public function checkDeathLines():Bool {
 		boyfriend.y += boyfriend.positionArray[1];
 		add(boyfriend);
 
-		camFollow = new FlxPoint(boyfriend.getMidpoint().x - boyfriend.cameraPosition[0] + camOffset[0], boyfriend.getMidpoint().y + boyfriend.cameraPosition[1] + camOffset[1]);
-
 		FlxG.sound.play(Paths.sound(deathSoundName));
 		Conductor.changeBPM(loopSoundBPM);
 		FlxG.camera.scroll.set();
@@ -140,14 +136,17 @@ public function checkDeathLines():Bool {
 
 		boyfriend.playAnim('firstDeath');
 
-		camFollowPos = new FlxObject(0, 0, 1, 1);
-		camFollowPos.setPosition(FlxG.camera.scroll.x + (FlxG.camera.width / 2), FlxG.camera.scroll.y + (FlxG.camera.height / 2));
-		add(camFollowPos);
+		camFollow = new FlxObject(0, 0, 1, 1);
+		final mid:FlxPoint = boyfriend.getGraphicMidpoint();
+		camFollow.setPosition(mid.x - boyfriend.cameraPosition[0] + camOffset[0], mid.y + boyfriend.cameraPosition[1] + camOffset[1]);
+		FlxG.camera.focusOn(new FlxPoint(FlxG.camera.scroll.x + (FlxG.camera.width / 2), FlxG.camera.scroll.y + (FlxG.camera.height / 2)));
+		add(camFollow);
+		mid.put();
 
 		PlayState.instance.callOnLuas('onGameOverCreatePost', []);
 		PlayState.instance.callOnHscript('onGameOverCreatePost', []);
 	}
-
+	public var startedDeath:Bool = false;
 	var isFollowingAlready:Bool = false;
 	override function update(elapsed:Float)
 	{
@@ -155,50 +154,24 @@ public function checkDeathLines():Bool {
 
 		if (FlxG.sound.music.playing) Conductor.songPosition = FlxG.sound.music.time;
 
-		if(FlxG.keys.justPressed.F11) FlxG.fullscreen = !FlxG.fullscreen;
-
 		PlayState.instance.callOnLuas('onUpdate', [elapsed]);
 		PlayState.instance.callOnHscript('onUpdate', [elapsed]);
-		if(updateCamera) {
-			var lerpVal:Float = Utils.boundTo(elapsed * 0.6, 0, 1);
-			camFollowPos.setPosition(FlxMath.lerp(camFollowPos.x, camFollow.x, lerpVal), FlxMath.lerp(camFollowPos.y, camFollow.y, lerpVal));
-		}
 
-		if (controls.ACCEPT && !isEnding) endBullshit();
+		if (boyfriend.animation.curAnim.name == 'firstDeath' && boyfriend.animation.curAnim.finished && startedDeath)
+			boyfriend.playAnim('deathLoop');
 
-		if (controls.BACK && !isEnding)
-		{
-			FlxG.sound.music.stop();
-			PlayState.deathCounter = 0;
-			PlayState.seenCutscene = false;
-			PlayState.chartingMode = false;
-
-			if(deathLineSound != null) {
-			    deathLineSound.onComplete = null;
-			    deathLineSound.stop();
-			    deathLineSound = null;
-			    FlxG.sound.music.volume = 1;
-                        }
-
-			WeekData.loadTheFirstEnabledMod();
-			if (PlayState.isStoryMode) MusicBeatState.switchState(new StoryMenuState());
-			else MusicBeatState.switchState(new FreeplayState());
-
-			FlxG.sound.playMusic(Paths.music('freakyMenu'));
-			PlayState.instance.callOnLuas('onGameOverConfirm', [false]);
-			PlayState.instance.callOnHscript('onGameOverConfirm', [false]);
-		}
 
 		if (boyfriend.animation.curAnim.name == 'firstDeath')
 		{
 			if(boyfriend.animation.curAnim.curFrame >= frameNumber && !isFollowingAlready)
 			{
-				FlxG.camera.follow(camFollowPos, LOCKON, 1);
+				FlxG.camera.follow(camFollow, LOCKON, 0);
 				updateCamera = true;
 				isFollowingAlready = true;
 			}
 			if (boyfriend.animation.curAnim.finished && !playingDeathSound)
 			{
+				startedDeath = true;
 				if (PlayState.SONG.stage == 'tank')
 				{
 					playingDeathSound = true;
@@ -222,6 +195,33 @@ public function checkDeathLines():Bool {
 			}
 		}
 
+		if (controls.ACCEPT && !isEnding) endBullshit();
+
+		if (controls.BACK && !isEnding)
+		{
+			FlxG.sound.music.stop();
+			PlayState.deathCounter = 0;
+			PlayState.seenCutscene = false;
+			PlayState.chartingMode = false;
+
+			if(deathLineSound != null) {
+			    deathLineSound.onComplete = null;
+			    deathLineSound.stop();
+			    deathLineSound = null;
+			    FlxG.sound.music.volume = 1;
+                        }
+
+			WeekData.loadTheFirstEnabledMod();
+			PlayState.isStoryMode ? MusicBeatState.switchState(new StoryMenuState()) : MusicBeatState.switchState(new FreeplayState());
+
+			FlxG.sound.playMusic(Paths.music('freakyMenu'));
+			PlayState.instance.callOnLuas('onGameOverConfirm', [false]);
+			PlayState.instance.callOnHscript('onGameOverConfirm', [false]);
+		}
+
+		if(updateCamera) FlxG.camera.followLerp = elapsed * 2.4 / (FlxG.updateFramerate / 60);
+		else FlxG.camera.followLerp = 0;
+
 		PlayState.instance.callOnLuas('onUpdatePost', [elapsed]);
 		PlayState.instance.callOnHscript('onUpdatePost', [elapsed]);
 	}
@@ -229,7 +229,6 @@ public function checkDeathLines():Bool {
 	override function beatHit()
 	{
 		super.beatHit();
-		//FlxG.log.add('beat');
 
 		if(beatAnimShit != 0)
 			if(boyfriend.animOffsets.exists('deathBeat') && !isEnding && curBeat % beatAnimShit == 0)
@@ -241,7 +240,7 @@ public function checkDeathLines():Bool {
 
 	var isEnding:Bool = false;
 
-    var coolCameraZoom:Float = 1;
+	var coolCameraZoom:Float = 1;
 
 	function shit():Void {
 		if (!isEnding) FlxG.sound.music.fadeIn(3, 0.2, 1);

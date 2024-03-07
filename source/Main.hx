@@ -2,20 +2,12 @@ package;
 
 import flixel.addons.transition.FlxTransitionableState;
 import grafex.util.PlayerSettings;
-import flixel.FlxG;
-import flixel.FlxGame;
-import flixel.FlxState;
-import flixel.tweens.FlxTween;
 import openfl.Lib;
 import openfl.display.Sprite;
 import openfl.events.Event;
 import grafex.util.ClientPrefs;
-import openfl.text.TextFormat;
-
 import openfl.Assets;
 import openfl.utils.AssetCache;
-
-import flixel.util.FlxSave;
 
 import grafex.windows.WindowsAPI;
 
@@ -29,9 +21,6 @@ import lime.app.Application;
 import openfl.events.UncaughtErrorEvent;
 import grafex.states.substates.PrelaunchingState;
 import external.FPSMem;
-#if debug
-import grafex.states.TitleState;
-#end
 
 import haxe.CallStack;
 import haxe.io.Path;
@@ -44,6 +33,8 @@ import haxe.format.JsonParser;
 
 import openfl.display.StageScaleMode;
 
+import grafex.system.GrafexGame;
+import grafex.system.GrafexRatioScaleMode;
 
 using StringTools;
 
@@ -59,13 +50,14 @@ class Main extends Sprite
 		width: 1280, // WINDOW width
 		height: 720, // WINDOW height
 		initialState: PrelaunchingState, // initial game state
-		zoom: -1.0, // game state bounds
 		framerate: 120, // default framerate
 		skipSplash: true, // if the default flixel splash screen should be skipped
 		startFullscreen: false // if the game should start at fullscreen mode
 	};
 
 	public static var appTitle:String = "Friday Night Funkin': Grafex Engine";
+	public static var curGame:GrafexGame;
+	public static var scaleMode:GrafexRatioScaleMode;
 
 	public static var appConfig:ConfigFile;
 
@@ -130,49 +122,33 @@ class Main extends Sprite
 
 	private function setupGame():Void
 	{
-		var stageWidth:Int = Lib.current.stage.stageWidth;
-		var stageHeight:Int = Lib.current.stage.stageHeight;
-
-		if (game.zoom == -1.0)
-		{
-			var ratioX:Float = stageWidth / game.width;
-			var ratioY:Float = stageHeight / game.height;
-			game.zoom = Math.min(ratioX, ratioY);
-			game.width = Math.ceil(stageWidth / game.zoom);
-			game.height = Math.ceil(stageHeight / game.zoom);
-		}
-
 		getConfigFile();
 
-		addChild(new FlxGame(game.width, game.height, game.initialState, #if (flixel < "5.0.0") game.zoom, #end game.framerate, game.framerate, game.skipSplash, game.startFullscreen));
-
-		initBaseGameSettings();
+		addChild(curGame = new GrafexGame(game.width, game.height,
+			game.initialState, game.framerate, game.framerate,
+			game.skipSplash, game.startFullscreen
+		));
 
 		#if !mobile
-		FPSMem = new FPSMem(6, 6, 0xFFFFFF);
-		addChild(FPSMem);
+		statisticMonitor = new FPSMem(6, 6, 0xFFFFFF);
+		addChild(statisticMonitor);
 		Lib.current.stage.align = "tl";
 		Lib.current.stage.scaleMode = StageScaleMode.NO_SCALE;
 		#end
 
+		initBaseGameSettings();
+
 		achievementToatManager = new grafex.system.achievements.AchievementsToast.AchievementsToastManager();
 		addChild(achievementToatManager);
 
-		//flixel.FlxG.plugins.add(new flixel.addons.plugin.ScreenShotPlugin());
-
 		Lib.current.loaderInfo.uncaughtErrorEvents.addEventListener(UncaughtErrorEvent.UNCAUGHT_ERROR, onCrash);
-		#if DEVS_BUILD
-		trace('Dev Build');
-		#else
-		trace('Release Build');
-		#end
 
 		#if html5
 		FlxG.mouse.visible = false;
 		#end
 	}
  
-	public var FPSMem:FPSMem;
+	public static var statisticMonitor:FPSMem;
 
 	public static var changeID:Int = 0;
 
@@ -185,9 +161,7 @@ class Main extends Sprite
 		AudioSwitchFix.init();
 
 		FlxG.fixedTimestep = false;
-
-		grafex.system.statesystem.ScriptedState.init();
-		grafex.system.statesystem.ScriptedSubState.init();
+		FlxG.scaleMode = scaleMode = new GrafexRatioScaleMode();
 
 		final bgColor = 0xFF0D1211;
 		FlxG.stage.color = bgColor;
@@ -201,12 +175,14 @@ class Main extends Sprite
 			Paths.clearStoredMemory();
 			clearCache();
 			gc();
+			scaleMode.resetSize();
 		});
-
 		FlxG.signals.postStateSwitch.add(function() {
 			//Paths.clearUnusedMemory();
+			GrfxScriptHandler.publicVariables = [];
 			clearCache();
 			gc();
+			scaleMode.resetSize();
 		});
 		FlxG.signals.gameResized.add(function (w, h) {
 		     if (FlxG.cameras != null) {
@@ -245,7 +221,7 @@ class Main extends Sprite
 
 	public function getFPS():Float
 	{
-		return FPSMem.currentFPS;
+		return statisticMonitor.currentFPS;
 	}
 
 	static function resetSpriteCache(sprite:Sprite):Void {

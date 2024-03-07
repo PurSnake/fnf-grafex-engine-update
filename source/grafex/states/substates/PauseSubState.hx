@@ -46,7 +46,7 @@ class PauseSubState extends MusicBeatSubstate
 	var skipTimeText:FlxText;
 	var skipTimeTracker:Alphabet;
 	var curTime:Float = Math.max(0, Conductor.songPosition);
-	var bg:FlxSprite = new FlxSprite().makeGraphic(FlxG.width, FlxG.height, FlxColor.BLACK);
+	var bg:FlxSprite = new FlxSprite().makeGraphic(1, 1, FlxColor.BLACK);
 	var levelInfo:FlxText = new FlxText(20, 15, 0, "", 32);
 	var composerInfo:FlxText = new FlxText(20, 15 + 32, 0, "", 27);
 	var levelDifficulty:FlxText = new FlxText(20, 15 + 32, 0, "", 32);
@@ -112,6 +112,8 @@ class PauseSubState extends MusicBeatSubstate
 			}
 		}
 
+		bg.scale.set(FlxG.width, FlxG.height);
+		bg.updateHitbox();
 		bg.alpha = 0;
 		bg.scrollFactor.set();
 		add(bg);
@@ -416,21 +418,16 @@ class PauseSubState extends MusicBeatSubstate
 	function changeSelection(change:Int = 0):Void
 	{
 		call("onChangeSelection", [change]);
-		curSelected += change;
-
 		FlxG.sound.play(Paths.sound('scrollMenu'), 0.4);
 
-		if (curSelected < 0)
-			curSelected = menuItems.length - 1;
-		if (curSelected >= menuItems.length)
-			curSelected = 0;
+		curSelected = FlxMath.wrap(curSelected + change, 0, menuItems.length - 1);
 
 		var bullShit:Int = 0;
 
 		for (item in grpMenuShit.members)
 		{
-			item.targetY = bullShit - curSelected;
-			bullShit++;
+			// https://haxe.org/manual/expression-operators-unops.html 😱😱
+			item.targetY = bullShit++ - curSelected;
 
 			item.alpha = 0.6;
 			// item.setGraphicSize(Std.int(item.width * 0.8));

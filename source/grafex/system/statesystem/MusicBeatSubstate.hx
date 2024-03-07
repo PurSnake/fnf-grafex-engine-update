@@ -41,12 +41,13 @@ class MusicBeatSubstate extends FlxSubState
 
 		trace(className + " // " + scriptName);
 		if (Paths.fileExists('states/sub/${scriptName}.hx', TEXT)) {
-			subStateScript = GrfxScriptHandler.loadStateModule('states/sub/${scriptName}');
-
+			final extraParams = [
+				scriptName => scriptName,
+				'scriptName' => scriptName
+			];
+			subStateScript = GrfxScriptHandler.loadStateModule('states/sub/${scriptName}', extraParams);
 			trace('states/sub/${scriptName}.hx');
 			instance = this;
-
-			subStateScript.set(scriptName, this);
 			subStateScript.set('this', this);
 			subStateScript.setParent(instance);
 			subStateScript.activate();
@@ -120,8 +121,8 @@ class MusicBeatSubstate extends FlxSubState
 
 
 	public override function close() {
-		super.close();
 		call("onClose");
+		super.close();
 	}
 
 	override function destroy()

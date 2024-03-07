@@ -39,11 +39,13 @@ function onUpdate(elapsed) {
 
 	if(FlxG.mouse.wheel != 0) changeItem(-FlxG.mouse.wheel);
 
-	if (FlxG.sound.music.volume < 0.8)
+	FlxG.camera.followLerp = FlxMath.bound(elapsed * 9 * (FlxG.updateFramerate / 60), 0, 1);
+
+	/*if (FlxG.sound.music.volume < 0.8)
 	{
 		FlxG.sound.music.volume += 0.5 * FlxG.elapsed;
 		if(FreeplayState.vocals != null) FreeplayState.vocals.volume += 0.5 * elapsed;
-	}
+	}*/
 }
 
 /*function onUpdatePost(elapsed) {

@@ -27,6 +27,10 @@ function onCreatePost() {
 }
 
 function onUpdatePost(elapsed) {
+
+
+ FlxG.camera.followLerp = FlxMath.bound(elapsed * 9 * (FlxG.updateFramerate / 60), 0, 1);
+
  for (healtIcon in iconArray)
   if(healtIcon.isOnScreen(camBackground))
    healtIcon.scale.set(FlxMath.lerp(healtIcon.customScale, healtIcon.scale.x, Utils.boundTo(1 - (elapsed * 9 * (Conductor.bpm / 200)), 0, 1)), FlxMath.lerp(healtIcon.customScale, healtIcon.scale.y, Utils.boundTo(1 - (elapsed * 9 * (Conductor.bpm / 200)), 0, 1)));

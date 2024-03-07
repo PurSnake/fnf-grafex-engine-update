@@ -138,8 +138,8 @@ class Note extends FlxSprite
 				case 'Hurt Note':
 					ignoreNote = mustPress;
 					reloadNote('HURT','','', true);
-                    neededHitsounds = false;
-                    multSpeed = 1.1;
+					neededHitsounds = false;
+					multSpeed = 1.1;
 					noteSplashTexture = 'HURTnoteSplashes';
 					colorSwap.hue = 0;
 					colorSwap.saturation = 0;
@@ -166,7 +166,7 @@ class Note extends FlxSprite
 		noteSplashBrt = colorSwap.brightness;
 		return value;
 	}
-    var lastNoteOffsetXForPixelAutoAdjusting:Float = 0;
+	var lastNoteOffsetXForPixelAutoAdjusting:Float = 0;
 	var lastNoteScaleToo:Float = 1;
 	public var originalHeightForCalcs:Float = 6;
 
@@ -204,7 +204,7 @@ class Note extends FlxSprite
 
 		// trace(prevNote);
 
-        if(prevNote!=null)
+		if(prevNote!=null)
 			prevNote.nextNote = this;
 
 		if (isSustainNote && prevNote != null)
@@ -255,9 +255,9 @@ class Note extends FlxSprite
 		if(prefix == null) prefix = '';
 		if(texture == null) texture = '';
 		if(suffix == null) suffix = '';
-        if(needHitsounds != null) neededHitsounds = needHitsounds;
+		if(needHitsounds != null) neededHitsounds = needHitsounds;
 		
-        var skin:String = texture;
+		var skin:String = texture;
 		if(texture.length < 1) {
 			skin = PlayState.SONG.arrowSkin;
 			if(skin == null || skin.length < 1) {
@@ -280,7 +280,7 @@ class Note extends FlxSprite
 				loadGraphic(Paths.image('pixelUI/' + blahblah + 'ENDS'));
 				width = width / 4;
 				height = height / 2;
-                originalHeightForCalcs = height;
+				originalHeightForCalcs = height;
 				loadGraphic(Paths.image('pixelUI/' + blahblah + 'ENDS'), true, Math.floor(width), Math.floor(height));
 			} else {
 				loadGraphic(Paths.image('pixelUI/' + blahblah));
@@ -291,7 +291,7 @@ class Note extends FlxSprite
 			setGraphicSize(Std.int(width * PlayState.daPixelZoom));
 			loadPixelNoteAnims();
 			antialiasing = false;
-            if(isSustainNote) {
+			if(isSustainNote) {
 				offsetX += lastNoteOffsetXForPixelAutoAdjusting;
 				lastNoteOffsetXForPixelAutoAdjusting = (width - 7) * (PlayState.daPixelZoom / 2);
 				offsetX -= lastNoteOffsetXForPixelAutoAdjusting;
@@ -303,15 +303,13 @@ class Note extends FlxSprite
 					lastScaleY *= lastNoteScaleToo; 
 				}
 			}
-    
 		} else {
 			frames = Paths.getSparrowAtlas(blahblah);
 			loadNoteAnims();
 			antialiasing = ClientPrefs.globalAntialiasing;
 		}
-		if(isSustainNote) {
-			scale.y = lastScaleY;
-		}
+		if(isSustainNote) scale.y = lastScaleY;
+
 		updateHitbox();
 
 		if(animName != null)
@@ -379,5 +377,10 @@ class Note extends FlxSprite
 			ogMultAlpha = multAlpha;
 			multAlpha *= 0.3;
 		}
+	}
+	override public function destroy()
+	{
+		clipRect = flixel.util.FlxDestroyUtil.put(clipRect);
+		super.destroy();
 	}
 }

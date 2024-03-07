@@ -366,27 +366,49 @@ class Paths
 
 		if (bitmap != null)
 		{
-			localTrackedAssets.push(file);
-			if (ClientPrefs.gpuRender && gpuRender)
-			{
-				var texture:RectangleTexture = FlxG.stage.context3D.createRectangleTexture(bitmap.width, bitmap.height, BGRA, true);
-				texture.uploadFromBitmapData(bitmap);
-				bitmap.image.data = null;
-				bitmap.dispose();
-				bitmap.disposeImage();
-				bitmap = BitmapData.fromTexture(texture);
-			}
-			var newGraphic:FlxGraphic = FlxGraphic.fromBitmapData(bitmap, false, file);
-			newGraphic.persist = true;
-			newGraphic.destroyOnNoUse = false;
-			currentTrackedAssets.set(file, newGraphic);
-			return newGraphic;
+			var retVal = cacheBitmap(file, bitmap, gpuRender);
+			if(retVal != null) return retVal;
 		}
 
 		trace('oh no its returning null NOOOO ($file)');
 		return null;
 	}
-	
+
+	static public function cacheBitmap(file:String, ?bitmap:BitmapData = null, ?allowGPU:Bool = true)
+	{
+		if(bitmap == null)
+		{
+			#if MODS_ALLOWED
+			if (FileSystem.exists(file))
+				bitmap = BitmapData.fromFile(file);
+			#else
+			else
+			#end
+			{
+				if (OpenFlAssets.exists(file, IMAGE))
+					bitmap = OpenFlAssets.getBitmapData(file);
+			}
+
+			if(bitmap == null) return null;
+		}
+
+		localTrackedAssets.push(file);
+		if (allowGPU && ClientPrefs.gpuRender)
+		{
+			var texture:RectangleTexture = FlxG.stage.context3D.createRectangleTexture(bitmap.width, bitmap.height, BGRA, true);
+			texture.uploadFromBitmapData(bitmap);
+			bitmap.image.data = null;
+			bitmap.dispose();
+			bitmap.disposeImage();
+			bitmap = BitmapData.fromTexture(texture);
+		}
+		var newGraphic:FlxGraphic = FlxGraphic.fromBitmapData(bitmap, false, file);
+		newGraphic.persist = true;
+		newGraphic.destroyOnNoUse = false;
+		currentTrackedAssets.set(file, newGraphic);
+		return newGraphic;
+	}
+
 	static public function getTextFromFile(key:String, ?ignoreMods:Bool = false):String
 	{
 		#if sys
@@ -443,7 +465,6 @@ class Paths
 		}
 		#end
 
-		//if(OpenFlAssets.exists(getPath(key, type, library, false))) {
 		if (FileSystem.exists(getPath(key, type, library, false))) {
 			return true;
 		}
@@ -499,9 +520,7 @@ class Paths
 		#if MODS_ALLOWED
 		var imageLoaded:FlxGraphic = image(key, library, gpuRender);
 		var txtExists:Bool = false;
-		if(FileSystem.exists(modsTxt(key))) {
-			txtExists = true;
-		}
+		if(FileSystem.exists(modsTxt(key))) txtExists = true;
 	
 		return FlxAtlasFrames.fromSpriteSheetPacker((imageLoaded != null ? imageLoaded : image(key, library, gpuRender)), (txtExists ? File.getContent(modsTxt(key)) : file('images/$key.txt', library)));
 		#else

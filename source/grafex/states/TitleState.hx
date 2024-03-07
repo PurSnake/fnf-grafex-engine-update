@@ -1,10 +1,6 @@
 package grafex.states;
 
-
-import grafex.data.EngineData;
-
 import grafex.system.statesystem.MusicBeatState;
-import grafex.system.Paths;
 import grafex.system.Conductor;
 
 import grafex.sprites.Alphabet;
@@ -70,7 +66,7 @@ typedef TitleData =
 	gfx:Float,
 	gfy:Float,
 	backgroundSprite:String,
-	bpm:Int
+	bpm:Float
 }
 
 class TitleState extends MusicBeatState
@@ -260,7 +256,7 @@ class TitleState extends MusicBeatState
 		FlxG.watch.addQuick("stepShit", curStep);
 
 		var pressedEnter:Bool = FlxG.keys.justPressed.ENTER || controls.ACCEPT;
-        var tryExitGame:Bool = FlxG.keys.justPressed.ESCAPE || controls.BACK;
+		var tryExitGame:Bool = FlxG.keys.justPressed.ESCAPE || controls.BACK;
 
 		#if mobile
 		for (touch in FlxG.touches.list)

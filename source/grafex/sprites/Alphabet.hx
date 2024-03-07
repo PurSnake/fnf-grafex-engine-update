@@ -342,7 +342,7 @@ class Alphabet extends FlxSpriteGroup
 		}
 	}
 
-override function update(elapsed:Float)
+	override function update(elapsed:Float)
 	{
 		if (isMenuItem)
 		{

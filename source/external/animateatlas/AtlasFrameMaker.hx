@@ -5,7 +5,7 @@ import openfl.geom.Rectangle;
 import flixel.math.FlxPoint;
 import flixel.math.FlxRect;
 import openfl.Assets;
-import tjson.TJSON as Json;
+import haxe.Json;
 import openfl.display.BitmapData;
 import external.animateatlas.JSONData.AtlasData;
 import external.animateatlas.JSONData.AnimationData;

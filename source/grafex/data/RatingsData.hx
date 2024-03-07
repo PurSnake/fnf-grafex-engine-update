@@ -2,7 +2,7 @@ package grafex.data;
 
 class RatingsData
 {
-	public static var grafexAnalogRatings:Array<Dynamic> = [
+	public static var grafexAnalogRatings:Array<Array<haxe.extern.EitherType<String, Float>>> = [
 		["F", 0.41], // 40%
 		["D", 0.66], // 65%
 		["C", 0.76], // 75%
@@ -15,5 +15,5 @@ class RatingsData
 		["SS+", 1] // 100%
 	];
 	
-	public static var errorRating:Array<Dynamic> = [[null, 1]];
+	public static var errorRating:Array<Array<haxe.extern.EitherType<String, Float>>> = [[null, 1]];
 }

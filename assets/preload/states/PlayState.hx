@@ -18,7 +18,7 @@ var options = {
 var coolCamAngle:Float = 0;
 
 function onCreate() {
-	//classicHealthBar = true;
+	classicHealthBar = true;
 
 	var file = Paths.getTextFromFile('data/PlayStateModuleOptions.json');
 	if (file != null) options = Json.parse(file);
@@ -41,26 +41,36 @@ function onCreatePost() {
 	paralaxedSprite.fixate(0, 0, 2, 2, 1, 1, 'vertical');
 	//paralaxedSprite.scale.set(.7, .7);
 	add(paralaxedSprite);*/
-}
 
-function onIconsBeat() {
-	if (classicHealthBar) {
-		iconP1.setGraphicSize(Std.int(iconP1.width + 30));
-		iconP2.setGraphicSize(Std.int(iconP2.width + 30));
-	}
+	if (classicHealthBar) 
+		for (icon in iconGroup.members) {
+			icon.updatePosition = function (elapsed) {
+				icon.isPlayer ?
+					icon.x = healthBar.x + (healthBar.width * (FlxMath.remapToRange(displayedHealth * 2 / maxHealth, 0, 100, 100, 0) * 0.01)) + (150 * icon.scale.x - 150) / 2 - 26
+				 : 
+					icon.x = healthBar.x + (healthBar.width * (FlxMath.remapToRange(displayedHealth * 2 / maxHealth, 0, 100, 100, 0) * 0.01)) - (150 * icon.scale.x) / 2 - 26 * 2;
+
+				icon.updateHitbox();
+				icon.origin.y = 15;
+			}
+			icon.updateScale = function (a, b) {
+				var stuff = FlxMath.lerp(icon.customScale, icon.scale.x, .85);
+				icon.scale.set(stuff, stuff);
+				icon.updateHitbox();
+			}
+			//icon.updateAnim = function () { }
+			icon.doScale = function () {
+				icon.scale.set(icon.customScale * 1.3, icon.customScale * 1.3);
+				icon.updateHitbox();
+			}
+		}
 }
 
 function onUpdate(elapsed) {
+
 	if(FlxG.keys.justPressed.SIX) options.useCustomPause = !options.useCustomPause;
 
 	if(FlxG.keys.justPressed.F5) FlxG.resetState(); 
-
-	if (classicHealthBar) {
-		iconP1.setGraphicSize(Std.int(FlxMath.lerp(150, iconP1.width, 1)));
-		iconP2.setGraphicSize(Std.int(FlxMath.lerp(150, iconP2.width, 1)));
-	}
-
-	healthBarWN.percent = displayedHealth;
 
 	if (PlayState.isPixelStage && false) {
 		camGame.antialiasing = false;
@@ -100,15 +110,6 @@ function onUpdate(elapsed) {
 }
 
 function onUpdatePost(elapsed) {
-	if (classicHealthBar) {
-		iconP2.origin.x = 80;
-		iconP2.origin.y = 0;
-		iconP1.origin.x = 50;
-		iconP1.origin.y = 0;
-	}  
-
-	healthBarWN.percent = displayedHealth;
-
 	if (options.angledCamera) {
 		coolCamAngle = FlxMath.lerp(0, coolCamAngle, FlxMath.bound(1 - (elapsed * 5 * playbackRate / camZoomingDecay * cameraSpeed), 0, 1));
 		camGame.angle = FlxMath.lerp(coolCamAngle, camGame.angle, FlxMath.bound(1 - (elapsed * 3.125 * playbackRate / camZoomingDecay * cameraSpeed), 0, 1));
@@ -148,7 +149,6 @@ function onTriggerCamMovement(focusedChar, strumId) {
 function opponentNoteHit(note, data, type, sus, id) {
  if (options.workLikePsych) camZooming = true;
 }
-
 
 function onPause() {
  if (!options.useCustomPause) return Function_Continue;

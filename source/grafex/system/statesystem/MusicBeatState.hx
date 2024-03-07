@@ -49,15 +49,12 @@ class MusicBeatState extends FlxUIState
 	override function create()
 	{
 		camBeat = FlxG.camera;
-		var skip:Bool = FlxTransitionableState.skipNextTransOut;
 		super.create();
-
-		if (!skip)
-			openSubState(new CustomFadeTransition(0.6, true));
-
-		FlxTransitionableState.skipNextTransOut = false;
 		loadStateScript();
 		timePassedOnState = 0;
+		var skip:Bool = FlxTransitionableState.skipNextTransOut;
+		if (!skip) openSubState(new CustomFadeTransition(0.6, true));
+		FlxTransitionableState.skipNextTransOut = false;
 	}
 
 	function loadStateScript()
@@ -68,12 +65,13 @@ class MusicBeatState extends FlxUIState
 		trace(className + " // " + scriptName);
 		if (Paths.fileExists('states/${scriptName}.hx', TEXT))
 		{
-			stateScript = GrfxScriptHandler.loadStateModule('states/${scriptName}');
-
+			final extraParams = [
+				scriptName => scriptName,
+				'scriptName' => scriptName
+			];
+			stateScript = GrfxScriptHandler.loadStateModule('states/${scriptName}', extraParams);
 			trace('states/${scriptName}.hx');
 			instance = this;
-
-			stateScript.set(scriptName, this);
 			stateScript.set('this', this);
 			stateScript.setParent(instance);
 			stateScript.activate();
