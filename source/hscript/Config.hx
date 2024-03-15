@@ -4,16 +4,17 @@ class Config {
 	// Runs support for custom classes in these
 	public static final ALLOWED_CUSTOM_CLASSES = [
 		"flixel",
-		"grafex"
+
+		"grafex",
 	];
 
 	// Runs support for abstract support in these
 	public static final ALLOWED_ABSTRACT_AND_ENUM = [
 		"flixel",
-		"openfl.display.BlendMode",
-		"haxe.xml",
+		"grafex",
+
 		"haxe.CallStack",
-		"grafex"
+		"openfl",
 	];
 
 	// Incase any of your files fail
@@ -23,7 +24,6 @@ class Config {
 	];
 
 	public static final DISALLOW_ABSTRACT_AND_ENUM = [
-		//"funkin.backend.FunkinSprite", // Error: String has no field trim, Due to Func
-		//"funkin.backend.scripting.events.PlayAnimEvent", // Error: expected member name or ';' after declaration specifiers, Due to Func
+
 	];
 }

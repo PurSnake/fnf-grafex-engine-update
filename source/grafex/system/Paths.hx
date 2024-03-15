@@ -376,37 +376,40 @@ class Paths
 
 	static public function cacheBitmap(file:String, ?bitmap:BitmapData = null, ?allowGPU:Bool = true)
 	{
-		if(bitmap == null)
+		if (bitmap == null)
 		{
 			#if MODS_ALLOWED
 			if (FileSystem.exists(file))
 				bitmap = BitmapData.fromFile(file);
-			#else
 			else
 			#end
-			{
-				if (OpenFlAssets.exists(file, IMAGE))
-					bitmap = OpenFlAssets.getBitmapData(file);
+			if (OpenFlAssets.exists(file, IMAGE))
+				bitmap = OpenFlAssets.getBitmapData(file);
+
+			if (bitmap == null) return null;
+		}
+
+		if (allowGPU && ClientPrefs.gpuRender && bitmap.image != null)
+		@:privateAccess {
+			bitmap.lock();
+			if (bitmap.__texture == null) {
+				bitmap.image.premultiplied = true;
+				bitmap.getTexture(FlxG.stage.context3D);
 			}
-
-			if(bitmap == null) return null;
-		}
-
-		localTrackedAssets.push(file);
-		if (allowGPU && ClientPrefs.gpuRender)
-		{
-			var texture:RectangleTexture = FlxG.stage.context3D.createRectangleTexture(bitmap.width, bitmap.height, BGRA, true);
-			texture.uploadFromBitmapData(bitmap);
-			bitmap.image.data = null;
-			bitmap.dispose();
+			bitmap.getSurface();
 			bitmap.disposeImage();
-			bitmap = BitmapData.fromTexture(texture);
+			bitmap.image.data = null;
+			bitmap.image = null;
+			bitmap.readable = true;
 		}
-		var newGraphic:FlxGraphic = FlxGraphic.fromBitmapData(bitmap, false, file);
-		newGraphic.persist = true;
-		newGraphic.destroyOnNoUse = false;
-		currentTrackedAssets.set(file, newGraphic);
-		return newGraphic;
+
+		final graph:FlxGraphic = FlxGraphic.fromBitmapData(bitmap, false, file);
+		graph.persist = true;
+		graph.destroyOnNoUse = false;
+
+		currentTrackedAssets.set(file, graph);
+		localTrackedAssets.push(file);
+		return graph;
 	}
 
 	static public function getTextFromFile(key:String, ?ignoreMods:Bool = false):String
@@ -569,7 +572,7 @@ class Paths
 	}
 	
 	inline static public function mods(key:String = '') {
-		return 'mods/' + key;
+		return 'content/' + key;
 	}
 	
 	inline static public function modsFont(key:String) {
@@ -631,7 +634,7 @@ class Paths
 				return fileToCheck;
 
 		}
-		return 'mods' + stageShitFUCK + '/' + key;
+		return 'content' + stageShitFUCK + '/' + key;
 	}
 
 

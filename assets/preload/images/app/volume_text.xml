@@ -1,0 +1,9 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TextureAtlas imagePath="volume_text.png">
+	<!-- Created with Adobe Animate version 24.0.0.305 -->
+	<!-- http://www.adobe.com/products/animate.html -->
+	<SubTexture name="volume_eng0000" x="2" y="2" width="160" height="40"/>
+	<SubTexture name="volume_esp0000" x="2" y="44" width="177" height="40"/>
+	<SubTexture name="volume_jap0000" x="2" y="86" width="118" height="45"/>
+	<SubTexture name="volume_rus0000" x="2" y="133" width="195" height="51"/>
+</TextureAtlas>

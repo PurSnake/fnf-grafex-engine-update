@@ -429,29 +429,36 @@ class GrfxModule
 		interp.execute(program);
 	}
 
+	private function _errorHandler(error:Error) {
+		var fn = 'script:${error.line}: ';
+		var err = error.toString();
+		if (err.startsWith(fn)) err = err.substr(fn.length);
+
+		trace(fn + '' + err);
+	}
+
 	private function importFailedCallback(cl:Array<String>):Bool {
 		final assetPath = Paths.getPath('source/${cl.join("/")}.hx', TEXT, null, true);
-		var code = File.getContent(assetPath);
-		trace(code);
-		trace(cl.join("/") + ".hx");
-		var parser:Parser = new Parser();
-		parser.allowJSON = parser.allowTypes = parser.allowMetadata = true;
-
-		var expr:Expr = null;
-		try {
-			if (code != null && code.trim() != "")
-				expr = parser.parseString(code, cl.join("/") + ".hx");
-		} catch(e:Error) {
-			trace(e);
-		} catch(e) {
-			trace(e.toString());
-		}
-		if (expr != null) {
-			@:privateAccess
-			interp.exprReturn(expr);
+		if (FileSystem.exists(assetPath)) {
+			var code = File.getContent(assetPath);
+			var expr:Expr = null;
+			var parser:Parser = new Parser();
+			parser.allowJSON = parser.allowTypes = parser.allowMetadata = true;
+			try {
+				if (code != null && code.trim() != "")
+					expr = parser.parseString(code, cl.join("/") + ".hx");
+			} catch(e:Error) {
+				_errorHandler(e);
+			} catch(e) {
+				_errorHandler(new Error(ECustom(e.toString()), 0, 0, assetPath, 0));
+			}
+			if (expr != null) {
+				@:privateAccess
+				interp.exprReturn(expr);
+			}
 			return true;
 		}
-		return true;
+		return false;
 	}
 
 	function errorTrace(text:String, color:FlxColor = FlxColor.WHITE)
@@ -843,29 +850,36 @@ class GrfxStateModule
 		interp.execute(program);
 	}
 
+	private function _errorHandler(error:Error) {
+		var fn = 'class:${error.line}: ';
+		var err = error.toString();
+		if (err.startsWith(fn)) err = err.substr(fn.length);
+
+		trace(fn + '' + err);
+	}
+
 	private function importFailedCallback(cl:Array<String>):Bool {
 		final assetPath = Paths.getPath('source/${cl.join("/")}.hx', TEXT, null, true);
-		var code = File.getContent(assetPath);
-		trace(code);
-		trace(cl.join("/") + ".hx");
-		var parser:Parser = new Parser();
-		parser.allowJSON = parser.allowTypes = parser.allowMetadata = true;
-
-		var expr:Expr = null;
-		try {
-			if (code != null && code.trim() != "")
-				expr = parser.parseString(code, cl.join("/") + ".hx");
-		} catch(e:Error) {
-			trace(e);
-		} catch(e) {
-			trace(e.toString());
-		}
-		if (expr != null) {
-			@:privateAccess
-			interp.exprReturn(expr);
+		if (FileSystem.exists(assetPath)) {
+			var code = File.getContent(assetPath);
+			var expr:Expr = null;
+			var parser:Parser = new Parser();
+			parser.allowJSON = parser.allowTypes = parser.allowMetadata = true;
+			try {
+				if (code != null && code.trim() != "")
+					expr = parser.parseString(code, cl.join("/") + ".hx");
+			} catch(e:Error) {
+				_errorHandler(e);
+			} catch(e) {
+				_errorHandler(new Error(ECustom(e.toString()), 0, 0, assetPath, 0));
+			}
+			if (expr != null) {
+				@:privateAccess
+				interp.exprReturn(expr);
+			}
 			return true;
 		}
-		return true;
+		return false;
 	}
 
 	public function setParent(parent:Dynamic) {

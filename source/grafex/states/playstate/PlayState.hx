@@ -5528,11 +5528,10 @@ class PlayState extends MusicBeatState
 		if (!showCombo && !showComboNum) return;
 		final toAddArray = [];
 
-		var comboSprite:FlxSprite;
+		var comboSprite:FlxSprite = new FlxSprite();
 		if (showCombo && showComboNum) {
 			final comboFrames = Paths.getSparrowAtlas(comboPath + 'AMnotecombo');
 			if(comboFrames != null) {
-				comboSprite = new FlxSprite();
 				comboSprite.frames = comboFrames;
 				comboSprite.animation.addByPrefix('anim', "note combo", 14, false);
 				comboSprite.antialiasing = ClientPrefs.globalAntialiasing;
@@ -5568,7 +5567,7 @@ class PlayState extends MusicBeatState
 				seperatedScore.push(comboCol % 10);
 				seperatedScore.reverse();
 
-				var oldNum = null;
+				var oldNum:Null<FlxSprite> = new FlxSprite();
 
 				for (num in seperatedScore) {
 					final comboNum = new FlxSprite();

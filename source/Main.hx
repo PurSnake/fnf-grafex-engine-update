@@ -163,14 +163,6 @@ class Main extends Sprite
 		FlxG.fixedTimestep = false;
 		FlxG.scaleMode = scaleMode = new GrafexRatioScaleMode();
 
-		final bgColor = 0xFF0D1211;
-		FlxG.stage.color = bgColor;
-
-		#if (flixel >= "5.1.0")
-		FlxG.game.soundTray.volumeUpSound = Paths.getPath('sounds/'+appConfig.appUpSound+'.ogg', SOUND, true);
-		FlxG.game.soundTray.volumeDownSound = Paths.getPath('sounds/'+appConfig.appDownSound+'.ogg', SOUND, true);
-		#end
-
 		FlxG.signals.preStateSwitch.add(function() {
 			Paths.clearStoredMemory();
 			clearCache();

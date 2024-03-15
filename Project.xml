@@ -12,7 +12,7 @@
 	<set name="SWF_VERSION" value="11.8" />
 	<haxedef name="LINC_LUA_RELATIVE_DYNAMIC_LIB"/>
 
-	<window width="1280" height="720" background="0x00FFFFFF" fps="" hardware="true" vsync="false" />
+	<window width="1280" height="720" background="0xFF060A09" fps="" hardware="true" vsync="false" />
 	<window if="html5" resizable="true" />
 	<window if="desktop" orientation="landscape" fullscreen="false" resizable="true" vsync="false"/>
 	<window if="mobile" orientation="landscape" fullscreen="true" width="0" height="0" resizable="false"/>
@@ -85,7 +85,7 @@
 	<assets path="assets/week7"         library="week7"         exclude="*.mp3" unless="web"/>
 	
 	<section if="MODS_ALLOWED">
-		<assets path='example_mods' rename='mods' embed='false'/>
+		<assets path='example_mods' rename='content' embed='false'/>
 	</section>
 
 	<assets path='extra/readme.txt' rename='you MUST readme.txt' />
@@ -131,7 +131,8 @@
 	<haxedef name='no-deprecation-warnings' />
 
 	<haxeflag name="--macro" value="allowPackage('flash')" />
-	<haxeflag name="--macro" value="include('my.pack')" />
+	<!--haxeflag name="--macro" value="include('gg.bb')" /-->
+
 	<haxeflag name="-dce" value="no" />
 
 	<icon path="extra/icons/iconOG.png" size='16'/>

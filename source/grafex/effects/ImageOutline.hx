@@ -1,3 +1,5 @@
+package grafex.effects;
+
 // credits, original source https://lassieadventurestudio.wordpress.com/2008/10/07/image-outline/
 import openfl.display.IBitmapDrawable;
 import openfl.display.BitmapData;
